@@ -231,3 +231,11 @@ supergateway                        4.0.0
 ```
 
 Update these deliberately and test before committing.
+
+## Void/Chromium build note
+
+The combined image overlays the complete upstream SearXNG HTTP MCP filesystem
+onto `void-musl-full`, then installs only `nodejs`, `chromium`, and `tini` with
+XBPS. Void's `nodejs` package supplies `npm`; `npm` is not a separate XBPS
+package. Build-time checks verify `node`, `npm`, Chromium, `docker-init`, and the
+upstream SearXNG entrypoint before npm MCP packages are installed.
