@@ -49,13 +49,17 @@ export SEARXNG_URL=http://127.0.0.1:8080
 # SearXNG itself stays private inside this container. Only its MCP facade is
 # published on :8888.
 echo "Starting SearXNG on 127.0.0.1:8080" >&2
-GRANIAN_INTERFACE=wsgi \
-GRANIAN_HOST=127.0.0.1 \
-GRANIAN_PORT=8080 \
-GRANIAN_WEBSOCKETS=false \
-GRANIAN_WORKERS=1 \
-GRANIAN_BLOCKING_THREADS=4 \
-granian searx.webapp:app &
+(
+  cd /opt/searxng-src
+  export PYTHONPATH=/opt/searxng-src
+  exec /opt/searxng-venv/bin/granian \
+    --interface wsgi \
+    --host 127.0.0.1 \
+    --port 8080 \
+    --workers 1 \
+    --blocking-threads 4 \
+    searx.webapp:app
+) &
 SEARX_PID=$!
 
 # Wait for SearXNG before bringing up the MCP facade.

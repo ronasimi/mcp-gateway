@@ -9,13 +9,14 @@ A single Docker container providing three MCP services for local/container agent
 Host-native clients use the same ports at `127.0.0.1`. All host bindings are loopback-only.
 
 
-### Build note: SearXNG settings
+### Build/runtime design
 
-The image deliberately does **not** export `SEARXNG_SETTINGS_PATH` while SearXNG is being installed. During package metadata generation SearXNG imports its own package; an explicit path to `/etc/searxng/settings.yml` would fail before the runtime bind mount exists. The runtime entrypoint creates `settings.yml` on first start and only then exports `SEARXNG_SETTINGS_PATH`.
+The image uses one Debian base but **two Python runtimes on purpose**:
 
-## Why this image is built from Debian/Python 3.14
+- Debian Python 3.11 runs pinned SearXNG from its source tree.
+- CPython 3.14 from the base image runs `searxng-http-mcp`, which requires Python 3.14+.
 
-SearXNG's production image is intentionally stripped and is not intended to be extended with a distro package manager. Earlier variants that tried to add Alpine `apk` or restore Void `xbps` were brittle. This repo instead installs all runtimes on one `python:3.14-slim-bookworm` base: SearXNG, `searxng-http-mcp`, Node.js, Chromium, Playwright MCP, Memory MCP, and Supergateway.
+SearXNG is not installed with `pip install .`. Instead, its pinned runtime requirements are installed into `/opt/searxng-venv` and the application runs directly from `/opt/searxng-src`. This avoids SearXNG `setup.py` importing the application during package metadata generation and removes the build-time dependency on runtime `/etc/searxng/settings.yml`. The runtime entrypoint creates the durable settings file before starting SearXNG.
 
 Upstream SearXNG is pinned by `SEARXNG_REF` (default `12f8b6515`, corresponding to the official `2026.9.25-12f8b6515` build). The Docker build clones the `master` commit history with `--filter=blob:none` and resolves the abbreviated revision locally. This avoids GitHub's refusal to fetch an abbreviated SHA directly while preserving a reproducible SearXNG revision.
 
