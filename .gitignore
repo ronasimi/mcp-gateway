@@ -1,3 +1,7 @@
 .env
 *.log
 .DS_Store
+# Durable MCP memory; keep the directory, not its contents.
+data/memory/*
+!data/memory/.gitkeep
+

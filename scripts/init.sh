@@ -35,6 +35,9 @@ PY
   echo "Created .env with a random SearXNG MCP API key."
 fi
 
+mkdir -p data/memory
+chmod 700 data/memory 2>/dev/null || true
+
 if ! docker network inspect ai-local >/dev/null 2>&1; then
   docker network create ai-local >/dev/null
   echo "Created external Docker network: ai-local"
@@ -50,8 +53,10 @@ echo
 echo "MCP container started."
 echo "Pi SearXNG MCP:     http://mcp-gateway:8888/mcp/"
 echo "Pi Playwright MCP:  http://mcp-gateway:8931/mcp"
+echo "Pi Memory MCP:      http://mcp-gateway:8932/mcp"
 echo "Host SearXNG MCP:   http://127.0.0.1:${MCP_GATEWAY_PORT:-8888}/mcp/"
 echo "Host Playwright:     http://127.0.0.1:${PLAYWRIGHT_HOST_PORT:-8931}/mcp"
+echo "Host Memory MCP:     http://127.0.0.1:${MEMORY_HOST_PORT:-8932}/mcp"
 echo "SearXNG local UI:    http://127.0.0.1:${MCP_GATEWAY_PORT:-8888}/"
 echo "Run ./scripts/token.sh to print the SearXNG API key."
-echo "Run ./scripts/status.sh to inspect both MCP endpoints."
+echo "Run ./scripts/status.sh to inspect all MCP endpoints."

@@ -15,14 +15,20 @@ services:
       PLAYWRIGHT_MCP_IDLE_TIMEOUT: ${PLAYWRIGHT_MCP_IDLE_TIMEOUT:-300000}
       PLAYWRIGHT_MCP_PING_TIMEOUT_MS: ${PLAYWRIGHT_MCP_PING_TIMEOUT_MS:-30000}
 
+      # Persistent MCP knowledge graph, exposed through Supergateway.
+      MEMORY_MCP_PORT: 8932
+      MEMORY_FILE_PATH: /data/memory/memory.jsonl
+
     # Loopback publishing supports host-native agents; container agents use ai-local.
     ports:
       - "127.0.0.1:${MCP_GATEWAY_PORT:-8888}:8888"
       - "127.0.0.1:${PLAYWRIGHT_HOST_PORT:-8931}:8931"
+      - "127.0.0.1:${MEMORY_HOST_PORT:-8932}:8932"
 
     volumes:
       - searxng_config:/etc/searxng
       - playwright_profile:/data/playwright
+      - ./data/memory:/data/memory
 
     # Chromium requires more headroom than search alone.
     mem_limit: ${MCP_GATEWAY_MEMORY:-1536m}

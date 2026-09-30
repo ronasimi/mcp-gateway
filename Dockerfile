@@ -19,7 +19,10 @@ RUN xbps-install -Suy xbps \
          tini \
          tzdata \
          wget \
-    && npm install -g --omit=dev @playwright/mcp@0.0.83 \
+    && npm install -g --omit=dev \
+         @playwright/mcp@0.0.83 \
+         @modelcontextprotocol/server-memory@2026.8.31 \
+         supergateway@4.0.0 \
     && npm cache clean --force \
     && rm -rf /var/cache/xbps/*
 
@@ -38,8 +41,8 @@ ENV PATH="/usr/local/searxng/.venv/bin:/usr/local/bin:/usr/bin:/bin" \
 
 COPY scripts/container-entrypoint.sh /usr/local/bin/mcp-stack-entrypoint
 RUN chmod +x /usr/local/bin/mcp-stack-entrypoint \
-    && mkdir -p /data/playwright /etc/searxng /var/cache/searxng
+    && mkdir -p /data/playwright /data/memory /etc/searxng /var/cache/searxng
 
-EXPOSE 8888 8931
+EXPOSE 8888 8931 8932
 
 ENTRYPOINT ["/usr/bin/docker-init", "--", "/usr/local/bin/mcp-stack-entrypoint"]

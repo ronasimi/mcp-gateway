@@ -1,27 +1,29 @@
-# Local SearXNG + Playwright MCP Gateway
+# Local SearXNG + Playwright + Memory MCP Gateway
 
 Standalone third repository for the local AI stack. It intentionally runs as **one container** so the complete stack stays at three long-lived containers:
 
 ```text
 Ollama project             Pi project                 MCP project
-┌─────────────┐           ┌──────────────┐            ┌────────────────────────┐
-│ ollama      │◄──────────│ Pi           │───────────►│ mcp-gateway            │
-│ :11434      │           │              │  ai-local  │                        │
-└─────────────┘           └──────────────┘            │ SearXNG MCP  :8888    │
+┌─────────────┐           ┌──────────────┐            ┌─────────────────────────┐
+│ ollama      │◄──────────│ Pi           │───────────►│ mcp-gateway             │
+│ :11434      │           │              │  ai-local  │                         │
+└─────────────┘           └──────────────┘            │ SearXNG MCP    :8888   │
                                                      │ Playwright MCP :8931   │
-                                                     │ Chromium (headless)    │
-                                                     └────────────────────────┘
+                                                     │ Memory MCP     :8932   │
+                                                     │ Chromium (headless)     │
+                                                     └─────────────────────────┘
 ```
 
-The image uses the self-contained `ghcr.io/whw23/searxng-http-mcp` application on a full Void Linux/musl runtime, then adds Microsoft's official `@playwright/mcp` plus system Chromium. Current SearXNG container images use a stripped Void runtime rather than Alpine, so the Dockerfile deliberately uses XBPS instead of `apk`. Pi gets private metasearch and browser automation without a fourth worker container.
+The image combines the self-contained `ghcr.io/whw23/searxng-http-mcp` application with Microsoft's Playwright MCP and the official Model Context Protocol Memory server. The Memory server is stdio-native, so Supergateway exposes it as Streamable HTTP without adding another container.
 
 ## MCP endpoints
 
-Pi connects over the external `ai-local` Docker network:
+Containerized agents attached to the external `ai-local` Docker network use:
 
 ```text
 SearXNG:    http://mcp-gateway:8888/mcp/
 Playwright: http://mcp-gateway:8931/mcp
+Memory:     http://mcp-gateway:8932/mcp
 ```
 
 Host-native MCP clients use the loopback-published endpoints:
@@ -29,16 +31,15 @@ Host-native MCP clients use the loopback-published endpoints:
 ```text
 SearXNG:    http://127.0.0.1:8888/mcp/
 Playwright: http://127.0.0.1:8931/mcp
+Memory:     http://127.0.0.1:8932/mcp
 SearXNG UI: http://127.0.0.1:8888/
 ```
 
-This makes the repository reusable by both containerized and host-native agents without exposing either MCP service to the LAN. The SearXNG endpoint and UI require the generated `x-api-key`. Playwright remains loopback/private-network only.
+None of these ports are published to the LAN. SearXNG requires the generated `x-api-key`. Playwright and Memory rely on loopback/private-Docker-network isolation, so do not attach untrusted containers to `ai-local`.
 
 ## Capabilities
 
 ### SearXNG MCP
-
-The bundled SearXNG MCP intentionally has a small surface:
 
 - `search` — private metasearch across SearXNG engines
 - `autocomplete` — query suggestions
@@ -46,16 +47,28 @@ The bundled SearXNG MCP intentionally has a small surface:
 
 ### Playwright MCP
 
-Microsoft's Playwright MCP provides browser navigation and interaction using structured accessibility snapshots, including navigation, clicking, typing, snapshots, tabs, screenshots, and related browser operations.
+Browser navigation and interaction through structured accessibility snapshots, including navigation, clicking, typing, snapshots, tabs and screenshots. Chromium runs headless with a persistent profile.
 
-The browser is configured as:
+### Memory MCP
 
-- headless Chromium;
-- system Chromium from the container, so no first-run browser download is needed;
-- persistent browser profile in a Docker volume;
-- five-minute idle close by default;
-- no code-generation payloads;
-- no Chromium sandbox because the process runs inside the container with `no-new-privileges`.
+The official MCP Memory server provides a small persistent knowledge graph. Its core operations include:
+
+- creating and deleting entities;
+- creating and deleting directed relations;
+- adding and deleting observations/facts;
+- searching nodes;
+- opening selected nodes;
+- reading the graph.
+
+The graph is shared by every MCP client that connects to this endpoint. This makes it suitable for durable agent facts, project decisions, machine configuration, recurring preferences and cross-session knowledge. It is not an embedding/vector database; retrieval is knowledge-graph/text based.
+
+Memory is stored on the host at:
+
+```text
+./data/memory/memory.jsonl
+```
+
+and mounted into the container at `/data/memory/memory.jsonl`. The directory is ignored by Git except for `.gitkeep`.
 
 ## Start
 
@@ -67,11 +80,12 @@ cp .env.example .env        # optional; init.sh does this automatically
 `init.sh`:
 
 1. creates a random 256-bit SearXNG MCP API key when needed;
-2. creates the external `ai-local` Docker network;
-3. builds the combined SearXNG + Playwright MCP image;
-4. starts the single MCP container.
+2. creates `./data/memory` for durable Memory MCP state;
+3. creates the external `ai-local` Docker network;
+4. builds the combined MCP image;
+5. starts the single MCP container.
 
-Check both endpoints:
+Check all endpoints:
 
 ```bash
 ./scripts/status.sh
@@ -93,13 +107,13 @@ Print the SearXNG API key:
 
 Pi and this MCP service are separate Compose projects. Attach Pi to `ai-local` using `pi/compose-snippet.yaml`.
 
-Copy the generated token into the Pi project's `.env`:
+Copy the generated SearXNG token into the Pi project's `.env`:
 
 ```bash
 MCP_GATEWAY_AUTH_TOKEN=$(./scripts/token.sh)
 ```
 
-Then adapt `pi/mcp-adapter.json.example` into Pi's MCP configuration. It defines two logical MCP servers pointing to the **same container**:
+Then adapt `pi/mcp-adapter.json.example` into Pi's MCP configuration. It defines three logical MCP servers pointing to the **same container**:
 
 ```json
 {
@@ -114,18 +128,22 @@ Then adapt `pi/mcp-adapter.json.example` into Pi's MCP configuration. It defines
     "playwright": {
       "url": "http://mcp-gateway:8931/mcp",
       "directTools": false
+    },
+    "memory": {
+      "url": "http://mcp-gateway:8932/mcp",
+      "directTools": false
     }
   }
 }
 ```
 
-Keep `directTools` disabled. Pi should see only its compact MCP proxy and discover SearXNG/Playwright capabilities on demand instead of injecting Playwright's relatively large browser schema set into every model request.
+Keep `directTools` disabled. Pi should see only its compact MCP proxy and discover search/browser/memory capabilities on demand instead of injecting their schemas into every model request.
 
 ## Other MCP clients
 
-The services are standard HTTP MCP endpoints and are not Pi-specific. Any compatible local agent can connect using the loopback URLs, while any compatible container attached to `ai-local` can use the Docker service-name URLs.
+The services are standard HTTP MCP endpoints and are not Pi-specific. Any compatible local agent can use the loopback URLs; any compatible container on `ai-local` can use the Docker service-name URLs.
 
-Host-native client example:
+Example host-native configuration:
 
 ```json
 {
@@ -138,53 +156,56 @@ Host-native client example:
     },
     "playwright": {
       "url": "http://127.0.0.1:8931/mcp"
+    },
+    "memory": {
+      "url": "http://127.0.0.1:8932/mcp"
     }
   }
 }
 ```
 
-Containerized clients on `ai-local` should replace `127.0.0.1` with `mcp-gateway`.
-
 ## Persistence
 
-Two named Docker volumes are used:
+Persistent state is split by purpose:
 
 ```text
-searxng_config       /etc/searxng
-playwright_profile   /data/playwright
+searxng_config                 /etc/searxng
+playwright_profile             /data/playwright
+./data/memory/                 /data/memory
 ```
 
-The Playwright profile preserves cookies and local storage across container restarts. Remove that volume if you want a completely clean browser session.
+The Memory knowledge graph is deliberately a bind mount rather than a named volume so it is easy to inspect, back up and version separately if desired.
+
+A simple backup is:
+
+```bash
+cp -a data/memory "data/memory.backup.$(date +%Y%m%d-%H%M%S)"
+```
 
 ## Security
 
 - SearXNG MCP/UI uses a random API key.
-- Both host ports bind only to `127.0.0.1`.
+- All host ports bind only to `127.0.0.1`.
 - Pi communicates over the private `ai-local` network.
-- `.env` is ignored by Git.
+- `.env` and Memory data are ignored by Git.
 - No Docker socket is mounted.
-- Playwright has powerful browser capabilities, so do not attach untrusted containers to `ai-local`.
-- Playwright's host allowlist is disabled to permit Docker service-name routing; network isolation, not that allowlist, is the boundary here.
+- Playwright has powerful browser capabilities.
+- Memory can contain sensitive durable facts; treat `data/memory/memory.jsonl` as private data.
+- Playwright and Memory currently rely on loopback/private-network isolation rather than endpoint authentication.
 
 ## Resource limits
 
-Chromium needs more headroom than search alone. Defaults are:
+Defaults remain:
 
 ```text
-Memory:       1536 MiB
-CPU:          2 cores
+Memory:        1536 MiB
+CPU:           2 cores
 Shared memory: 512 MiB
 ```
 
-Tune them in `.env`:
+Memory MCP itself is small compared with Chromium and should not materially change the resource budget.
 
-```bash
-MCP_GATEWAY_MEMORY=1536m
-MCP_GATEWAY_CPUS=2.0
-PLAYWRIGHT_SHM_SIZE=512m
-```
-
-For the Ryzen 4650U/16 GB host this keeps the browser bounded while leaving most memory available to Ollama.
+Tune limits in `.env` if needed.
 
 ## Logs
 
@@ -192,23 +213,21 @@ For the Ryzen 4650U/16 GB host this keeps the browser bounded while leaving most
 docker compose logs -f mcp-gateway
 ```
 
-## Updating an existing checkout
+## Updating
 
-Older revisions used `MCP_GATEWAY_PORT=8811`. To adopt the new standard host endpoint at `127.0.0.1:8888`, update your existing `.env` before restarting:
-
-```bash
-sed -i 's/^MCP_GATEWAY_PORT=8811$/MCP_GATEWAY_PORT=8888/' .env
-```
-
-If you intentionally use a custom port, keep it; only the container-side port remains fixed at `8888`.
-
-## Update
-
-Rebuild against the newest SearXNG base image while retaining the pinned Playwright MCP package version in the Dockerfile:
+Rebuild against the newest SearXNG base image while retaining the pinned MCP package versions in `Dockerfile`:
 
 ```bash
 docker compose build --pull --no-cache
 docker compose up -d
 ```
 
-To deliberately update Playwright MCP, change the pinned `@playwright/mcp` version in `Dockerfile`, rebuild, and test before committing.
+The current image pins:
+
+```text
+@playwright/mcp                    0.0.83
+@modelcontextprotocol/server-memory 2026.8.31
+supergateway                        4.0.0
+```
+
+Update these deliberately and test before committing.
