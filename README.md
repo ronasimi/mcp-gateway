@@ -24,15 +24,15 @@ SearXNG:    http://mcp-gateway:8888/mcp/
 Playwright: http://mcp-gateway:8931/mcp
 ```
 
-Host-only diagnostics are bound to loopback:
+Host-native MCP clients use the loopback-published endpoints:
 
 ```text
-SearXNG:    http://127.0.0.1:8811/mcp/
+SearXNG:    http://127.0.0.1:8888/mcp/
 Playwright: http://127.0.0.1:8931/mcp
-SearXNG UI: http://127.0.0.1:8811/
+SearXNG UI: http://127.0.0.1:8888/
 ```
 
-The SearXNG endpoint and UI require the generated `x-api-key`. Playwright is **not exposed to the LAN**; it is reachable only from localhost and containers attached to `ai-local`.
+This makes the repository reusable by both containerized and host-native agents without exposing either MCP service to the LAN. The SearXNG endpoint and UI require the generated `x-api-key`. Playwright remains loopback/private-network only.
 
 ## Capabilities
 
@@ -121,6 +121,30 @@ Then adapt `pi/mcp-adapter.json.example` into Pi's MCP configuration. It defines
 
 Keep `directTools` disabled. Pi should see only its compact MCP proxy and discover SearXNG/Playwright capabilities on demand instead of injecting Playwright's relatively large browser schema set into every model request.
 
+## Other MCP clients
+
+The services are standard HTTP MCP endpoints and are not Pi-specific. Any compatible local agent can connect using the loopback URLs, while any compatible container attached to `ai-local` can use the Docker service-name URLs.
+
+Host-native client example:
+
+```json
+{
+  "mcpServers": {
+    "searxng": {
+      "url": "http://127.0.0.1:8888/mcp/",
+      "headers": {
+        "x-api-key": "<MCP_GATEWAY_AUTH_TOKEN>"
+      }
+    },
+    "playwright": {
+      "url": "http://127.0.0.1:8931/mcp"
+    }
+  }
+}
+```
+
+Containerized clients on `ai-local` should replace `127.0.0.1` with `mcp-gateway`.
+
 ## Persistence
 
 Two named Docker volumes are used:
@@ -167,6 +191,16 @@ For the Ryzen 4650U/16 GB host this keeps the browser bounded while leaving most
 ```bash
 docker compose logs -f mcp-gateway
 ```
+
+## Updating an existing checkout
+
+Older revisions used `MCP_GATEWAY_PORT=8811`. To adopt the new standard host endpoint at `127.0.0.1:8888`, update your existing `.env` before restarting:
+
+```bash
+sed -i 's/^MCP_GATEWAY_PORT=8811$/MCP_GATEWAY_PORT=8888/' .env
+```
+
+If you intentionally use a custom port, keep it; only the container-side port remains fixed at `8888`.
 
 ## Update
 

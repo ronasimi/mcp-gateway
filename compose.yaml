@@ -15,9 +15,9 @@ services:
       PLAYWRIGHT_MCP_IDLE_TIMEOUT: ${PLAYWRIGHT_MCP_IDLE_TIMEOUT:-300000}
       PLAYWRIGHT_MCP_PING_TIMEOUT_MS: ${PLAYWRIGHT_MCP_PING_TIMEOUT_MS:-30000}
 
-    # Localhost-only diagnostics. Pi should use the ai-local Docker network.
+    # Loopback publishing supports host-native agents; container agents use ai-local.
     ports:
-      - "127.0.0.1:${MCP_GATEWAY_PORT:-8811}:8888"
+      - "127.0.0.1:${MCP_GATEWAY_PORT:-8888}:8888"
       - "127.0.0.1:${PLAYWRIGHT_HOST_PORT:-8931}:8931"
 
     volumes:
