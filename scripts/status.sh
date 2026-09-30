@@ -1,54 +1,27 @@
 #!/usr/bin/env bash
-set -Eeuo pipefail
-cd "$(dirname "${BASH_SOURCE[0]}")/.."
-set -a
-source ./.env
-set +a
+set -u
+cd "$(dirname "$0")/.."
 
-echo "== compose =="
+echo "== Containers =="
 docker compose ps
 
 echo
-echo "== SearXNG MCP =="
-if command -v curl >/dev/null 2>&1; then
-  code="$(curl -sS -o /dev/null -w '%{http_code}' \
-    -H "x-api-key: ${MCP_GATEWAY_AUTH_TOKEN}" \
-    "http://127.0.0.1:${MCP_GATEWAY_PORT:-8888}/mcp/" || true)"
-  echo "HTTP ${code:-unreachable} at http://127.0.0.1:${MCP_GATEWAY_PORT:-8888}/mcp/"
-else
-  echo "curl not installed; skipping HTTP probe"
-fi
+echo "== Local endpoints =="
+for spec in \
+  "SearXNG MCP|${MCP_GATEWAY_PORT:-8888}|/mcp" \
+  "Playwright MCP|${PLAYWRIGHT_HOST_PORT:-8931}|/mcp" \
+  "Memory MCP|${MEMORY_HOST_PORT:-8932}|/mcp"; do
+  IFS='|' read -r name port path <<<"$spec"
+  code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 3 "http://127.0.0.1:${port}${path}" 2>/dev/null || true)"
+  if [[ -n "$code" && "$code" != "000" ]]; then
+    printf '%-16s reachable (HTTP %s) at http://127.0.0.1:%s%s\n' "$name" "$code" "$port" "$path"
+  else
+    printf '%-16s NOT reachable at http://127.0.0.1:%s%s\n' "$name" "$port" "$path"
+  fi
+done
 
 echo
-echo "== Playwright MCP =="
-if command -v curl >/dev/null 2>&1; then
-  code="$(curl -sS -o /dev/null -w '%{http_code}' \
-    "http://127.0.0.1:${PLAYWRIGHT_HOST_PORT:-8931}/mcp" || true)"
-  echo "HTTP ${code:-unreachable} at http://127.0.0.1:${PLAYWRIGHT_HOST_PORT:-8931}/mcp"
-else
-  echo "curl not installed; skipping HTTP probe"
-fi
-
-echo
-echo "== Memory MCP =="
-if command -v curl >/dev/null 2>&1; then
-  code="$(curl -sS -o /dev/null -w '%{http_code}' \
-    "http://127.0.0.1:${MEMORY_HOST_PORT:-8932}/mcp" || true)"
-  echo "HTTP ${code:-unreachable} at http://127.0.0.1:${MEMORY_HOST_PORT:-8932}/mcp"
-else
-  echo "curl not installed; skipping HTTP probe"
-fi
-
-echo
-echo "== memory file =="
-if [[ -f data/memory/memory.jsonl ]]; then
-  printf 'Path: %s\n' "$(realpath data/memory/memory.jsonl)"
-  printf 'Lines: %s\n' "$(wc -l < data/memory/memory.jsonl)"
-  printf 'Size: %s bytes\n' "$(stat -c %s data/memory/memory.jsonl)"
-else
-  echo "No memory file yet; it will be created on first write."
-fi
-
-echo
-echo "== recent logs =="
-docker compose logs --tail=160 mcp-gateway
+echo "== Persistent data =="
+printf 'SearXNG:    %s\n' "$(du -sh data/searxng 2>/dev/null | cut -f1 || echo 0)"
+printf 'Playwright: %s\n' "$(du -sh data/playwright 2>/dev/null | cut -f1 || echo 0)"
+printf 'Memory:     %s\n' "$(du -sh data/memory 2>/dev/null | cut -f1 || echo 0)"

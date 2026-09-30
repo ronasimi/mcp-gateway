@@ -1,68 +1,19 @@
 {
   "mcpServers": {
     "searxng": {
-      "url": "http://mcp-gateway:8888/mcp/",
-      "headers": {
-        "x-api-key": "${MCP_GATEWAY_AUTH_TOKEN}"
-      },
+      "url": "http://mcp-gateway:8888/mcp",
       "directTools": false,
       "requestTimeoutMs": 30000,
       "searchKeywords": {
-        "search": [
-          "web",
-          "search",
-          "internet",
-          "current",
-          "news",
-          "research"
-        ],
-        "autocomplete": [
-          "suggest",
-          "query",
-          "autocomplete"
-        ],
-        "engine_info": [
-          "search engines",
-          "categories",
-          "searxng"
-        ]
+        "*": ["web", "search", "internet", "searxng", "news"]
       }
     },
     "playwright": {
       "url": "http://mcp-gateway:8931/mcp",
       "directTools": false,
-      "requestTimeoutMs": 60000,
+      "requestTimeoutMs": 30000,
       "searchKeywords": {
-        "browser_navigate": [
-          "browser",
-          "navigate",
-          "url",
-          "website",
-          "page"
-        ],
-        "browser_click": [
-          "click",
-          "button",
-          "link",
-          "browser"
-        ],
-        "browser_type": [
-          "type",
-          "input",
-          "form",
-          "browser"
-        ],
-        "browser_snapshot": [
-          "page",
-          "accessibility",
-          "snapshot",
-          "browser"
-        ],
-        "browser_take_screenshot": [
-          "screenshot",
-          "browser",
-          "page image"
-        ]
+        "*": ["browser", "web", "navigate", "page", "click", "form", "screenshot"]
       }
     },
     "memory": {
@@ -70,59 +21,7 @@
       "directTools": false,
       "requestTimeoutMs": 30000,
       "searchKeywords": {
-        "create_entities": [
-          "memory",
-          "remember",
-          "knowledge",
-          "store facts",
-          "entities"
-        ],
-        "create_relations": [
-          "memory",
-          "relationship",
-          "relation",
-          "connect entities"
-        ],
-        "add_observations": [
-          "memory",
-          "remember fact",
-          "add fact",
-          "observation"
-        ],
-        "search_nodes": [
-          "memory",
-          "recall",
-          "remember",
-          "knowledge",
-          "find fact",
-          "search memory"
-        ],
-        "open_nodes": [
-          "memory",
-          "recall entity",
-          "open memory",
-          "known entity"
-        ],
-        "read_graph": [
-          "memory",
-          "knowledge graph",
-          "all memories"
-        ],
-        "delete_entities": [
-          "forget",
-          "delete memory",
-          "remove entity"
-        ],
-        "delete_observations": [
-          "forget fact",
-          "delete observation",
-          "remove fact"
-        ],
-        "delete_relations": [
-          "forget relation",
-          "delete relation",
-          "remove relationship"
-        ]
+        "*": ["memory", "remember", "recall", "knowledge", "entity", "relation", "observation"]
       }
     }
   },
@@ -130,7 +29,6 @@
     "directTools": false,
     "namespaceProxyTools": false,
     "allowInstall": false,
-    "scriptMode": true,
-    "hostConfigDiscovery": "off"
+    "scriptMode": true
   }
 }

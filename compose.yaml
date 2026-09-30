@@ -1,36 +1,36 @@
 services:
   mcp-gateway:
-    build: .
-    image: local/searxng-playwright-mcp:latest
+    build:
+      context: .
+      args:
+        SEARXNG_REF: ${SEARXNG_REF:-12f8b6515}
+    image: local/agent-mcp-stack:latest
     container_name: mcp-gateway
     restart: unless-stopped
 
     environment:
-      # Protects the SearXNG MCP endpoint and UI.
-      API_KEY: ${MCP_GATEWAY_AUTH_TOKEN:?Set MCP_GATEWAY_AUTH_TOKEN in .env}
+      # Used as the durable SearXNG secret on first initialization.
+      MCP_GATEWAY_AUTH_TOKEN: ${MCP_GATEWAY_AUTH_TOKEN:-}
+      SEARXNG_SECRET: ${SEARXNG_SECRET:-}
 
-      # Playwright stays private on ai-local; Pi reaches it directly by container name.
       PLAYWRIGHT_MCP_PORT: 8931
       PLAYWRIGHT_MCP_USER_DATA_DIR: /data/playwright
       PLAYWRIGHT_MCP_IDLE_TIMEOUT: ${PLAYWRIGHT_MCP_IDLE_TIMEOUT:-300000}
-      PLAYWRIGHT_MCP_PING_TIMEOUT_MS: ${PLAYWRIGHT_MCP_PING_TIMEOUT_MS:-30000}
 
-      # Persistent MCP knowledge graph, exposed through Supergateway.
       MEMORY_MCP_PORT: 8932
       MEMORY_FILE_PATH: /data/memory/memory.jsonl
 
-    # Loopback publishing supports host-native agents; container agents use ai-local.
+    # Host-native agents use loopback; containers on ai-local use the service name.
     ports:
       - "127.0.0.1:${MCP_GATEWAY_PORT:-8888}:8888"
       - "127.0.0.1:${PLAYWRIGHT_HOST_PORT:-8931}:8931"
       - "127.0.0.1:${MEMORY_HOST_PORT:-8932}:8932"
 
     volumes:
-      - searxng_config:/etc/searxng
-      - playwright_profile:/data/playwright
+      - ./data/searxng:/etc/searxng
+      - ./data/playwright:/data/playwright
       - ./data/memory:/data/memory
 
-    # Chromium requires more headroom than search alone.
     mem_limit: ${MCP_GATEWAY_MEMORY:-1536m}
     cpus: ${MCP_GATEWAY_CPUS:-2.0}
     shm_size: ${PLAYWRIGHT_SHM_SIZE:-512m}
@@ -40,10 +40,6 @@ services:
 
     networks:
       - ai-local
-
-volumes:
-  searxng_config:
-  playwright_profile:
 
 networks:
   ai-local:
