@@ -1,47 +1,86 @@
 services:
+  # Use the upstream self-contained SearXNG MCP image unchanged.
+  mcp-searxng:
+    image: ${SEARXNG_IMAGE:-ghcr.io/whw23/searxng-http-mcp:latest}
+    container_name: mcp-searxng
+    restart: unless-stopped
+    pull_policy: always
+
+    # No application-level API key is needed here: this container is not
+    # published to the host or ai-local. Only mcp-gateway can reach it.
+
+    expose:
+      - "8888"
+
+    mem_limit: ${SEARXNG_MEMORY:-512m}
+    cpus: ${SEARXNG_CPUS:-1.0}
+
+    security_opt:
+      - no-new-privileges:true
+
+    networks:
+      - mcp-backend
+
+  # Stable public endpoint for Pi and other local agents.  This container hosts
+  # Playwright + Memory and reverse-proxies :8888 to the untouched upstream
+  # SearXNG MCP container, so existing mcp-gateway URLs do not change.
   mcp-gateway:
     build:
       context: .
+      dockerfile: Dockerfile.tools
       args:
-        SEARXNG_REF: ${SEARXNG_REF:-12f8b6515}
-    image: local/agent-mcp-stack:latest
+        PLAYWRIGHT_MCP_VERSION: ${PLAYWRIGHT_MCP_VERSION:-0.0.83}
+        MEMORY_MCP_VERSION: ${MEMORY_MCP_VERSION:-2026.8.31}
+        SUPERGATEWAY_VERSION: ${SUPERGATEWAY_VERSION:-4.0.0}
+    image: local/agent-mcp-tools:latest
     container_name: mcp-gateway
     restart: unless-stopped
 
+    depends_on:
+      mcp-searxng:
+        condition: service_healthy
+
     environment:
-      # Used as the durable SearXNG secret on first initialization.
-      MCP_GATEWAY_AUTH_TOKEN: ${MCP_GATEWAY_AUTH_TOKEN:-}
-      SEARXNG_SECRET: ${SEARXNG_SECRET:-}
+      SEARXNG_UPSTREAM_HOST: mcp-searxng
+      SEARXNG_UPSTREAM_PORT: 8888
+      SEARXNG_PROXY_PORT: 8888
 
       PLAYWRIGHT_MCP_PORT: 8931
+      PLAYWRIGHT_MCP_EXECUTABLE_PATH: /usr/bin/chromium
       PLAYWRIGHT_MCP_USER_DATA_DIR: /data/playwright
       PLAYWRIGHT_MCP_IDLE_TIMEOUT: ${PLAYWRIGHT_MCP_IDLE_TIMEOUT:-300000}
+      PLAYWRIGHT_MCP_PING_TIMEOUT_MS: ${PLAYWRIGHT_MCP_PING_TIMEOUT_MS:-30000}
+      PLAYWRIGHT_MCP_SHARED_BROWSER_CONTEXT: ${PLAYWRIGHT_MCP_SHARED_BROWSER_CONTEXT:-true}
 
       MEMORY_MCP_PORT: 8932
       MEMORY_FILE_PATH: /data/memory/memory.jsonl
 
-    # Host-native agents use loopback; containers on ai-local use the service name.
     ports:
       - "127.0.0.1:${MCP_GATEWAY_PORT:-8888}:8888"
       - "127.0.0.1:${PLAYWRIGHT_HOST_PORT:-8931}:8931"
       - "127.0.0.1:${MEMORY_HOST_PORT:-8932}:8932"
 
     volumes:
-      - ./data/searxng:/etc/searxng
       - ./data/playwright:/data/playwright
       - ./data/memory:/data/memory
 
-    mem_limit: ${MCP_GATEWAY_MEMORY:-1536m}
-    cpus: ${MCP_GATEWAY_CPUS:-2.0}
+    mem_limit: ${MCP_GATEWAY_MEMORY:-1024m}
+    cpus: ${MCP_GATEWAY_CPUS:-1.5}
     shm_size: ${PLAYWRIGHT_SHM_SIZE:-512m}
 
     security_opt:
       - no-new-privileges:true
 
     networks:
+      - mcp-backend
       - ai-local
 
 networks:
+  # Private service network: not published to host/ai-local, but deliberately
+  # NOT internal so SearXNG retains outbound Internet access for search engines.
+  mcp-backend:
+
+  # Shared by Pi and any other trusted containerized local agents.
   ai-local:
     external: true
     name: ai-local

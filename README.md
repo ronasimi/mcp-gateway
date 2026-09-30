@@ -1,24 +1,24 @@
-# Local MCP services
+# Local MCP Gateway
 
-A single Docker container providing three MCP services for local/container agents:
+Reusable MCP services for Pi and other local/containerized agents.
 
-- **SearXNG MCP** — `http://mcp-gateway:8888/mcp`
-- **Playwright MCP** — `http://mcp-gateway:8931/mcp`
-- **Memory MCP** — `http://mcp-gateway:8932/mcp`
+## Services
 
-Host-native clients use the same ports at `127.0.0.1`. All host bindings are loopback-only.
+```text
+mcp-searxng  (upstream ghcr.io/whw23/searxng-http-mcp)
+    private mcp-backend network, outbound Internet enabled
+            |
+            v
+mcp-gateway
+    :8888 -> SearXNG Web UI + MCP proxy
+    :8931 -> Playwright MCP
+    :8932 -> Memory MCP
+            |
+            +-- ai-local -> Pi / trusted containers
+            +-- 127.0.0.1 -> host-native agents
+```
 
-
-### Build/runtime design
-
-The image uses one Debian base but **two Python runtimes on purpose**:
-
-- Debian Python 3.11 runs pinned SearXNG from its source tree.
-- CPython 3.14 from the base image runs `searxng-http-mcp`, which requires Python 3.14+.
-
-SearXNG is not installed with `pip install .`. Instead, its pinned runtime requirements are installed into `/opt/searxng-venv` and the application runs directly from `/opt/searxng-src`. This avoids SearXNG `setup.py` importing the application during package metadata generation and removes the build-time dependency on runtime `/etc/searxng/settings.yml`. The runtime entrypoint creates the durable settings file before starting SearXNG.
-
-Upstream SearXNG is pinned by `SEARXNG_REF` (default `12f8b6515`, corresponding to the official `2026.9.25-12f8b6515` build). The Docker build clones the `master` commit history with `--filter=blob:none` and resolves the abbreviated revision locally. This avoids GitHub's refusal to fetch an abbreviated SHA directly while preserving a reproducible SearXNG revision.
+The upstream SearXNG container is not published to the host and is not attached to `ai-local`, so it does not need an extra API key. The gateway is the only client on its private service network. `mcp-backend` is intentionally **not** an `internal: true` Docker network: SearXNG needs outbound Internet access to query search engines.
 
 ## Start
 
@@ -27,45 +27,42 @@ cp -n .env.example .env
 ./scripts/init.sh
 ```
 
-Then:
+Verify:
 
 ```bash
 ./scripts/status.sh
-docker compose logs -f mcp-gateway
-```
-
-## Persistent host data
-
-```text
-data/searxng/       SearXNG settings
-data/playwright/    Chromium profile
-data/memory/        Memory MCP JSONL graph
+docker compose logs -f mcp-gateway mcp-searxng
 ```
 
 ## Endpoints
 
-Container clients on the external `ai-local` network:
-
-```text
-http://mcp-gateway:8888/mcp
-http://mcp-gateway:8931/mcp
-http://mcp-gateway:8932/mcp
-```
-
 Host-native clients:
 
 ```text
-http://127.0.0.1:8888/mcp
+http://127.0.0.1:8888/mcp/
 http://127.0.0.1:8931/mcp
 http://127.0.0.1:8932/mcp
 ```
 
-These endpoints are intentionally not LAN-published. Treat `ai-local` as a trusted local Docker network.
+Container clients on `ai-local`:
 
-## Pi
+```text
+http://mcp-gateway:8888/mcp/
+http://mcp-gateway:8931/mcp
+http://mcp-gateway:8932/mcp
+```
 
-Use `pi/mcp-adapter.json.example` with `pi-mcp-adapter`. All three servers use `directTools: false` so tool schemas stay behind MCP discovery rather than entering every model request.
+SearXNG Web UI is available at `http://127.0.0.1:8888/`.
 
-### SearXNG revision checkout
+## Persistent data
 
-`SEARXNG_REF` may be an abbreviated commit ID such as `12f8b6515`. Do not replace the Dockerfile checkout with `git fetch origin "$SEARXNG_REF"`: GitHub does not advertise abbreviated commit IDs as remote refs. The image intentionally retrieves the filtered `master` history first and resolves the pinned commit locally.
+```text
+data/playwright/    Chromium profile / cookies / site state
+data/memory/        Memory MCP JSONL graph
+```
+
+SearXNG uses the upstream image's packaged configuration by default. This avoids stale host-mounted `/etc/searxng` files from older custom builds. If you later need custom SearXNG settings, add a deliberate config mount after validating it against the upstream image version.
+
+## Pi integration
+
+Keep all three servers `directTools: false` in `pi-mcp-adapter` so browser/search/memory schemas remain behind on-demand MCP discovery rather than bloating every model prompt.

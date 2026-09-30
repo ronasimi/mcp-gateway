@@ -1,7 +1,11 @@
 .env
 *.log
 .DS_Store
-# Durable MCP memory; keep the directory, not its contents.
+
+# Durable runtime state. Keep directory placeholders, not user data.
+data/searxng/*
+!data/searxng/.gitkeep
+data/playwright/*
+!data/playwright/.gitkeep
 data/memory/*
 !data/memory/.gitkeep
-
