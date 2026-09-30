@@ -1,0 +1,45 @@
+services:
+  mcp-gateway:
+    build: .
+    image: local/searxng-playwright-mcp:latest
+    container_name: mcp-gateway
+    restart: unless-stopped
+
+    environment:
+      # Protects the SearXNG MCP endpoint and UI.
+      API_KEY: ${MCP_GATEWAY_AUTH_TOKEN:?Set MCP_GATEWAY_AUTH_TOKEN in .env}
+
+      # Playwright stays private on ai-local; Pi reaches it directly by container name.
+      PLAYWRIGHT_MCP_PORT: 8931
+      PLAYWRIGHT_MCP_USER_DATA_DIR: /data/playwright
+      PLAYWRIGHT_MCP_IDLE_TIMEOUT: ${PLAYWRIGHT_MCP_IDLE_TIMEOUT:-300000}
+      PLAYWRIGHT_MCP_PING_TIMEOUT_MS: ${PLAYWRIGHT_MCP_PING_TIMEOUT_MS:-30000}
+
+    # Localhost-only diagnostics. Pi should use the ai-local Docker network.
+    ports:
+      - "127.0.0.1:${MCP_GATEWAY_PORT:-8811}:8888"
+      - "127.0.0.1:${PLAYWRIGHT_HOST_PORT:-8931}:8931"
+
+    volumes:
+      - searxng_config:/etc/searxng
+      - playwright_profile:/data/playwright
+
+    # Chromium requires more headroom than search alone.
+    mem_limit: ${MCP_GATEWAY_MEMORY:-1536m}
+    cpus: ${MCP_GATEWAY_CPUS:-2.0}
+    shm_size: ${PLAYWRIGHT_SHM_SIZE:-512m}
+
+    security_opt:
+      - no-new-privileges:true
+
+    networks:
+      - ai-local
+
+volumes:
+  searxng_config:
+  playwright_profile:
+
+networks:
+  ai-local:
+    external: true
+    name: ai-local

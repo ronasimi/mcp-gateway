@@ -1,0 +1,14 @@
+# Merge these pieces into the independent Pi project's compose.yaml.
+# Copy MCP_GATEWAY_AUTH_TOKEN from this repository's .env into the Pi project's .env.
+
+services:
+  pi:
+    environment:
+      MCP_GATEWAY_AUTH_TOKEN: ${MCP_GATEWAY_AUTH_TOKEN}
+    networks:
+      - ai-local
+
+networks:
+  ai-local:
+    external: true
+    name: ai-local
