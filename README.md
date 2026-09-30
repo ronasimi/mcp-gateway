@@ -54,3 +54,9 @@ data/searxng/     SearXNG settings
 data/playwright/  Chromium profile
 data/memory/      Memory MCP JSONL graph
 ```
+
+## Pi bounded discovery profile
+
+The paired Pi update keeps four core tools and adds only `mcp_search` and `mcp_call`. Its `pi/mcp-adapter.json.example` now uses `directTools: false` for every server, disables MCP scripting, and limits result output. Playwright, Memory, and SearXNG all use discovery. The bounded response, per-turn discovery grants, and execution loop guard are implemented in the Pi extension; this adapter configuration alone does not enforce them.
+
+No gateway runtime/service changes are required for this update. Keep the existing endpoints and persistent data. The updated Pi prompt sends live page-reading requests to MCP Playwright instead of the optional page-picker bridge.
