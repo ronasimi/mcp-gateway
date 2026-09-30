@@ -1,13 +1,12 @@
 #!/bin/sh
 set -eu
 
-PROXY_PID=""
 PLAYWRIGHT_PID=""
 MEMORY_PID=""
 
 cleanup() {
   trap - INT TERM EXIT
-  for pid in "${MEMORY_PID}" "${PLAYWRIGHT_PID}" "${PROXY_PID}"; do
+  for pid in "${MEMORY_PID}" "${PLAYWRIGHT_PID}"; do
     [ -n "${pid}" ] && kill "${pid}" 2>/dev/null || true
   done
   wait 2>/dev/null || true
@@ -15,10 +14,6 @@ cleanup() {
 trap cleanup INT TERM EXIT
 
 mkdir -p /data/playwright /data/memory
-
-echo "Starting SearXNG proxy on :${SEARXNG_PROXY_PORT:-8888}" >&2
-node /usr/local/lib/mcp-gateway/searxng-proxy.mjs &
-PROXY_PID=$!
 
 CHROMIUM_BIN="${PLAYWRIGHT_MCP_EXECUTABLE_PATH:-/usr/bin/chromium}"
 if [ ! -x "${CHROMIUM_BIN}" ]; then
@@ -60,7 +55,6 @@ MEMORY_PID=$!
 
 while :; do
   for pair in \
-    "SearXNG proxy:${PROXY_PID}" \
     "Playwright MCP:${PLAYWRIGHT_PID}" \
     "Memory MCP:${MEMORY_PID}"; do
     name=${pair%%:*}

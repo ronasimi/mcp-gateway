@@ -1,68 +1,56 @@
-# Local MCP Gateway
+# Local MCP stack
 
-Reusable MCP services for Pi and other local/containerized agents.
+This repository provides three MCP capabilities using two containers:
 
-## Services
+- **SearXNG MCP + Web UI** — upstream `ghcr.io/whw23/searxng-http-mcp` image, exposed directly on `127.0.0.1:8888` and `mcp-searxng:8888` on `ai-local`.
+- **Playwright MCP** — `127.0.0.1:8931` / `mcp-gateway:8931`.
+- **Memory MCP** — `127.0.0.1:8932` / `mcp-gateway:8932`, persisted in `data/memory/memory.jsonl`.
 
-```text
-mcp-searxng  (upstream ghcr.io/whw23/searxng-http-mcp)
-    private mcp-backend network, outbound Internet enabled
-            |
-            v
-mcp-gateway
-    :8888 -> SearXNG Web UI + MCP proxy
-    :8931 -> Playwright MCP
-    :8932 -> Memory MCP
-            |
-            +-- ai-local -> Pi / trusted containers
-            +-- 127.0.0.1 -> host-native agents
-```
+## Why SearXNG is direct
 
-The upstream SearXNG container is not published to the host and is not attached to `ai-local`, so it does not need an extra API key. The gateway is the only client on its private service network. `mcp-backend` is intentionally **not** an `internal: true` Docker network: SearXNG needs outbound Internet access to query search engines.
+The upstream SearXNG MCP image already multiplexes its Web UI and `/mcp/` endpoint on port 8888. Putting another HTTP reverse proxy in front of it caused browser `/search` POST/GET requests to be treated differently from direct requests and made 403 failures harder to diagnose. v11 publishes the upstream container directly instead.
 
-## Start
+The local SearXNG overlay explicitly keeps both `html` and `json` search formats enabled and disables SearXNG's public-instance limiter. The SearXNG Search API returns 403 when a requested format is not enabled, so both formats are required for browser + MCP use.
+
+## Initialize
 
 ```bash
-cp -n .env.example .env
 ./scripts/init.sh
 ```
 
-Verify:
-
-```bash
-./scripts/status.sh
-docker compose logs -f mcp-gateway mcp-searxng
-```
+The script creates `ai-local` if necessary, generates `SEARXNG_SECRET`, seeds `data/searxng/settings.yml`, pulls the upstream SearXNG image, builds the Playwright/Memory image, and starts the stack.
 
 ## Endpoints
 
-Host-native clients:
+Host/native clients:
 
 ```text
-http://127.0.0.1:8888/mcp/
-http://127.0.0.1:8931/mcp
-http://127.0.0.1:8932/mcp
+SearXNG MCP     http://127.0.0.1:8888/mcp/
+SearXNG Web UI  http://127.0.0.1:8888/
+Playwright MCP  http://127.0.0.1:8931/mcp
+Memory MCP      http://127.0.0.1:8932/mcp
 ```
 
-Container clients on `ai-local`:
+Containers attached to `ai-local`:
 
 ```text
-http://mcp-gateway:8888/mcp/
-http://mcp-gateway:8931/mcp
-http://mcp-gateway:8932/mcp
+SearXNG MCP     http://mcp-searxng:8888/mcp/
+Playwright MCP  http://mcp-gateway:8931/mcp
+Memory MCP      http://mcp-gateway:8932/mcp
 ```
 
-SearXNG Web UI is available at `http://127.0.0.1:8888/`.
+## Verify
+
+```bash
+./scripts/status.sh
+```
+
+It checks the SearXNG root, performs a real HTML `/search` request, checks the MCP listener, prints the relevant persisted settings, and checks Playwright/Memory.
 
 ## Persistent data
 
 ```text
-data/playwright/    Chromium profile / cookies / site state
-data/memory/        Memory MCP JSONL graph
+data/searxng/     SearXNG settings
+data/playwright/  Chromium profile
+data/memory/      Memory MCP JSONL graph
 ```
-
-SearXNG uses the upstream image's packaged configuration by default. This avoids stale host-mounted `/etc/searxng` files from older custom builds. If you later need custom SearXNG settings, add a deliberate config mount after validating it against the upstream image version.
-
-## Pi integration
-
-Keep all three servers `directTools: false` in `pi-mcp-adapter` so browser/search/memory schemas remain behind on-demand MCP discovery rather than bloating every model prompt.

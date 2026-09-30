@@ -21,21 +21,19 @@ RUN apt-get update \
        "@modelcontextprotocol/server-memory@${MEMORY_MCP_VERSION}" \
        "supergateway@${SUPERGATEWAY_VERSION}" \
     && npm cache clean --force \
-    && command -v node \
     && command -v playwright-mcp \
     && command -v mcp-server-memory \
     && command -v supergateway \
     && command -v chromium
 
 COPY scripts/gateway-entrypoint.sh /usr/local/bin/mcp-gateway-entrypoint
-COPY scripts/searxng-proxy.mjs /usr/local/lib/mcp-gateway/searxng-proxy.mjs
 COPY scripts/healthcheck.sh /usr/local/bin/mcp-gateway-healthcheck
 
 RUN chmod +x /usr/local/bin/mcp-gateway-entrypoint /usr/local/bin/mcp-gateway-healthcheck \
-    && mkdir -p /data/playwright /data/memory /usr/local/lib/mcp-gateway \
-    && chown -R node:node /data /usr/local/lib/mcp-gateway
+    && mkdir -p /data/playwright /data/memory \
+    && chown -R node:node /data
 
-EXPOSE 8888 8931 8932
+EXPOSE 8931 8932
 
 USER node
 
