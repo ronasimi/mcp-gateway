@@ -12,7 +12,7 @@ Host-native clients use the same ports at `127.0.0.1`. All host bindings are loo
 
 SearXNG's production image is intentionally stripped and is not intended to be extended with a distro package manager. Earlier variants that tried to add Alpine `apk` or restore Void `xbps` were brittle. This repo instead installs all runtimes on one `python:3.14-slim-bookworm` base: SearXNG, `searxng-http-mcp`, Node.js, Chromium, Playwright MCP, Memory MCP, and Supergateway.
 
-Upstream SearXNG is pinned by `SEARXNG_REF` (default `12f8b6515`).
+Upstream SearXNG is pinned by `SEARXNG_REF` (default `12f8b6515`, corresponding to the official `2026.9.25-12f8b6515` build). The Docker build clones the `master` commit history with `--filter=blob:none` and resolves the abbreviated revision locally. This avoids GitHub's refusal to fetch an abbreviated SHA directly while preserving a reproducible SearXNG revision.
 
 ## Start
 
@@ -59,3 +59,7 @@ These endpoints are intentionally not LAN-published. Treat `ai-local` as a trust
 ## Pi
 
 Use `pi/mcp-adapter.json.example` with `pi-mcp-adapter`. All three servers use `directTools: false` so tool schemas stay behind MCP discovery rather than entering every model request.
+
+### SearXNG revision checkout
+
+`SEARXNG_REF` may be an abbreviated commit ID such as `12f8b6515`. Do not replace the Dockerfile checkout with `git fetch origin "$SEARXNG_REF"`: GitHub does not advertise abbreviated commit IDs as remote refs. The image intentionally retrieves the filtered `master` history first and resolves the pinned commit locally.

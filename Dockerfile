@@ -32,10 +32,11 @@ RUN apt-get update \
 
 # Install SearXNG from an explicit upstream revision on the same glibc/Python
 # runtime used at execution time. This avoids cross-distro rootfs overlays.
-RUN git clone https://github.com/searxng/searxng.git /opt/searxng-src \
+RUN git clone --filter=blob:none --no-checkout --single-branch --branch master \
+         https://github.com/searxng/searxng.git /opt/searxng-src \
     && cd /opt/searxng-src \
-    && git fetch --depth 1 origin "${SEARXNG_REF}" \
-    && git checkout --detach FETCH_HEAD \
+    && git rev-parse --verify "${SEARXNG_REF}^{commit}" \
+    && git checkout --detach "${SEARXNG_REF}" \
     && python -m pip install --no-cache-dir --upgrade pip setuptools wheel pyyaml msgspec typing-extensions pybind11 \
     && python -m pip install --no-cache-dir --use-pep517 --no-build-isolation . \
     && python -m pip install --no-cache-dir \
