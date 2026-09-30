@@ -1,0 +1,47 @@
+FROM node:22-bookworm-slim
+
+ARG SUPERGATEWAY_VERSION=4.0.0
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    NODE_ENV=production
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+       ca-certificates \
+       curl \
+       dnsutils \
+       file \
+       imagemagick \
+       iproute2 \
+       iputils-ping \
+       libimage-exiftool-perl \
+       netcat-openbsd \
+       nmap \
+       openssh-client \
+       pandoc \
+       poppler-utils \
+       tini \
+       traceroute \
+       unzip \
+    && rm -rf /var/lib/apt/lists/* \
+    && npm install -g --omit=dev "supergateway@${SUPERGATEWAY_VERSION}" \
+    && npm cache clean --force \
+    && command -v supergateway \
+    && command -v convert \
+    && command -v pdftotext \
+    && command -v pandoc \
+    && command -v nmap \
+    && command -v ssh
+
+COPY scripts/system-tools.mjs /opt/mcp/system-tools.mjs
+RUN chmod 0755 /opt/mcp/system-tools.mjs \
+    && mkdir -p /workspace /data/ssh \
+    && touch /data/ssh/config
+
+EXPOSE 8933
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD ["sh", "-c", "curl -sS -o /dev/null --max-time 3 http://127.0.0.1:${SYSTEM_MCP_PORT:-8933}/mcp"]
+
+ENTRYPOINT ["/usr/bin/tini", "--"]
+CMD ["sh", "-c", "exec supergateway --stdio 'node /opt/mcp/system-tools.mjs' --outputTransport streamableHttp --port ${SYSTEM_MCP_PORT:-8933} --streamableHttpPath /mcp --logLevel info"]

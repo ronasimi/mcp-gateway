@@ -23,7 +23,10 @@ ensure_env_secret() {
 
 ensure_env_secret SEARXNG_SECRET
 
-mkdir -p data/searxng data/playwright data/memory
+mkdir -p data/searxng data/playwright data/memory data/workspace data/ssh
+[[ -e data/ssh/config ]] || touch data/ssh/config
+chmod 700 data/ssh 2>/dev/null || true
+chmod 600 data/ssh/config 2>/dev/null || true
 
 # Seed a known-good local/private SearXNG config on first install. Do not
 # overwrite user changes on later runs.
@@ -59,6 +62,9 @@ docker compose pull mcp-searxng
 
 echo "Building Playwright + Memory gateway image..."
 docker compose build --pull mcp-gateway
+
+echo "Building bounded system-tools MCP image..."
+docker compose build --pull mcp-system
 
 echo "Starting MCP stack..."
 docker compose up -d

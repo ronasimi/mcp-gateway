@@ -74,6 +74,61 @@ services:
     networks:
       - ai-local
 
+  # Privileged/local diagnostics MCP. All schemas stay behind Pi bounded
+  # discovery (directTools=false). Host/Docker access is isolated here.
+  mcp-system:
+    build:
+      context: .
+      dockerfile: Dockerfile.system
+      args:
+        SUPERGATEWAY_VERSION: ${SUPERGATEWAY_VERSION:-4.0.0}
+    image: local/agent-mcp-system:latest
+    container_name: mcp-system
+    restart: unless-stopped
+
+    environment:
+      SYSTEM_MCP_PORT: 8933
+      MCP_WORKSPACE: /workspace
+      MCP_HOST_ROOT: /host
+      DOCKER_SOCKET: /var/run/docker.sock
+      OPENWRT_SSH_CONFIG: /data/ssh/config
+      DOCKER_ALLOW_WRITE: ${DOCKER_ALLOW_WRITE:-false}
+      DOCKER_ALLOW_EXEC: ${DOCKER_ALLOW_EXEC:-false}
+      OPENWRT_ALLOW_WRITE: ${OPENWRT_ALLOW_WRITE:-false}
+      SYSTEM_TOOLS_TIMEOUT_MS: ${SYSTEM_TOOLS_TIMEOUT_MS:-30000}
+      SYSTEM_TOOLS_MAX_OUTPUT: ${SYSTEM_TOOLS_MAX_OUTPUT:-65536}
+
+    ports:
+      - "127.0.0.1:${SYSTEM_TOOLS_HOST_PORT:-8933}:8933"
+
+    volumes:
+      - type: bind
+        source: ${HOST_ROOT_PATH:-/}
+        target: /host
+        read_only: true
+        bind:
+          propagation: rslave
+      - type: bind
+        source: ${DOCKER_SOCKET_PATH:-/var/run/docker.sock}
+        target: /var/run/docker.sock
+      - type: bind
+        source: ${MCP_WORKSPACE_PATH:-./data/workspace}
+        target: /workspace
+      - ./data/ssh:/data/ssh
+
+    mem_limit: ${SYSTEM_TOOLS_MEMORY:-768m}
+    cpus: ${SYSTEM_TOOLS_CPUS:-1.0}
+
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_RAW
+    security_opt:
+      - no-new-privileges:true
+
+    networks:
+      - ai-local
+
 networks:
   ai-local:
     external: true

@@ -39,7 +39,8 @@ echo
 echo "== Other MCP endpoints =="
 for spec in \
   "Playwright MCP|${PLAYWRIGHT_HOST_PORT:-8931}|/mcp" \
-  "Memory MCP|${MEMORY_HOST_PORT:-8932}|/mcp"; do
+  "Memory MCP|${MEMORY_HOST_PORT:-8932}|/mcp" \
+  "System Tools MCP|${SYSTEM_TOOLS_HOST_PORT:-8933}|/mcp"; do
   IFS='|' read -r name port path <<<"$spec"
   code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 3 "http://127.0.0.1:${port}${path}" 2>/dev/null || true)"
   if [[ -n "$code" && "$code" != "000" ]]; then
@@ -52,12 +53,14 @@ done
 echo
 echo "== ai-local DNS =="
 docker compose exec -T mcp-gateway getent hosts mcp-searxng 2>/dev/null || echo "mcp-searxng not resolvable from ai-local"
+docker compose exec -T mcp-gateway getent hosts mcp-system 2>/dev/null || echo "mcp-system not resolvable from ai-local"
 
 echo
 echo "== Persistent data =="
 printf 'SearXNG:   %s\n' "$(du -sh data/searxng 2>/dev/null | cut -f1 || echo 0)"
 printf 'Playwright:%s\n' "$(du -sh data/playwright 2>/dev/null | cut -f1 || echo 0)"
 printf 'Memory:    %s\n' "$(du -sh data/memory 2>/dev/null | cut -f1 || echo 0)"
+printf 'Workspace: %s\n' "$(du -sh data/workspace 2>/dev/null | cut -f1 || echo 0)"
 
 echo
 echo "== Client endpoints =="
@@ -65,3 +68,4 @@ echo "Host/local SearXNG:  http://127.0.0.1:${PORT}/mcp/"
 echo "Container SearXNG:   http://mcp-searxng:8888/mcp/"
 echo "Container Playwright:http://mcp-gateway:8931/mcp"
 echo "Container Memory:    http://mcp-gateway:8932/mcp"
+echo "Container System:    http://mcp-system:8933/mcp"

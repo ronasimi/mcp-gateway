@@ -68,6 +68,435 @@
         ]
       },
       "lifecycle": "lazy"
+    },
+    "system": {
+      "url": "http://mcp-system:8933/mcp",
+      "directTools": false,
+      "exposeResources": false,
+      "requestTimeoutMs": 120000,
+      "searchKeywords": {
+        "*": [
+          "docker",
+          "container",
+          "host",
+          "system",
+          "linux",
+          "network",
+          "dns",
+          "ping",
+          "port",
+          "router",
+          "openwrt",
+          "uci",
+          "ubus",
+          "wifi",
+          "image",
+          "photo",
+          "picture",
+          "pdf",
+          "document",
+          "docx",
+          "xlsx",
+          "pptx",
+          "file"
+        ],
+        "docker_list_containers": [
+          "docker ps",
+          "containers",
+          "services",
+          "running containers",
+          "stopped containers",
+          "container inventory"
+        ],
+        "docker_inspect_container": [
+          "docker inspect",
+          "container config",
+          "container mounts",
+          "container environment",
+          "container health",
+          "container network"
+        ],
+        "docker_container_logs": [
+          "docker logs",
+          "container logs",
+          "service logs",
+          "stderr",
+          "stdout",
+          "stack trace",
+          "startup error"
+        ],
+        "docker_container_stats": [
+          "docker stats",
+          "container cpu",
+          "container memory",
+          "resource usage",
+          "container performance"
+        ],
+        "docker_list_images": [
+          "docker images",
+          "image list",
+          "local images",
+          "image inventory",
+          "tags"
+        ],
+        "docker_inspect_image": [
+          "image inspect",
+          "docker image config",
+          "layers",
+          "entrypoint",
+          "image metadata"
+        ],
+        "docker_list_networks": [
+          "docker networks",
+          "container networks",
+          "bridge network",
+          "docker connectivity"
+        ],
+        "docker_inspect_network": [
+          "docker network inspect",
+          "subnet",
+          "ipam",
+          "network containers",
+          "aliases"
+        ],
+        "docker_list_volumes": [
+          "docker volumes",
+          "persistent storage",
+          "named volumes"
+        ],
+        "docker_inspect_volume": [
+          "volume inspect",
+          "mountpoint",
+          "volume driver"
+        ],
+        "docker_container_action": [
+          "start container",
+          "stop container",
+          "restart container",
+          "pause container",
+          "kill container"
+        ],
+        "docker_remove_container": [
+          "remove container",
+          "delete container",
+          "docker rm"
+        ],
+        "docker_remove_image": [
+          "remove image",
+          "delete image",
+          "docker rmi"
+        ],
+        "host_snapshot": [
+          "host status",
+          "system health",
+          "linux health",
+          "uptime",
+          "load average",
+          "host overview",
+          "system snapshot"
+        ],
+        "host_cpu_info": [
+          "cpu info",
+          "processor",
+          "cpu flags",
+          "cpu load",
+          "architecture"
+        ],
+        "host_memory_info": [
+          "memory",
+          "ram",
+          "swap",
+          "meminfo",
+          "memory pressure"
+        ],
+        "host_processes": [
+          "processes",
+          "ps",
+          "running process",
+          "top",
+          "pid",
+          "cpu process",
+          "memory process"
+        ],
+        "host_process_info": [
+          "process inspect",
+          "pid info",
+          "cmdline",
+          "open files",
+          "process environment"
+        ],
+        "host_disk_usage": [
+          "disk usage",
+          "filesystem",
+          "free space",
+          "df",
+          "mount usage"
+        ],
+        "host_read_file": [
+          "host file",
+          "linux config",
+          "read config",
+          "proc file",
+          "sys file",
+          "log file"
+        ],
+        "network_dns_lookup": [
+          "dns",
+          "resolve hostname",
+          "dig",
+          "a record",
+          "aaaa",
+          "mx",
+          "txt",
+          "cname",
+          "nameserver"
+        ],
+        "network_ping": [
+          "ping",
+          "icmp",
+          "latency",
+          "packet loss",
+          "reachable",
+          "connectivity"
+        ],
+        "network_trace_route": [
+          "traceroute",
+          "trace route",
+          "network path",
+          "hops",
+          "routing latency"
+        ],
+        "network_http_probe": [
+          "http probe",
+          "https probe",
+          "url status",
+          "endpoint health",
+          "curl",
+          "ttfb",
+          "redirect",
+          "web service"
+        ],
+        "network_port_check": [
+          "port check",
+          "tcp port",
+          "service reachable",
+          "open port",
+          "connect port"
+        ],
+        "network_scan_ports": [
+          "nmap",
+          "port scan",
+          "lan scan",
+          "service discovery",
+          "open ports",
+          "cidr"
+        ],
+        "network_interfaces": [
+          "interfaces",
+          "ip address",
+          "routes",
+          "neighbors",
+          "ip route",
+          "network interface"
+        ],
+        "openwrt_status": [
+          "openwrt status",
+          "router status",
+          "router health",
+          "anansi",
+          "arachne",
+          "router uptime",
+          "router memory"
+        ],
+        "openwrt_uci_show": [
+          "uci show",
+          "openwrt config",
+          "router config",
+          "network config",
+          "wireless config",
+          "firewall config",
+          "dhcp config",
+          "minidlna"
+        ],
+        "openwrt_uci_get": [
+          "uci get",
+          "router setting",
+          "openwrt setting",
+          "ssid",
+          "lan ip"
+        ],
+        "openwrt_ubus_call": [
+          "ubus",
+          "openwrt rpc",
+          "router live state",
+          "network interface dump",
+          "system board"
+        ],
+        "openwrt_logread": [
+          "logread",
+          "router logs",
+          "openwrt logs",
+          "wifi logs",
+          "dhcp logs",
+          "firewall logs"
+        ],
+        "openwrt_wifi_status": [
+          "wifi status",
+          "wireless status",
+          "iwinfo",
+          "ssid",
+          "radio",
+          "wifi clients",
+          "signal"
+        ],
+        "openwrt_service_action": [
+          "openwrt service",
+          "router service",
+          "restart service",
+          "init.d"
+        ],
+        "openwrt_uci_set": [
+          "uci set",
+          "change router setting",
+          "openwrt write",
+          "commit uci"
+        ],
+        "image_list": [
+          "list images",
+          "find images",
+          "photos",
+          "pictures",
+          "png",
+          "jpeg",
+          "webp"
+        ],
+        "image_info": [
+          "image info",
+          "image dimensions",
+          "width height",
+          "identify image",
+          "image format"
+        ],
+        "image_metadata": [
+          "exif",
+          "image metadata",
+          "camera metadata",
+          "gps metadata",
+          "orientation"
+        ],
+        "image_resize": [
+          "resize image",
+          "scale image",
+          "change dimensions",
+          "image size"
+        ],
+        "image_crop": [
+          "crop image",
+          "trim image",
+          "extract image region"
+        ],
+        "image_convert": [
+          "convert image",
+          "image format",
+          "png to jpg",
+          "jpg to webp",
+          "image quality"
+        ],
+        "image_thumbnail": [
+          "thumbnail",
+          "preview image",
+          "small image",
+          "image preview"
+        ],
+        "document_list": [
+          "list documents",
+          "find pdf",
+          "find docx",
+          "files",
+          "documents",
+          "pdfs"
+        ],
+        "document_info": [
+          "document info",
+          "pdf info",
+          "pdf pages",
+          "document metadata",
+          "mime type"
+        ],
+        "document_extract_text": [
+          "extract text",
+          "read pdf",
+          "read document",
+          "pdf text",
+          "docx text",
+          "pptx text",
+          "xlsx text",
+          "ocr alternative"
+        ],
+        "document_search_text": [
+          "search document",
+          "find in pdf",
+          "find text",
+          "search pdf",
+          "document grep",
+          "clause"
+        ],
+        "document_convert": [
+          "convert document",
+          "pandoc",
+          "docx markdown",
+          "markdown html",
+          "epub",
+          "document format"
+        ],
+        "document_render_pdf_page": [
+          "render pdf",
+          "pdf page image",
+          "pdf screenshot",
+          "visual pdf",
+          "page png",
+          "inspect pdf page"
+        ],
+        "docker_exec": [
+          "docker exec",
+          "run in container",
+          "container command",
+          "inside container",
+          "container shell",
+          "diagnose container"
+        ],
+        "host_network_info": [
+          "host network",
+          "host routes",
+          "host interfaces",
+          "host arp",
+          "host resolver",
+          "host connectivity"
+        ],
+        "openwrt_clients": [
+          "router clients",
+          "connected devices",
+          "dhcp leases",
+          "wifi clients",
+          "lan clients",
+          "arp clients"
+        ],
+        "openwrt_package_query": [
+          "opkg",
+          "openwrt packages",
+          "installed package",
+          "router package",
+          "minidlna installed"
+        ],
+        "image_compare": [
+          "compare images",
+          "image diff",
+          "rmse",
+          "verify image change",
+          "visual diff"
+        ]
+      },
+      "lifecycle": "lazy"
     }
   },
   "settings": {
