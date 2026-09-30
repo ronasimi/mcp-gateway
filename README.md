@@ -13,7 +13,7 @@ Ollama project             Pi project                 MCP project
                                                      └────────────────────────┘
 ```
 
-The image extends the self-contained `ghcr.io/whw23/searxng-http-mcp` image and adds Microsoft's official `@playwright/mcp` plus Alpine Chromium. Pi gets private metasearch and browser automation without a fourth worker container.
+The image uses the self-contained `ghcr.io/whw23/searxng-http-mcp` application on a full Void Linux/musl runtime, then adds Microsoft's official `@playwright/mcp` plus system Chromium. Current SearXNG container images use a stripped Void runtime rather than Alpine, so the Dockerfile deliberately uses XBPS instead of `apk`. Pi gets private metasearch and browser automation without a fourth worker container.
 
 ## MCP endpoints
 
