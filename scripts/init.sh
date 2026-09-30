@@ -23,10 +23,27 @@ ensure_env_secret() {
 
 ensure_env_secret SEARXNG_SECRET
 
-mkdir -p data/searxng data/playwright data/memory data/workspace data/ssh
+# .env is intentionally shell-compatible; load optional path/profile settings
+# for the setup logic below. Docker Compose also reads the same file.
+set -a
+# shellcheck disable=SC1091
+source .env
+set +a
+
+mkdir -p data/searxng data/playwright data/memory data/workspace data/ssh data/google secrets
 [[ -e data/ssh/config ]] || touch data/ssh/config
-chmod 700 data/ssh 2>/dev/null || true
+chmod 700 data/ssh data/google secrets 2>/dev/null || true
 chmod 600 data/ssh/config 2>/dev/null || true
+
+# Generate a local encryption key for Google OAuth tokens. This key is mounted
+# separately from the encrypted token file and never enters model context.
+google_key="${GOOGLE_TOKEN_KEY_SOURCE:-./secrets/google-token.key}"
+if [[ ! -s "$google_key" ]]; then
+  mkdir -p "$(dirname "$google_key")"
+  openssl rand -hex 32 > "$google_key"
+  chmod 600 "$google_key" 2>/dev/null || true
+  echo "Generated Google token encryption key: $google_key"
+fi
 
 # Seed a known-good local/private SearXNG config on first install. Do not
 # overwrite user changes on later runs.
@@ -68,6 +85,20 @@ docker compose build --pull mcp-system
 
 echo "Starting MCP stack..."
 docker compose up -d
+
+# Google is optional because Compose must not require an OAuth client secret on
+# installations that do not use account tools. If the client JSON exists, start
+# the bounded Google MCP; authorization can be completed with google-auth.sh.
+google_client="${GOOGLE_OAUTH_CLIENT_SOURCE:-./secrets/google-oauth-client.json}"
+if [[ -s "$google_client" ]]; then
+  echo "Building Google Workspace MCP image..."
+  docker compose --profile google build --pull mcp-google
+  echo "Starting Google Workspace MCP..."
+  docker compose --profile google up -d mcp-google
+else
+  echo "Google Workspace MCP disabled (no OAuth client at $google_client)."
+  echo "To enable it, place a Desktop OAuth client JSON there and run ./scripts/google-auth.sh"
+fi
 
 echo
 ./scripts/status.sh

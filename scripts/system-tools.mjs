@@ -91,6 +91,28 @@ const TOOLS = [
   { name:'document_render_pdf_page', description:'PDF page render: render one PDF page to PNG at a chosen DPI using pdftoppm. Use when page layout, figures, scans, or visual inspection matters. Output stays inside the workspace.', inputSchema:s('Render one PDF page to PNG.', {input:str('Workspace-relative PDF path.'), page:num('1-based page number.',{minimum:1}), output:str('Workspace-relative PNG output path.'), dpi:num('Render DPI; default 144.',{minimum:36,maximum:600})}, ['input','page','output']) },
 ];
 
+
+const SYSTEM_MUTATING = new Set([
+  'docker_exec','docker_container_action','docker_remove_container','docker_remove_image',
+  'openwrt_service_action','openwrt_uci_set',
+  'image_resize','image_crop','image_convert','image_thumbnail',
+  'document_convert','document_render_pdf_page',
+]);
+const SYSTEM_DESTRUCTIVE = new Set(['docker_remove_container','docker_remove_image']);
+const SYSTEM_OPEN_WORLD = new Set([
+  'network_dns_lookup','network_ping','network_trace_route','network_http_probe','network_port_check','network_scan_ports',
+  'openwrt_status','openwrt_uci_show','openwrt_uci_get','openwrt_ubus_call','openwrt_logread','openwrt_wifi_status','openwrt_clients','openwrt_package_query','openwrt_service_action','openwrt_uci_set',
+]);
+for (const tool of TOOLS) {
+  const mutating = SYSTEM_MUTATING.has(tool.name);
+  tool.annotations = {
+    readOnlyHint: !mutating,
+    destructiveHint: SYSTEM_DESTRUCTIVE.has(tool.name),
+    idempotentHint: !mutating || ['image_resize','image_crop','image_convert','image_thumbnail','document_convert','document_render_pdf_page'].includes(tool.name),
+    openWorldHint: SYSTEM_OPEN_WORLD.has(tool.name),
+  };
+}
+
 const toolMap = new Map(TOOLS.map(t => [t.name,t]));
 
 function clip(value, max=MAX_OUTPUT) {

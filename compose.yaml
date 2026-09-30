@@ -129,7 +129,89 @@ services:
     networks:
       - ai-local
 
+
+  # Google Workspace MCP. Account credentials are server-side only: the model
+  # never receives OAuth client secrets, access tokens, or refresh tokens.
+  # Enable with: docker compose --profile google up -d mcp-google
+  mcp-google:
+    profiles: ["google"]
+    build:
+      context: .
+      dockerfile: Dockerfile.google
+      args:
+        SUPERGATEWAY_VERSION: ${SUPERGATEWAY_VERSION:-4.0.0}
+    image: local/agent-mcp-google:latest
+    container_name: mcp-google
+    restart: unless-stopped
+
+    environment:
+      GOOGLE_MCP_PORT: 8934
+      GOOGLE_OAUTH_CLIENT_FILE: /run/secrets/google_oauth_client
+      GOOGLE_TOKEN_KEY_FILE: /run/secrets/google_token_key
+      GOOGLE_TOKEN_FILE: /data/google/token.enc.json
+      GOOGLE_SCOPES: ${GOOGLE_SCOPES:-https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/calendar.calendarlist.readonly https://www.googleapis.com/auth/calendar.events.readonly https://www.googleapis.com/auth/calendar.freebusy https://www.googleapis.com/auth/drive.readonly}
+      GOOGLE_GMAIL_WRITE: ${GOOGLE_GMAIL_WRITE:-false}
+      GOOGLE_CALENDAR_WRITE: ${GOOGLE_CALENDAR_WRITE:-false}
+      GOOGLE_DRIVE_WRITE: ${GOOGLE_DRIVE_WRITE:-false}
+      GOOGLE_TOOLS_MAX_OUTPUT: ${GOOGLE_TOOLS_MAX_OUTPUT:-65536}
+      MCP_WORKSPACE: /workspace
+
+    ports:
+      - "127.0.0.1:${GOOGLE_MCP_HOST_PORT:-8934}:8934"
+
+    secrets:
+      - google_oauth_client
+      - google_token_key
+
+    volumes:
+      - ./data/google:/data/google
+      - type: bind
+        source: ${MCP_WORKSPACE_PATH:-./data/workspace}
+        target: /workspace
+
+    mem_limit: ${GOOGLE_MCP_MEMORY:-384m}
+    cpus: ${GOOGLE_MCP_CPUS:-0.75}
+
+    security_opt:
+      - no-new-privileges:true
+
+    networks:
+      - ai-local
+
+  # One-shot human OAuth bootstrap. This service is never started as part of
+  # the normal stack; scripts/google-auth.sh invokes it explicitly.
+  mcp-google-auth:
+    profiles: ["setup"]
+    build:
+      context: .
+      dockerfile: Dockerfile.google
+      args:
+        SUPERGATEWAY_VERSION: ${SUPERGATEWAY_VERSION:-4.0.0}
+    image: local/agent-mcp-google:latest
+    environment:
+      GOOGLE_OAUTH_CLIENT_FILE: /run/secrets/google_oauth_client
+      GOOGLE_TOKEN_KEY_FILE: /run/secrets/google_token_key
+      GOOGLE_TOKEN_FILE: /data/google/token.enc.json
+      GOOGLE_SCOPES: ${GOOGLE_SCOPES:-https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/calendar.calendarlist.readonly https://www.googleapis.com/auth/calendar.events.readonly https://www.googleapis.com/auth/calendar.freebusy https://www.googleapis.com/auth/drive.readonly}
+      GOOGLE_OAUTH_CALLBACK_PORT: 53682
+    ports:
+      - "127.0.0.1:${GOOGLE_OAUTH_CALLBACK_PORT:-53682}:53682"
+    secrets:
+      - google_oauth_client
+      - google_token_key
+    volumes:
+      - ./data/google:/data/google
+    security_opt:
+      - no-new-privileges:true
+    command: ["node", "/opt/mcp/google-auth.mjs"]
+
 networks:
   ai-local:
     external: true
     name: ai-local
+
+secrets:
+  google_oauth_client:
+    file: ${GOOGLE_OAUTH_CLIENT_SOURCE:-./secrets/google-oauth-client.json}
+  google_token_key:
+    file: ${GOOGLE_TOKEN_KEY_SOURCE:-./secrets/google-token.key}

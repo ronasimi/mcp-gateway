@@ -13,3 +13,8 @@ data/workspace/*
 !data/workspace/.gitkeep
 data/ssh/*
 !data/ssh/.gitkeep
+
+# Google OAuth credentials/tokens. Never commit account secrets.
+secrets/*
+data/google/*
+!data/google/.gitkeep
