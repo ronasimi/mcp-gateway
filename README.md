@@ -8,6 +8,11 @@ A single Docker container providing three MCP services for local/container agent
 
 Host-native clients use the same ports at `127.0.0.1`. All host bindings are loopback-only.
 
+
+### Build note: SearXNG settings
+
+The image deliberately does **not** export `SEARXNG_SETTINGS_PATH` while SearXNG is being installed. During package metadata generation SearXNG imports its own package; an explicit path to `/etc/searxng/settings.yml` would fail before the runtime bind mount exists. The runtime entrypoint creates `settings.yml` on first start and only then exports `SEARXNG_SETTINGS_PATH`.
+
 ## Why this image is built from Debian/Python 3.14
 
 SearXNG's production image is intentionally stripped and is not intended to be extended with a distro package manager. Earlier variants that tried to add Alpine `apk` or restore Void `xbps` were brittle. This repo instead installs all runtimes on one `python:3.14-slim-bookworm` base: SearXNG, `searxng-http-mcp`, Node.js, Chromium, Playwright MCP, Memory MCP, and Supergateway.

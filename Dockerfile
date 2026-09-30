@@ -10,8 +10,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONUNBUFFERED=1 \
     PLAYWRIGHT_BROWSERS_PATH=0 \
     PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 \
-    SEARXNG_URL=http://127.0.0.1:8080 \
-    SEARXNG_SETTINGS_PATH=/etc/searxng/settings.yml
+    SEARXNG_URL=http://127.0.0.1:8080
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
@@ -38,10 +37,11 @@ RUN git clone --filter=blob:none --no-checkout --single-branch --branch master \
     && git rev-parse --verify "${SEARXNG_REF}^{commit}" \
     && git checkout --detach "${SEARXNG_REF}" \
     && python -m pip install --no-cache-dir --upgrade pip setuptools wheel pyyaml msgspec typing-extensions pybind11 \
-    && python -m pip install --no-cache-dir --use-pep517 --no-build-isolation . \
+    && SEARXNG_DISABLE_ETC_SETTINGS=1 python -m pip install --no-cache-dir --use-pep517 --no-build-isolation . \
     && python -m pip install --no-cache-dir \
          granian==2.7.9 \
          "searxng-http-mcp==${SEARXNG_MCP_VERSION}" \
+    && SEARXNG_DISABLE_ETC_SETTINGS=1 python -c "import searx; import searx.webapp; print('SearXNG import smoke test OK')" \
     && rm -rf /opt/searxng-src/.git
 
 RUN npm install -g --omit=dev \
