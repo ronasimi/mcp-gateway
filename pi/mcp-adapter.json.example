@@ -656,19 +656,33 @@
           "account connected",
           "authorization"
         ],
+        "gmail_get_unread_count": [
+          "gmail unread count",
+          "unread email count",
+          "unread inbox count",
+          "how many unread emails",
+          "how many unread messages",
+          "number of unread emails",
+          "number of unread messages",
+          "gmail unread total",
+          "inbox unread total",
+          "count unread mail",
+          "mailbox unread count"
+        ],
         "gmail_search_messages": [
           "gmail search",
           "search email",
           "find email",
           "latest email",
           "recent email",
-          "unread mail",
-          "inbox",
           "mail from",
           "mail subject",
           "receipt",
           "notification",
-          "message search"
+          "message search",
+          "list unread email",
+          "find unread messages",
+          "inbox messages"
         ],
         "gmail_get_message": [
           "read email",

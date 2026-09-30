@@ -34,10 +34,17 @@ const TOOLS = [
 
   // Gmail
   {
+    name: 'gmail_get_unread_count',
+    description: 'Gmail unread count: return the exact unread message and unread thread counts for a Gmail label, default INBOX. Use for scalar questions such as "how many unread emails do I have?", "unread inbox count", or "number of unread Gmail messages". Prefer this over gmail_search_messages when only a count is needed.',
+    inputSchema: s('Get exact Gmail unread counts from one label without listing messages.', {
+      label_id: str('Gmail label ID to count; default "INBOX". Common system IDs include INBOX, UNREAD, SPAM, TRASH, SENT, and STARRED.'),
+    }),
+  },
+  {
     name: 'gmail_search_messages',
-    description: 'Gmail search: find messages in the authorized mailbox using normal Gmail search syntax such as from:, to:, subject:, newer_than:, label:, has:attachment, or free text. Returns message IDs, thread IDs, headers, labels, dates, and snippets. Use for latest email, unread mail, sender/subject lookup, receipts, notifications, or locating a message before reading it.',
-    inputSchema: s('Search Gmail messages with Gmail query syntax.', {
-      query: str('Gmail search query, e.g. "is:unread newer_than:7d", "from:alice@example.com", or "subject:invoice".'),
+    description: 'Gmail search: list messages in the authorized mailbox using normal Gmail search syntax such as from:, to:, subject:, newer_than:, label:, has:attachment, is:unread, or free text. Returns message IDs, thread IDs, headers, labels, dates, and snippets. Use when the user needs matching messages or message details. Do not use it only to count unread mail; use gmail_get_unread_count instead because search result_size_estimate is not an exact count.',
+    inputSchema: s('Search and list Gmail messages with Gmail query syntax; not for exact mailbox counts.', {
+      query: str('Gmail search query, e.g. "in:inbox is:unread newer_than:7d", "from:alice@example.com", or "subject:invoice".'),
       max_results: num('Maximum messages to return; default 20, maximum 100.', { minimum: 1, maximum: 100 }),
       page_token: str('Optional Gmail page token for continuing a previous search.'),
     }),
@@ -379,6 +386,16 @@ async function callTool(name, a) {
       };
     }
 
+    case 'gmail_get_unread_count': {
+      const labelId = String(a.label_id || 'INBOX').trim() || 'INBOX';
+      const { body } = await googleFetch(`https://gmail.googleapis.com/gmail/v1/users/me/labels/${encodeURIComponent(labelId)}`);
+      return {
+        label_id: body.id || labelId,
+        label_name: body.name || labelId,
+        messages_unread: Number(body.messagesUnread || 0),
+        threads_unread: Number(body.threadsUnread || 0),
+      };
+    }
     case 'gmail_search_messages': {
       const max = Math.max(1, Math.min(100, Number(a.max_results || 20)));
       const u = `https://gmail.googleapis.com/gmail/v1/users/me/messages?${qs({ q: a.query, maxResults: max, pageToken: a.page_token })}`;

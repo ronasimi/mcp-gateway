@@ -23,7 +23,7 @@ The catalog is optimized for semantic/lexical discovery in two layers:
 1. **Tool names and MCP descriptions** use explicit domain + action names such as `docker_container_logs`, `network_dns_lookup`, `openwrt_uci_get`, `image_resize`, and `document_extract_text`.
 2. **`searchKeywords` aliases** add likely user/model phrasing such as `docker logs`, `container error`, `router clients`, `wifi status`, `find in pdf`, `resize image`, `host memory`, and `port scan`.
 
-This keeps all 53 system-tool schemas and all 22 Google Workspace schemas out of the steady-state prompt while making them easy for a small local model to retrieve. Tool definitions also include MCP read-only/destructive/idempotent/open-world annotations where applicable.
+This keeps all 53 system-tool schemas and all 23 Google Workspace schemas out of the steady-state prompt while making them easy for a small local model to retrieve. Tool definitions also include MCP read-only/destructive/idempotent/open-world annotations where applicable.
 
 ## System tools
 
@@ -195,7 +195,7 @@ Enabling a gate does not grant an OAuth scope. Re-run `./scripts/google-auth.sh`
 
 Google tools include:
 
-- Gmail: search/read message, read thread, labels, create draft, send draft, modify labels.
+- Gmail: exact unread count, search/read message, read thread, labels, create draft, send draft, modify labels.
 - Calendar: list calendars/events, get event, free/busy, create/update/delete event.
 - Drive: search, metadata, read text, download/export to the shared MCP workspace, create folder, upload, delete.
 
