@@ -13,8 +13,24 @@ ENV DEBIAN_FRONTEND=noninteractive \
     HOME=/data/security \
     PATH=/opt/semgrep/bin:${PATH}
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
+# Bookworm keeps Nikto in non-free and Suricata in bookworm-backports.
+# Enable those components explicitly so the security image builds reproducibly
+# from node:22-bookworm-slim instead of depending on the host's APT config.
+RUN set -eux; \
+    if [ -f /etc/apt/sources.list.d/debian.sources ]; then \
+      sed -i 's/^Components: main$/Components: main contrib non-free non-free-firmware/' /etc/apt/sources.list.d/debian.sources; \
+    else \
+      sed -i 's/ main$/ main contrib non-free non-free-firmware/' /etc/apt/sources.list; \
+    fi; \
+    printf '%s\n' \
+      'Types: deb' \
+      'URIs: http://deb.debian.org/debian' \
+      'Suites: bookworm-backports' \
+      'Components: main contrib non-free non-free-firmware' \
+      'Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg' \
+      > /etc/apt/sources.list.d/bookworm-backports.sources; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends \
        binutils \
        ca-certificates \
        clamav \
@@ -34,15 +50,16 @@ RUN apt-get update \
        python3 \
        python3-venv \
        sslscan \
-       suricata \
+       suricata-update \
        tcpdump \
        tshark \
        tini \
        unzip \
-       yara \
-    && rm -rf /var/lib/apt/lists/* \
-    && npm install -g --omit=dev "supergateway@${SUPERGATEWAY_VERSION}" \
-    && npm cache clean --force
+       yara; \
+    apt-get install -y --no-install-recommends -t bookworm-backports suricata; \
+    rm -rf /var/lib/apt/lists/*; \
+    npm install -g --omit=dev "supergateway@${SUPERGATEWAY_VERSION}"; \
+    npm cache clean --force
 
 # Security analyzers are version-pinned so rebuilds do not silently move the toolchain.
 RUN set -eux; \

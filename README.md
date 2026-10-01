@@ -331,4 +331,7 @@ The Pi addendum distinguishes domain knowledge from runtime execution tools so s
 Reference replacements are stored in `pi/BASE_PREAMBLE.txt` and `pi/MCP_SEARCH_DESCRIPTION.txt`. If your Pi version generates those strings elsewhere, use the reference files to update that source manually.
 
 For the manually selected WhiteRabbitNeo security model, `pi/Modelfile.whiterabbitneo` provides the recommended 16K-context system prompt. It identifies the local role without claiming a remote provider and tells the model to distinguish security knowledge from executable runtime tools.
+### Security image package sources
+
+`mcp-security` is based on Debian Bookworm. Its Dockerfile enables `non-free` for Nikto and `bookworm-backports` for Suricata explicitly; no host APT configuration is required.
 
