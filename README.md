@@ -9,7 +9,7 @@ A local MCP stack for Pi with **bounded/semantic tool discovery**. The normal mo
 | SearXNG MCP | `127.0.0.1:8888/mcp/` | Web search |
 | Playwright MCP | `127.0.0.1:8931/mcp` | Browser navigation, snapshots, screenshots |
 | Memory MCP | `127.0.0.1:8932/mcp` | Persistent graph memory |
-| System Tools MCP | `127.0.0.1:8933/mcp` | Docker, host, network, OpenWrt, image, document tools |
+| System Tools MCP | `127.0.0.1:8933/mcp` | Docker, host, network, OpenWrt, image, and document tools |
 | Google Workspace MCP | `127.0.0.1:8934/mcp` | Gmail, Calendar, and Drive account tools (optional) |
 
 Containers on the external `ai-local` network use `mcp-searxng:8888`, `mcp-gateway:8931/8932`, and `mcp-system:8933`. When enabled, Google Workspace is `mcp-google:8934`.
@@ -46,7 +46,8 @@ Read/diagnostic tools include container listing/inspection/logs/stats, image lis
 - `docker_remove_container`
 - `docker_remove_image`
 
-`docker_exec` is disabled by default with `DOCKER_ALLOW_EXEC=false`. Lifecycle/removal operations are disabled by default with `DOCKER_ALLOW_WRITE=false`.
+`docker_list_containers` defaults to running containers only (`all=false`) and returns a compact normalized summary rather than raw Docker API objects. `docker_exec` is disabled by default with `DOCKER_ALLOW_EXEC=false`. Lifecycle/removal operations are disabled by default with `DOCKER_ALLOW_WRITE=false`.
+
 
 ### Host
 
@@ -217,7 +218,7 @@ The initializer:
 - builds/starts Google Workspace automatically when `secrets/google-oauth-client.json` exists;
 - runs the status checks.
 
-Then merge/copy `pi/mcp-adapter.json.example` into Pi's MCP adapter configuration, use `pi/APPEND_SYSTEM.md` as the bounded-discovery prompt fragment, and restart Pi.
+Then merge/copy `pi/mcp-adapter.json.example` into Pi's MCP adapter configuration, use `pi/APPEND_SYSTEM.md` as the bounded-discovery prompt fragment, and restart Pi. For the standard `~/Projects/pi-docker` layout, `./scripts/install-pi-bounded-config.sh` backs up and updates both files and also patches the older native `mcp_search` description when that source is present on the host.
 
 ## Workspace
 
@@ -279,7 +280,7 @@ node scripts/validate-catalog.mjs
 ```text
 data/searxng/     SearXNG configuration
 data/playwright/  Chromium profile
-data/memory/      Memory MCP JSONL graph
+data/memory/      Memory MCP JSONL graph (live persistent state)
 data/workspace/   Default image/document workspace
 data/ssh/         OpenWrt SSH config and keys (ignored by git)
 data/google/      Encrypted Google OAuth token state (ignored by git)

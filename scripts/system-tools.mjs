@@ -26,7 +26,7 @@ const arr = (description, items) => ({ type: 'array', description, items });
 
 const TOOLS = [
   // Docker
-  { name:'docker_list_containers', description:'Docker containers: list running or stopped containers with names, image, state, status, ports, and IDs. Use for docker ps, container inventory, compose-service troubleshooting, or finding a container before logs/inspect.', inputSchema:s('List Docker containers.', {all:bool('Include stopped containers; default true.')}) },
+  { name:'docker_list_containers', description:'Docker container summary: list running containers by default with compact names, image, state, status, health, ports, networks, and Compose project/service. Use for docker ps, what containers are running, container inventory, or finding a container before logs/inspect. Set all=true only when stopped containers are also requested.', inputSchema:s('List Docker containers in a compact normalized form.', {all:bool('Include stopped containers too; default false.')}) },
   { name:'docker_inspect_container', description:'Docker container inspect: return detailed configuration, mounts, networks, health, state, environment, labels, and runtime metadata for one container by name or ID.', inputSchema:s('Inspect one Docker container.', {container:str('Container name or ID.')}, ['container']) },
   { name:'docker_container_logs', description:'Docker logs: read recent stdout/stderr logs from a container. Use for service failures, stack traces, startup errors, health checks, and application diagnostics.', inputSchema:s('Read Docker container logs.', {container:str('Container name or ID.'), tail:num('Number of log lines; default 200.',{minimum:1,maximum:5000}), since:str('Docker-compatible time or duration, e.g. 10m, 2h, 2026-09-30T12:00:00Z.')}, ['container']) },
   { name:'docker_container_stats', description:'Docker stats: get one-shot CPU, memory, network I/O, block I/O, PID, and memory-limit metrics for a container.', inputSchema:s('Get container resource usage.', {container:str('Container name or ID.')}, ['container']) },
@@ -40,6 +40,7 @@ const TOOLS = [
   { name:'docker_container_action', description:'Docker container lifecycle: start, stop, restart, pause, unpause, or kill a container. Mutating actions are disabled unless DOCKER_ALLOW_WRITE=true.', inputSchema:s('Perform a Docker lifecycle action.', {container:str('Container name or ID.'), action:str('Lifecycle action.',{enum:['start','stop','restart','pause','unpause','kill']}), timeout:num('Stop/restart timeout seconds.',{minimum:0,maximum:300})}, ['container','action']) },
   { name:'docker_remove_container', description:'Docker container remove: delete a stopped container, optionally force. Disabled unless DOCKER_ALLOW_WRITE=true. Use only when removal is explicitly required.', inputSchema:s('Remove a Docker container.', {container:str('Container name or ID.'), force:bool('Force removal of a running container.')}, ['container']) },
   { name:'docker_remove_image', description:'Docker image remove: delete a local image by name/tag/ID, optionally force. Disabled unless DOCKER_ALLOW_WRITE=true.', inputSchema:s('Remove a Docker image.', {image:str('Image name, tag, digest, or ID.'), force:bool('Force removal.')}, ['image']) },
+
 
   // Host
   { name:'host_snapshot', description:'Host system snapshot: summarize hostname, kernel, uptime, load average, CPU count, memory/swap, filesystem usage, and basic OS identity from the mounted host. Use first for general host health or performance triage.', inputSchema:s('Get a concise host health snapshot.', {}) },
@@ -244,7 +245,22 @@ async function extractText(file,maxChars=60000){
 
 async function callTool(name,a={}){
   switch(name){
-    case 'docker_list_containers': return dockerReq('GET',`/containers/json?all=${a.all===false?0:1}`);
+    case 'docker_list_containers': {
+      const includeAll=a.all===true; const rows=await dockerReq('GET',`/containers/json?all=${includeAll?1:0}`);
+      const containers=(Array.isArray(rows)?rows:[]).map(c=>({
+        id:String(c.Id||'').slice(0,12),
+        name:(Array.isArray(c.Names)&&c.Names[0]?String(c.Names[0]).replace(/^\//,''):null),
+        image:c.Image||null,
+        state:c.State||null,
+        status:c.Status||null,
+        health:/\((healthy|unhealthy|health: starting)\)/i.exec(String(c.Status||''))?.[1]||null,
+        ports:(c.Ports||[]).map(p=>({ip:p.IP||null,private_port:p.PrivatePort||null,public_port:p.PublicPort||null,type:p.Type||null})),
+        networks:Object.keys(c.NetworkSettings?.Networks||{}),
+        compose_project:c.Labels?.['com.docker.compose.project']||null,
+        compose_service:c.Labels?.['com.docker.compose.service']||null,
+      }));
+      return {count:containers.length,all:includeAll,containers};
+    }
     case 'docker_inspect_container': return dockerReq('GET',`/containers/${await dockerContainerId(a.container)}/json`);
     case 'docker_container_logs': {
       const tail=Math.max(1,Math.min(5000,Number(a.tail||200))); const since=a.since?`&since=${encodeURIComponent(a.since)}`:'';
@@ -271,6 +287,7 @@ async function callTool(name,a={}){
     }
     case 'docker_remove_container': if(!DOCKER_ALLOW_WRITE) throw new Error('Docker mutations disabled; set DOCKER_ALLOW_WRITE=true to enable'); else {await dockerReq('DELETE',`/containers/${await dockerContainerId(a.container)}?force=${a.force?1:0}`); return {ok:true};}
     case 'docker_remove_image': if(!DOCKER_ALLOW_WRITE) throw new Error('Docker mutations disabled; set DOCKER_ALLOW_WRITE=true to enable'); else return dockerReq('DELETE',`/images/${encodeURIComponent(assertToken(a.image,'image'))}?force=${a.force?1:0}`);
+
 
     case 'host_snapshot': {
       const [osr,hostName,up,load,mem,cpu,df]=await Promise.all([

@@ -1,0 +1,1 @@
+Discover bounded MCP tools for capabilities beyond core file/edit/bash tools. Search before shell/network workarounds for infrastructure or external services. Servers: system=Docker/host/network/OpenWrt/image/document; google=Gmail/Calendar/Drive; playwright=live browser; searxng=web search; memory=durable memory. Returns up to 3 schemas; call exact matches via mcp_call.

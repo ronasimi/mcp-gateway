@@ -188,7 +188,7 @@
         ]
       },
       "lifecycle": "lazy",
-      "description": "Durable graph memory for facts, entities, relationships, and observations that should persist across conversations. Use for remember/recall/store-memory tasks, not ordinary files."
+      "description": "Durable graph memory for facts, entities, relationships, and observations that persist across conversations. Use for remember/recall/store-memory tasks."
     },
     "system": {
       "url": "http://mcp-system:8933/mcp",
@@ -219,15 +219,21 @@
           "docx",
           "xlsx",
           "pptx",
-          "file"
+          "file",
+          "running containers",
+          "docker ps"
         ],
         "docker_list_containers": [
-          "docker ps",
-          "containers",
-          "services",
+          "docker containers",
           "running containers",
+          "containers running now",
+          "what containers are running",
+          "docker ps",
+          "docker ps -a",
+          "container list",
+          "container inventory",
           "stopped containers",
-          "container inventory"
+          "compose containers"
         ],
         "docker_inspect_container": [
           "docker inspect",
@@ -618,7 +624,7 @@
         ]
       },
       "lifecycle": "lazy",
-      "description": "Local infrastructure and file-processing tools: Docker, Linux host diagnostics, networking, OpenWrt routers, images, and documents. Prefer dedicated tools over generic shell/network workarounds."
+      "description": "Local infrastructure and processing tools: Docker, Linux host diagnostics, networking, OpenWrt routers, image processing, and document processing. Prefer these dedicated tools over shell/network workarounds."
     },
     "google": {
       "transport": "http",
