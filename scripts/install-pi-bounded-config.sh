@@ -18,7 +18,16 @@ import json, pathlib, sys
 out=pathlib.Path(sys.argv[1]); template=pathlib.Path(sys.argv[2])
 base=json.loads(out.read_text()) if out.exists() else {}
 src=json.loads(template.read_text())
-base.setdefault('mcpServers', {}).update(src.get('mcpServers', {}))
+servers=base.setdefault('mcpServers', {})
+for name, incoming in src.get('mcpServers', {}).items():
+    existing=servers.get(name, {})
+    if isinstance(existing, dict) and isinstance(incoming, dict):
+        # Preserve host/Pi-specific transport settings that the portable template
+        # does not carry (for example requestTimeoutMs), while template-owned
+        # metadata such as searchKeywords replaces stale wildcard catalogs.
+        servers[name]={**existing, **incoming}
+    else:
+        servers[name]=incoming
 base.setdefault('settings', {}).update(src.get('settings', {}))
 out.write_text(json.dumps(base, indent=2)+'\n')
 PY
@@ -32,7 +41,7 @@ old_descs=[
 'Discover bounded MCP tools for capabilities beyond core file/edit/bash tools. Search before shell/network workarounds for infrastructure or external services. Servers: system=Docker/host/network/OpenWrt/image/document; google=Gmail/Calendar/Drive; playwright=live browser; searxng=web search; memory=durable memory. Returns up to 3 schemas; call exact matches via mcp_call.',
 'Discover bounded MCP tools for capabilities beyond core file/edit/bash tools. Search before shell/network workarounds for infrastructure or external services. Servers: system=Docker/host/network/OpenWrt/image/document; security=authorized red-team/blue-team assessment and defensive analysis; google=Gmail/Calendar/Drive; playwright=live browser; searxng=web search; memory=durable memory. Returns up to 3 schemas; call exact matches via mcp_call.'
 ]
-new_desc='Discover bounded MCP tools for capabilities not directly provided by core tools. Search before shell/network workarounds when an external, infrastructure, or security capability is needed. Servers: security=authorized red-team/blue-team, vulnerability assessment, reconnaissance, security testing, forensics, malware, packet/log and incident analysis; system=Docker/host/network/OpenWrt/image/document; google=Gmail/Calendar/Drive; playwright=browser interaction/live pages; searxng=public web search; memory=durable memory. Returns up to 3 complete schemas; execute exact matches via mcp_call.'
+new_desc='Discover bounded MCP tools for capabilities not directly provided by core tools. Security work should use server=security; the gate also strongly infers security routing when that filter is omitted. Returns up to 3 complete schemas plus hasMore/nextOffset for bounded continuation. Validate schema fit before execution and use mcp_call only with an exact returned tool.'
 old_preambles=[
 'You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.',
 'You are an expert coding assistant operating inside Pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.'

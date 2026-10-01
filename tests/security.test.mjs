@@ -158,10 +158,14 @@ test('MCP protocol validates calls, parses Nmap/ffuf, preserves large JSON and r
   const call=(name,args)=>rpc('tools/call',{name,arguments:args});
   try {
     const catalog=await rpc('tools/list',{}); assert.equal(catalog.tools.length,43);
+    const interfaceTool=catalog.tools.find(t=>t.name==='security_network_interfaces');
+    assert.match(interfaceTool.description,/container.*namespace/i); assert.match(interfaceTool.description,/LAN[- ]host enumeration/i);
     const bad=await call('security_sqlmap',{}); assert.equal(bad.isError,true);
     for(const target of ['8.8.8.8','127.0.0.1/99','fd00::1','--script=default']) {
       const r=await call('security_network_discover',{target}); assert.equal(r.isError,true,target);
     }
+    const discovery=JSON.parse((await call('security_network_discover',{target:'127.0.0.1'})).content[0].text);
+    assert.equal(discovery.scope,'target-scan'); assert.equal(discovery.complete,true);
     const ports=JSON.parse((await call('security_port_scan',{target:'127.0.0.1'})).content[0].text);assert.equal(ports.open_ports[0].port,80);
     const fuzz=JSON.parse((await call('security_web_content_discover',{url:'http://127.0.0.1/'})).content[0].text);assert.equal(fuzz.count,1);assert.equal(fuzz.results[0].status,200);
     await fs.writeFile(path.join(dir,'workspace','big.json'),JSON.stringify({value:'x'.repeat(4000)}));

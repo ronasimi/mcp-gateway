@@ -831,7 +831,14 @@
           "LAN scan",
           "asset discovery",
           "ping sweep",
-          "red team recon"
+          "red team recon",
+          "host discovery",
+          "discover devices",
+          "discover live devices",
+          "enumerate live hosts",
+          "scan local network",
+          "local network discovery",
+          "LAN host discovery"
         ],
         "security_port_scan": [
           "port scan",
@@ -883,7 +890,11 @@
           "known vulnerabilities",
           "web vulnerabilities",
           "misconfiguration scan",
-          "red team scan"
+          "red team scan",
+          "nuclei scan",
+          "scan vulnerabilities",
+          "CVE vulnerability scan",
+          "web CVE scan"
         ],
         "security_web_content_discover": [
           "ffuf",
@@ -990,7 +1001,11 @@
           "security interfaces",
           "capture interfaces",
           "network interfaces",
-          "routes"
+          "routes",
+          "security container interfaces",
+          "container routes",
+          "security namespace",
+          "capture interface list"
         ],
         "security_suricata_analyze_pcap": [
           "Suricata",

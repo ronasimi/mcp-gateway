@@ -81,6 +81,12 @@ and network namespaces**. Osquery's `processes` and `listening_ports` tables do
 not describe the host. Read-only `/host` files remain available to the dedicated
 host tools. No host PID namespace or privileged-container mode is added.
 
+`security_network_interfaces` has the same container-only visibility and must not
+be used as LAN-host enumeration. For an authorized LAN inventory, first obtain
+the real LAN CIDR from the System/OpenWrt side when necessary, then call
+`security_network_discover` with that CIDR. Its result is explicitly marked
+`scope: "target-scan"`; the interface tool reports `scope: "security-container"`.
+
 ## Active tools and jobs
 
 The existing `SECURITY_ALLOW_ACTIVE`, `SECURITY_TARGET_ALLOWLIST`, and
