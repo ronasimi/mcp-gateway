@@ -91,6 +91,7 @@ services:
       MCP_WORKSPACE: /workspace
       MCP_HOST_ROOT: /host
       DOCKER_SOCKET: /var/run/docker.sock
+      # SSH config references the dedicated Pi/OpenWrt identity and pinned hosts.
       OPENWRT_SSH_CONFIG: /data/ssh/config
       DOCKER_ALLOW_WRITE: ${DOCKER_ALLOW_WRITE:-false}
       DOCKER_ALLOW_EXEC: ${DOCKER_ALLOW_EXEC:-false}
@@ -114,7 +115,8 @@ services:
       - type: bind
         source: ${MCP_WORKSPACE_PATH:-./data/workspace}
         target: /workspace
-      - ./data/ssh:/data/ssh
+      # Router SSH credentials are host-managed and never writable by the MCP.
+      - ./data/ssh:/data/ssh:ro
 
     mem_limit: ${SYSTEM_TOOLS_MEMORY:-768m}
     cpus: ${SYSTEM_TOOLS_CPUS:-1.0}
