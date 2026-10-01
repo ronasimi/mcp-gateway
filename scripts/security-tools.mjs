@@ -5,13 +5,13 @@ import path from 'node:path';
 import os from 'node:os';
 import dns from 'node:dns/promises';
 import crypto from 'node:crypto';
-import { execFile } from 'node:child_process';
-import { promisify } from 'node:util';
+import { isIP, BlockList } from 'node:net';
+import { runStatus as execute, confinedPath, validateArguments } from './security-runtime.mjs';
+import { EXTENDED_TOOLS, createExtendedSecurity } from './security-extended.mjs';
 
-const execFileAsync = promisify(execFile);
 const WORKSPACE = path.resolve(process.env.MCP_WORKSPACE || '/workspace');
 const HOST_ROOT = path.resolve(process.env.MCP_HOST_ROOT || '/host');
-const MAX_OUTPUT = Number(process.env.SECURITY_MAX_OUTPUT || 32768);
+const MAX_OUTPUT = Math.max(1024, Math.min(10000, Number(process.env.SECURITY_MAX_OUTPUT) || 10000));
 const DEFAULT_TIMEOUT = Number(process.env.SECURITY_TIMEOUT_MS || 60000);
 const ALLOW_ACTIVE = /^(1|true|yes)$/i.test(process.env.SECURITY_ALLOW_ACTIVE || 'true');
 const ALLOW_CAPTURE = /^(1|true|yes)$/i.test(process.env.SECURITY_ALLOW_PACKET_CAPTURE || 'false');
@@ -27,7 +27,8 @@ const bool = (description) => ({ type:'boolean', description });
 const arr = (description, items, extra={}) => ({ type:'array', description, items, ...extra });
 
 const TOOLS = [
-  // Active / red-team assessment (bounded, non-exploit)
+  ...EXTENDED_TOOLS,
+  // Active / red-team assessment
   { name:'security_network_discover', description:'Authorized network discovery: find live hosts on a private or explicitly allowlisted IP/CIDR using Nmap host discovery. Use for LAN asset discovery, subnet inventory, or identifying reachable hosts before deeper assessment.', inputSchema:s('Discover live hosts on an authorized network target.', {target:str('Hostname, IP address, or CIDR such as 192.168.1.0/24.')}, ['target']) },
   { name:'security_port_scan', description:'Authorized TCP port scan: identify open ports on a private or explicitly allowlisted host using bounded Nmap connect scanning. Use for open ports, exposed services, attack-surface inventory, or red-team reconnaissance.', inputSchema:s('Scan TCP ports on an authorized target.', {target:str('Hostname or IP address.'), ports:str('Nmap port expression such as 22,80,443 or 1-1024; default top 1000 ports.'), timeout_seconds:num('Maximum scan duration; default 60, maximum 180.',{minimum:5,maximum:180})}, ['target']) },
   { name:'security_service_detect', description:'Authorized service/version detection: identify products and versions listening on selected TCP ports with Nmap version-light probes. Use after port discovery to fingerprint SSH, HTTP, databases, and other exposed services.', inputSchema:s('Detect services on an authorized target.', {target:str('Hostname or IP address.'), ports:str('Nmap port expression such as 22,80,443; omit for Nmap defaults.'), timeout_seconds:num('Maximum scan duration; default 90, maximum 240.',{minimum:10,maximum:240})}, ['target']) },
@@ -35,7 +36,7 @@ const TOOLS = [
   { name:'security_http_headers_audit', description:'HTTP security-header audit: fetch response headers from an authorized HTTP/HTTPS URL and summarize common browser-security headers, redirect target, status, and server disclosure. Use for CSP, HSTS, X-Frame-Options, cookie/header posture, or basic web hardening.', inputSchema:s('Inspect security-relevant HTTP response headers.', {url:str('Authorized http:// or https:// URL.')}, ['url']) },
   { name:'security_web_server_audit', description:'Authorized Nikto web-server audit: perform a bounded active check for common server misconfiguration, exposed files, risky defaults, and known web-server issues. Use for web security assessment; not for exploitation.', inputSchema:s('Run a bounded Nikto audit against an authorized web target.', {url:str('Authorized http:// or https:// URL.'), timeout_seconds:num('Maximum runtime; default 90, maximum 180.',{minimum:15,maximum:180})}, ['url']) },
   { name:'security_vulnerability_scan', description:'Authorized Nuclei vulnerability scan: run curated detection templates against one authorized HTTP/HTTPS URL and return compact findings by severity. Use for known-CVE/misconfiguration detection. Does not expose arbitrary templates or payload execution.', inputSchema:s('Run bounded vulnerability detection against an authorized URL.', {url:str('Authorized http:// or https:// URL.'), severities:arr('Severities to include; default low,medium,high,critical.', str('One severity.',{enum:['info','low','medium','high','critical']}),{maxItems:5}), rate_limit:num('Maximum requests per second; default 20, maximum 50.',{minimum:1,maximum:50}), timeout_seconds:num('Maximum total runtime; default 120, maximum 300.',{minimum:15,maximum:300})}, ['url']) },
-  { name:'security_web_content_discover', description:'Authorized web content discovery: fuzz URL paths with ffuf using a bounded wordlist, request rate, concurrency, and runtime. Use for hidden paths, administrative endpoints, backup files, and content inventory on systems you are authorized to assess.', inputSchema:s('Discover web paths on an authorized URL.', {url:str('Base authorized http:// or https:// URL. FUZZ is appended when absent.'), wordlist:str('Optional workspace-relative wordlist; omit for the built-in common path list.'), rate_limit:num('Requests per second; default 20, maximum 50.',{minimum:1,maximum:50}), concurrency:num('Concurrent workers; default 10, maximum 30.',{minimum:1,maximum:30}), timeout_seconds:num('Maximum runtime; default 60, maximum 180.',{minimum:10,maximum:180})}, ['url']) },
+  { name:'security_web_content_discover', description:'Authorized web content discovery: fuzz URL paths with ffuf using a bounded wordlist, request rate, concurrency, and runtime. Use for hidden paths, administrative endpoints, backup files, and content inventory on systems you are authorized to assess.', inputSchema:s('Discover web paths on an authorized URL.', {url:str('Base authorized http:// or https:// URL. FUZZ is appended when absent.'), wordlist:str('Optional workspace-relative wordlist; omit for the built-in common path list.'), status_codes:arr('HTTP status codes to return; default only 200.', {type:'integer',description:'HTTP status code.',minimum:100,maximum:599},{minItems:1,maxItems:10}), rate_limit:num('Requests per second; default 20, maximum 50.',{minimum:1,maximum:50}), concurrency:num('Concurrent workers; default 10, maximum 30.',{minimum:1,maximum:30}), timeout_seconds:num('Maximum runtime; default 60, maximum 180.',{minimum:10,maximum:180})}, ['url']) },
   { name:'security_dns_records', description:'DNS security/reconnaissance lookup: retrieve common A, AAAA, CNAME, MX, NS, TXT, SOA, and CAA records for a domain. Use for DNS inventory, mail/security policy review, or domain reconnaissance.', inputSchema:s('Retrieve common DNS records for a domain.', {domain:str('DNS domain name.')}, ['domain']) },
 
   // Blue-team / defensive analysis
@@ -61,6 +62,7 @@ const ACTIVE = new Set(['security_network_discover','security_port_scan','securi
 const WRITES_WORKSPACE = new Set(['security_generate_sbom','security_packet_capture','security_suricata_analyze_pcap']);
 const OPEN_WORLD = new Set([...ACTIVE,'security_dns_records']);
 for (const tool of TOOLS) {
+  if (tool.annotations) continue;
   tool.annotations={
     readOnlyHint: !WRITES_WORKSPACE.has(tool.name),
     destructiveHint:false,
@@ -69,6 +71,10 @@ for (const tool of TOOLS) {
   };
 }
 const toolMap=new Map(TOOLS.map(t=>[t.name,t]));
+const extended = createExtendedSecurity({ runStatus, safeWorkspace, assertAuthorizedTarget, assertAuthorizedUrl });
+const extendedNames = new Set(EXTENDED_TOOLS.map(t => t.name));
+process.on('exit', () => extended.jobs.stopAll());
+for (const signal of ['SIGTERM', 'SIGINT']) process.on(signal, () => { extended.jobs.stopAll(); process.exit(0); });
 
 function clip(value,max=MAX_OUTPUT){
   const text=typeof value==='string'?value:JSON.stringify(value,null,2);
@@ -76,29 +82,19 @@ function clip(value,max=MAX_OUTPUT){
   return text.slice(0,max)+`\n...[truncated at ${max} bytes]`;
 }
 async function runStatus(cmd,args=[],opts={}){
-  try{
-    const {stdout='',stderr=''}=await execFileAsync(cmd,args.map(String),{timeout:opts.timeout??DEFAULT_TIMEOUT,maxBuffer:opts.maxBuffer??8*1024*1024,env:{...process.env,...(opts.env||{})}});
-    return {code:0,stdout,stderr};
-  }catch(e){
-    if(typeof e.code==='number') return {code:e.code,stdout:String(e.stdout||''),stderr:String(e.stderr||'')};
-    throw e;
-  }
+  return execute(cmd,args,{timeout:DEFAULT_TIMEOUT,...opts});
 }
 async function run(cmd,args=[],opts={}){
   const r=await runStatus(cmd,args,opts);
   if(r.code!==0) throw new Error(`${cmd} exited ${r.code}: ${clip((r.stderr||r.stdout).trim(),4000)}`);
-  return clip([r.stdout.trim(),r.stderr.trim()].filter(Boolean).join('\n'));
+  return r.stdout.trim();
 }
 function safeWorkspace(rel='.',{mustExist=false}={}){
-  if(typeof rel!=='string'||rel.includes('\0')) throw new Error('path must be a string without NUL bytes');
-  const resolved=path.resolve(WORKSPACE,rel);
-  if(!(resolved===WORKSPACE||resolved.startsWith(WORKSPACE+path.sep))) throw new Error('path escapes MCP workspace');
-  if(mustExist&&!fs.existsSync(resolved)) throw new Error(`workspace path not found: ${rel}`);
-  return resolved;
+  return confinedPath(WORKSPACE,rel,{mustExist});
 }
 function safeHostLog(p){
   if(typeof p!=='string'||!p.startsWith('/var/log/')||p.includes('\0')||p.includes('..')) throw new Error('host log path must be under /var/log');
-  const resolved=path.join(HOST_ROOT,p);
+  const resolved=confinedPath(path.join(HOST_ROOT,'var/log'),p.slice('/var/log/'.length),{mustExist:true});
   if(!fs.existsSync(resolved)) throw new Error(`host log not found: ${p}`);
   return resolved;
 }
@@ -118,17 +114,21 @@ function ipv4InCidr(ip,cidr){
   const mask=bits===0?0:(0xffffffff<<(32-bits))>>>0; return (a&mask)===(n&mask);
 }
 function ipAllowed(ip){
+  if (!isIP(ip)) return false;
   if(ALLOW_PUBLIC) return true;
-  if(ip.includes(':')){
-    const s=ip.toLowerCase();
-    if(s==='::1'||s.startsWith('fc')||s.startsWith('fd')||/^fe[89ab]/.test(s)) return true;
-    return TARGET_ALLOWLIST.some(x=>x===ip||x===`${ip}/128`);
+  const rules = new BlockList();
+  for (const entry of TARGET_ALLOWLIST) {
+    const [address,bits] = entry.split('/'), family = isIP(address);
+    if (!family) continue;
+    if (bits == null) rules.addAddress(address, family === 6 ? 'ipv6' : 'ipv4');
+    else rules.addSubnet(address, Number(bits), family === 6 ? 'ipv6' : 'ipv4');
   }
-  return TARGET_ALLOWLIST.some(c=>c.includes(':')?false:ipv4InCidr(ip,c));
+  return rules.check(ip, isIP(ip) === 6 ? 'ipv6' : 'ipv4');
 }
 function cidrAllowed(target){
   if(!target.includes('/')) return false;
   const [ip,bits]=target.split('/');
+  if (!/^\d+$/.test(bits || '') || Number(bits) < 0 || Number(bits) > 32 || target.split('/').length !== 2) return false;
   if(ipv4Int(ip)!=null){
     if(ALLOW_PUBLIC) return true;
     return TARGET_ALLOWLIST.some(c=>!c.includes(':')&&ipv4InCidr(ip,c)&&Number(bits)>=Number(c.split('/')[1]??32));
@@ -142,7 +142,7 @@ async function assertAuthorizedTarget(target,{allowCidr=false}={}){
   if(t.includes('/')&&allowCidr){ if(!cidrAllowed(t)) throw new Error(`target CIDR is not private/allowlisted: ${t}`); return t; }
   if(t.includes('/')) throw new Error('CIDR is not accepted by this tool');
   let ips=[];
-  if(ipv4Int(t)!=null||t.includes(':')) ips=[t];
+  if(isIP(t)) ips=[t];
   else {
     if(!/^[A-Za-z0-9._-]+$/.test(t)) throw new Error('invalid hostname');
     try{ ips=(await dns.lookup(t,{all:true,verbatim:true})).map(x=>x.address); }catch(e){ throw new Error(`target DNS resolution failed: ${e.message}`); }
@@ -154,7 +154,8 @@ async function assertAuthorizedUrl(value){
   if(!ALLOW_ACTIVE) throw new Error('active security tools are disabled; set SECURITY_ALLOW_ACTIVE=true');
   const u=new URL(String(value));
   if(!['http:','https:'].includes(u.protocol)) throw new Error('only http/https URLs are allowed');
-  await assertAuthorizedTarget(u.hostname);
+  if(u.username || u.password) throw new Error('embedded URL credentials are not allowed');
+  await assertAuthorizedTarget(u.hostname.replace(/^\[|\]$/g,''));
   return u.toString();
 }
 function parseNmapGrep(text){
@@ -186,6 +187,7 @@ function redactSecretFinding(x){
 function countBy(items,keyFn){const out={}; for(const x of items){const k=keyFn(x)||'UNKNOWN'; out[k]=(out[k]||0)+1;} return out;}
 
 async function callTool(name,a={}){
+  if (extendedNames.has(name)) return extended.call(name,a);
   switch(name){
     case 'security_network_discover': {
       const target=await assertAuthorizedTarget(a.target,{allowCidr:true});
@@ -225,7 +227,13 @@ async function callTool(name,a={}){
     case 'security_web_content_discover': {
       let url=await assertAuthorizedUrl(a.url); if(!url.includes('FUZZ')) url=url.replace(/\/$/,'')+'/FUZZ';
       const wl=a.wordlist?safeWorkspace(a.wordlist,{mustExist:true}):DEFAULT_FFUF_WORDLIST; const rate=Math.max(1,Math.min(50,Number(a.rate_limit||20))); const threads=Math.max(1,Math.min(30,Number(a.concurrency||10))); const sec=Math.max(10,Math.min(180,Number(a.timeout_seconds||60)));
-      const tmp=path.join(os.tmpdir(),`ffuf-${crypto.randomUUID()}.json`); try{const r=await runStatus('ffuf',['-u',url,'-w',wl,'-of','json','-o',tmp,'-t',String(threads),'-rate',String(rate),'-maxtime',String(sec),'-s'],{timeout:(sec+20)*1000,maxBuffer:4*1024*1024}); const j=JSON.parse(await fsp.readFile(tmp,'utf8')); const results=(j.results||[]).map(x=>({url:x.url,status:x.status,length:x.length,words:x.words,lines:x.lines,redirectlocation:x.redirectlocation||null})); return {url,exit_code:r.code,count:results.length,results:results.slice(0,200),complete:true};} finally{await fsp.rm(tmp,{force:true});}
+      const statuses = a.status_codes ?? [200];
+      const r = await runStatus('ffuf',['-u',url,'-w',wl,'-json','-mc',statuses.join(','),'-noninteractive','-t',String(threads),'-rate',String(rate),'-maxtime',String(sec)],{timeout:(sec+10)*1000,maxBuffer:8*1024*1024});
+      const results=[]; let invalid=0;
+      for(const line of r.stdout.split(/\r?\n/).filter(Boolean)) {
+        try { const x=JSON.parse(line); if(statuses.includes(x.status)) results.push({url:x.url,status:x.status,length:x.length,words:x.words,lines:x.lines}); } catch { invalid++; }
+      }
+      return {url,exit_code:r.code,count:results.length,results:results.slice(0,200),truncated:results.length>200,complete:r.code===0&&!invalid,exhaustive:false,time_limit_seconds:sec,diagnostics:r.stderr.slice(0,2000)};
     }
     case 'security_dns_records': {
       const domain=String(a.domain||'').trim(); if(!/^[A-Za-z0-9._-]+$/.test(domain)) throw new Error('invalid domain'); const records={};
@@ -247,7 +255,7 @@ async function callTool(name,a={}){
       const p=safeWorkspace(a.path||'.',{mustExist:true}); const r=await runStatus('syft',[p,'-o','json'],{timeout:180000,maxBuffer:64*1024*1024}); if(r.code!==0) throw new Error(`syft exited ${r.code}: ${clip(r.stderr,3000)}`); const j=JSON.parse(r.stdout); const pkgs=(j.artifacts||[]).map(x=>({name:x.name,version:x.version,type:x.type,purl:x.purl||null})); let output=null; if(a.output){const o=safeWorkspace(a.output); await fsp.mkdir(path.dirname(o),{recursive:true}); const rr=await runStatus('syft',[p,'-o','cyclonedx-json'],{timeout:180000,maxBuffer:64*1024*1024}); if(rr.code!==0) throw new Error(`syft exited ${rr.code}: ${clip(rr.stderr,3000)}`); await fsp.writeFile(o,rr.stdout); output=path.relative(WORKSPACE,o);} return {path:a.path||'.',package_count:pkgs.length,by_type:countBy(pkgs,x=>x.type),packages:pkgs.slice(0,200),output};
     }
     case 'security_yara_scan': {
-      const p=safeWorkspace(a.path,{mustExist:true}); const rules=a.rules?safeWorkspace(a.rules,{mustExist:true}):'/opt/security/rules/default.yar'; const st=await fsp.stat(p); const args=[]; if(st.isDirectory()) args.push('-r'); args.push(rules,p); const r=await runStatus('yara',args,{timeout:120000,maxBuffer:8*1024*1024}); const hits=r.stdout.split(/\r?\n/).filter(Boolean).slice(0,500); return {path:a.path,rules:a.rules||'bundled-default',count:hits.length,matches:hits,complete:[0,1].includes(r.code)};
+      const p=safeWorkspace(a.path,{mustExist:true}); const rules=a.rules?safeWorkspace(a.rules,{mustExist:true}):'/opt/security/rules/default.yar'; const st=await fsp.stat(p); const args=[]; if(st.isDirectory()) args.push('-r'); args.push(rules,p); const r=await runStatus('yara',args,{timeout:120000,maxBuffer:8*1024*1024}); const hits=r.stdout.split(/\r?\n/).filter(Boolean); return {path:a.path,rules:a.rules||'bundled-default',count:hits.length,matches:hits.slice(0,500),truncated:hits.length>500,exit_code:r.code,complete:r.code===0,diagnostics:r.stderr.slice(0,2000)};
     }
     case 'security_malware_scan': {
       const p=safeWorkspace(a.path,{mustExist:true}); const st=await fsp.stat(p); const args=['--infected','--no-summary']; if(st.isDirectory()) args.push('-r'); args.push(p); const r=await runStatus('clamscan',args,{timeout:180000,maxBuffer:16*1024*1024}); const hits=r.stdout.split(/\r?\n/).filter(l=>/FOUND$/.test(l)).slice(0,500); return {path:a.path,infected_count:hits.length,detections:hits,complete:[0,1].includes(r.code),engine_error:r.code>1?clip(r.stderr||r.stdout,3000):null};
@@ -284,7 +292,18 @@ async function callTool(name,a={}){
   throw new Error(`unknown tool: ${name}`);
 }
 
+// Keep large reports recoverable without putting them all in the model context.
+async function encodeResult(value) {
+  const encoded=JSON.stringify(value);
+  if(Buffer.byteLength(encoded)<=MAX_OUTPUT) return encoded;
+  const rel=`.security-results/${crypto.randomUUID()}.json`;
+  const file=safeWorkspace(rel);
+  await fsp.mkdir(path.dirname(file),{recursive:true});
+  await fsp.writeFile(file,encoded+'\n',{mode:0o600});
+  return JSON.stringify({truncated:true,output_file:rel,total_bytes:Buffer.byteLength(encoded),preview:encoded.slice(0,Math.max(128,Math.floor(MAX_OUTPUT/8)))});
+}
+
 function response(id,result){process.stdout.write(JSON.stringify({jsonrpc:'2.0',id,result})+'\n');}
 function errorResponse(id,code,message,data){process.stdout.write(JSON.stringify({jsonrpc:'2.0',id,error:{code,message,...(data?{data}:{})}})+'\n');}
 let input=''; process.stdin.setEncoding('utf8'); process.stdin.on('data',chunk=>{input+=chunk; let idx; while((idx=input.indexOf('\n'))>=0){const line=input.slice(0,idx).trim(); input=input.slice(idx+1); if(line) handle(line);}});
-async function handle(line){let msg; try{msg=JSON.parse(line);}catch{return;} if(msg.method==='notifications/initialized'||msg.method==='notifications/cancelled')return; if(msg.id==null)return; try{if(msg.method==='initialize')return response(msg.id,{protocolVersion:msg.params?.protocolVersion||'2025-06-18',capabilities:{tools:{listChanged:false}},serverInfo:{name:'local-security-tools',version:'1.0.0'}}); if(msg.method==='ping')return response(msg.id,{}); if(msg.method==='tools/list')return response(msg.id,{tools:TOOLS}); if(msg.method==='tools/call'){const name=msg.params?.name,args=msg.params?.arguments||{}; if(!toolMap.has(name))throw new Error(`unknown tool: ${name}`); try{const out=await callTool(name,args); return response(msg.id,{content:[{type:'text',text:clip(out)}],isError:false});}catch(e){return response(msg.id,{content:[{type:'text',text:clip(e?.message||String(e))}],isError:true});}} return errorResponse(msg.id,-32601,`Method not found: ${msg.method}`);}catch(e){return errorResponse(msg.id,-32603,e?.message||String(e));}}
+async function handle(line){let msg; try{msg=JSON.parse(line);}catch{return;} if(msg.method==='notifications/initialized'||msg.method==='notifications/cancelled')return; if(msg.id==null)return; try{if(msg.method==='initialize')return response(msg.id,{protocolVersion:msg.params?.protocolVersion||'2025-06-18',capabilities:{tools:{listChanged:false}},serverInfo:{name:'local-security-tools',version:'1.1.0'}}); if(msg.method==='ping')return response(msg.id,{}); if(msg.method==='tools/list')return response(msg.id,{tools:TOOLS}); if(msg.method==='tools/call'){const name=msg.params?.name,args=msg.params?.arguments||{}; if(!toolMap.has(name))throw new Error(`unknown tool: ${name}`); try{validateArguments(toolMap.get(name).inputSchema,args); const out=await callTool(name,args); return response(msg.id,{content:[{type:'text',text:await encodeResult(out)}],isError:false});}catch(e){return response(msg.id,{content:[{type:'text',text:clip(e?.message||String(e))}],isError:true});}} return errorResponse(msg.id,-32601,`Method not found: ${msg.method}`);}catch(e){return errorResponse(msg.id,-32603,e?.message||String(e));}}

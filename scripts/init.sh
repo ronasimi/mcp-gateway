@@ -30,7 +30,7 @@ set -a
 source .env
 set +a
 
-mkdir -p data/searxng data/playwright data/memory data/workspace data/ssh data/google secrets
+mkdir -p data/searxng data/playwright data/memory data/workspace data/security data/ssh data/google secrets
 [[ -e data/ssh/config ]] || touch data/ssh/config
 chmod 700 data/ssh data/google secrets 2>/dev/null || true
 chmod 600 data/ssh/config 2>/dev/null || true
@@ -82,6 +82,9 @@ docker compose build --pull mcp-gateway
 
 echo "Building bounded system-tools MCP image..."
 docker compose build --pull mcp-system
+
+echo "Building security CLI suite..."
+docker compose build --pull mcp-security
 
 echo "Starting MCP stack..."
 docker compose up -d

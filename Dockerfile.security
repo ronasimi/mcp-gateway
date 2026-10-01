@@ -7,6 +7,9 @@ ARG GITLEAKS_VERSION=8.30.1
 ARG TRIVY_VERSION=0.74.0
 ARG SYFT_VERSION=1.52.0
 ARG SEMGREP_VERSION=1.178.0
+ARG SUBFINDER_VERSION=2.16.0
+ARG FIRECRAWL_CLI_VERSION=1.25.1
+ARG METASPLOIT_VERSION=6.5.3~20260818061200~1rapid7-1
 
 ENV DEBIAN_FRONTEND=noninteractive \
     NODE_ENV=production \
@@ -40,16 +43,20 @@ RUN set -eux; \
        dnsutils \
        file \
        git \
+       gnupg \
        iproute2 \
        iputils-ping \
        jq \
        lynis \
        nikto \
        nmap \
+       netcat-openbsd \
        openssl \
        python3 \
        python3-venv \
        sslscan \
+       socat \
+       sqlmap \
        suricata-update \
        tcpdump \
        tshark \
@@ -83,7 +90,11 @@ RUN python3 -m venv /opt/semgrep \
     && /opt/semgrep/bin/pip install --no-cache-dir "semgrep==${SEMGREP_VERSION}" \
     && mkdir -p /workspace /data/security /opt/security/rules
 
-COPY scripts/security-tools.mjs /opt/mcp/security-tools.mjs
+COPY scripts/install-security-extras.sh /opt/mcp/install-security-extras.sh
+COPY config/metasploit-release.asc /opt/mcp/metasploit-release.asc
+RUN sh /opt/mcp/install-security-extras.sh
+COPY scripts/security-tools.mjs scripts/security-runtime.mjs scripts/security-extended.mjs /opt/mcp/
+COPY scripts/smoke-security.mjs /opt/mcp/smoke-security.mjs
 COPY security-rules/default.yar /opt/security/rules/default.yar
 RUN chmod 0755 /opt/mcp/security-tools.mjs \
     && command -v supergateway \

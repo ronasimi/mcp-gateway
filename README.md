@@ -289,7 +289,7 @@ secrets/          OAuth client JSON + token-encryption key (ignored by git)
 
 ## Security MCP
 
-`mcp-security` exposes a bounded red-team/blue-team security toolkit at `http://mcp-security:8935/mcp`. Schemas remain behind `mcp_search` (`directTools=false`). Active network/web tools are limited to private or explicitly allowlisted targets by default; the server does not expose arbitrary shell, credential spraying, password cracking, persistence, or exploit-payload execution.
+`mcp-security` exposes a bounded red-team/blue-team security toolkit at `http://mcp-security:8935/mcp`. Schemas remain behind `mcp_search` (`directTools=false`). Active network/web tools are limited to private or explicitly allowlisted targets by default; typed sqlmap, Metasploit and listener operations are available alongside the scanners.
 
 Core active tools include Nmap discovery/port/service scans, TLS auditing, HTTP security-header checks, Nikto, Nuclei, ffuf content discovery, and DNS enumeration. Defensive tools include Trivy, Gitleaks, Semgrep, Syft SBOMs, YARA, ClamAV, tshark/PCAP analysis, optional tcpdump capture, Suricata offline IDS, host log search, IOC search, and Lynis hardening review.
 
@@ -302,7 +302,7 @@ SECURITY_TARGET_ALLOWLIST="127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,1
 SECURITY_ALLOW_PACKET_CAPTURE=false
 ```
 
-`SECURITY_TARGET_ALLOWLIST` is the enforcement boundary for active scans. Add a public CIDR/host network only when you are explicitly authorized to assess it. Packet capture is separately disabled by default.
+`SECURITY_TARGET_ALLOWLIST` checks active target addresses; it is an application policy, not a network sandbox. Add a public CIDR/host network only when you are explicitly authorized to assess it. Packet capture is separately disabled by default.
 
 Build/start and validate:
 
@@ -335,3 +335,7 @@ For the manually selected WhiteRabbitNeo security model, `pi/Modelfile.whiterabb
 
 `mcp-security` is based on Debian Bookworm. Its Dockerfile enables `non-free` for Nikto and `bookworm-backports` for Suricata explicitly; no host APT configuration is required.
 
+
+## Expanded security CLI suite
+
+The security catalog now has 43 tools. See [SECURITY-SUITE.md](docs/SECURITY-SUITE.md) for the full tool mapping, Firecrawl setup, background jobs, namespace visibility, dependency versions and offline image checks.
