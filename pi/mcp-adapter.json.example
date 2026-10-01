@@ -848,6 +848,234 @@
         ]
       },
       "lifecycle": "lazy"
+    },
+    "security": {
+      "url": "http://mcp-security:8935/mcp",
+      "directTools": false,
+      "exposeResources": false,
+      "requestTimeoutMs": 300000,
+      "description": "Authorized cybersecurity assessment and defensive analysis. Use for red-team reconnaissance/vulnerability detection on private or explicitly allowlisted targets, plus blue-team code/secret/SBOM/malware/PCAP/IDS/log/hardening analysis. No arbitrary shell, password attacks, persistence, or exploit-payload execution.",
+      "searchKeywords": {
+        "*": [
+          "security",
+          "cybersecurity",
+          "red team",
+          "blue team",
+          "pentest",
+          "vulnerability",
+          "reconnaissance",
+          "incident response",
+          "forensics",
+          "malware",
+          "PCAP",
+          "IDS",
+          "SAST",
+          "SBOM",
+          "hardening"
+        ],
+        "security_network_discover": [
+          "network discovery",
+          "discover hosts",
+          "live hosts",
+          "subnet scan",
+          "LAN scan",
+          "asset discovery",
+          "ping sweep",
+          "red team recon"
+        ],
+        "security_port_scan": [
+          "port scan",
+          "open ports",
+          "nmap",
+          "exposed ports",
+          "attack surface",
+          "scan host",
+          "red team recon"
+        ],
+        "security_service_detect": [
+          "service detection",
+          "service fingerprint",
+          "version detection",
+          "nmap -sV",
+          "identify services",
+          "banner fingerprint"
+        ],
+        "security_tls_audit": [
+          "TLS audit",
+          "SSL audit",
+          "sslscan",
+          "weak TLS",
+          "cipher scan",
+          "certificate security",
+          "HTTPS hardening"
+        ],
+        "security_http_headers_audit": [
+          "security headers",
+          "HTTP headers audit",
+          "CSP",
+          "HSTS",
+          "X-Frame-Options",
+          "web hardening",
+          "response headers"
+        ],
+        "security_web_server_audit": [
+          "Nikto",
+          "web server audit",
+          "web vulnerability audit",
+          "server misconfiguration",
+          "exposed files",
+          "web security scan"
+        ],
+        "security_vulnerability_scan": [
+          "Nuclei",
+          "vulnerability scan",
+          "CVE scan",
+          "known vulnerabilities",
+          "web vulnerabilities",
+          "misconfiguration scan",
+          "red team scan"
+        ],
+        "security_web_content_discover": [
+          "ffuf",
+          "content discovery",
+          "directory fuzzing",
+          "hidden paths",
+          "admin paths",
+          "web enumeration",
+          "find endpoints"
+        ],
+        "security_dns_records": [
+          "DNS records",
+          "DNS enumeration",
+          "MX records",
+          "TXT records",
+          "NS records",
+          "domain reconnaissance",
+          "CAA"
+        ],
+        "security_workspace_vuln_scan": [
+          "Trivy",
+          "dependency vulnerabilities",
+          "filesystem vulnerability scan",
+          "IaC scan",
+          "misconfiguration scan",
+          "workspace security",
+          "secret scan"
+        ],
+        "security_secret_scan": [
+          "Gitleaks",
+          "secret scan",
+          "exposed credentials",
+          "committed secrets",
+          "API key leak",
+          "private key leak"
+        ],
+        "security_code_scan": [
+          "Semgrep",
+          "static analysis",
+          "SAST",
+          "code security scan",
+          "insecure code",
+          "application security"
+        ],
+        "security_generate_sbom": [
+          "SBOM",
+          "Syft",
+          "software bill of materials",
+          "package inventory",
+          "dependency inventory"
+        ],
+        "security_yara_scan": [
+          "YARA",
+          "malware rules",
+          "IOC scan",
+          "suspicious file",
+          "artifact scan"
+        ],
+        "security_malware_scan": [
+          "ClamAV",
+          "malware scan",
+          "virus scan",
+          "infected files",
+          "malicious files"
+        ],
+        "security_file_hash": [
+          "file hash",
+          "SHA256",
+          "SHA512",
+          "MD5",
+          "IOC hash",
+          "integrity check"
+        ],
+        "security_file_strings": [
+          "strings",
+          "binary strings",
+          "artifact strings",
+          "malware triage",
+          "embedded domains",
+          "binary inspect"
+        ],
+        "security_pcap_summary": [
+          "PCAP summary",
+          "packet capture analysis",
+          "tshark",
+          "protocol hierarchy",
+          "traffic analysis"
+        ],
+        "security_pcap_conversations": [
+          "PCAP conversations",
+          "top talkers",
+          "TCP conversations",
+          "UDP conversations",
+          "network forensics"
+        ],
+        "security_packet_capture": [
+          "packet capture",
+          "tcpdump",
+          "capture traffic",
+          "PCAP capture",
+          "network capture"
+        ],
+        "security_network_interfaces": [
+          "security interfaces",
+          "capture interfaces",
+          "network interfaces",
+          "routes"
+        ],
+        "security_suricata_analyze_pcap": [
+          "Suricata",
+          "IDS analysis",
+          "PCAP IDS",
+          "network alerts",
+          "intrusion detection",
+          "offline IDS"
+        ],
+        "security_host_log_search": [
+          "security logs",
+          "auth log",
+          "host logs",
+          "authentication failures",
+          "incident logs",
+          "IOC logs"
+        ],
+        "security_workspace_ioc_search": [
+          "IOC search",
+          "indicator search",
+          "find IP",
+          "find domain",
+          "find hash",
+          "incident response search"
+        ],
+        "security_host_audit": [
+          "Lynis",
+          "host audit",
+          "hardening audit",
+          "security baseline",
+          "Linux hardening",
+          "blue team audit"
+        ]
+      },
+      "lifecycle": "lazy"
     }
   },
   "settings": {

@@ -130,6 +130,67 @@ services:
       - ai-local
 
 
+  # Bounded security assessment MCP. Active network/web assessment is constrained
+  # to private or explicitly allowlisted targets; no arbitrary shell/payload tool.
+  mcp-security:
+    build:
+      context: .
+      dockerfile: Dockerfile.security
+      args:
+        SUPERGATEWAY_VERSION: ${SUPERGATEWAY_VERSION:-4.0.0}
+        NUCLEI_VERSION: ${NUCLEI_VERSION:-3.11.1}
+        FFUF_VERSION: ${FFUF_VERSION:-2.3.0}
+        GITLEAKS_VERSION: ${GITLEAKS_VERSION:-8.30.1}
+        TRIVY_VERSION: ${TRIVY_VERSION:-0.74.0}
+        SYFT_VERSION: ${SYFT_VERSION:-1.52.0}
+        SEMGREP_VERSION: ${SEMGREP_VERSION:-1.178.0}
+    image: local/agent-mcp-security:latest
+    container_name: mcp-security
+    restart: unless-stopped
+
+    environment:
+      SECURITY_MCP_PORT: 8935
+      MCP_WORKSPACE: /workspace
+      MCP_HOST_ROOT: /host
+      SECURITY_ALLOW_ACTIVE: ${SECURITY_ALLOW_ACTIVE:-true}
+      SECURITY_ALLOW_PACKET_CAPTURE: ${SECURITY_ALLOW_PACKET_CAPTURE:-false}
+      SECURITY_ALLOW_PUBLIC_TARGETS: ${SECURITY_ALLOW_PUBLIC_TARGETS:-false}
+      SECURITY_TARGET_ALLOWLIST: ${SECURITY_TARGET_ALLOWLIST:-127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,169.254.0.0/16,::1/128,fc00::/7,fe80::/10}
+      SECURITY_TIMEOUT_MS: ${SECURITY_TIMEOUT_MS:-60000}
+      SECURITY_MAX_OUTPUT: ${SECURITY_MAX_OUTPUT:-32768}
+      SECURITY_FFUF_WORDLIST: ${SECURITY_FFUF_WORDLIST:-/usr/share/dirb/wordlists/common.txt}
+
+    ports:
+      - "127.0.0.1:${SECURITY_MCP_HOST_PORT:-8935}:8935"
+
+    volumes:
+      - type: bind
+        source: ${HOST_ROOT_PATH:-/}
+        target: /host
+        read_only: true
+        bind:
+          propagation: rslave
+      - type: bind
+        source: ${MCP_WORKSPACE_PATH:-./data/workspace}
+        target: /workspace
+      - ./data/security:/data/security
+
+    mem_limit: ${SECURITY_MCP_MEMORY:-1536m}
+    cpus: ${SECURITY_MCP_CPUS:-2.0}
+    tmpfs:
+      - /tmp:size=512m
+
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_RAW
+    security_opt:
+      - no-new-privileges:true
+
+    networks:
+      - ai-local
+
+
   # Google Workspace MCP. Account credentials are server-side only: the model
   # never receives OAuth client secrets, access tokens, or refresh tokens.
   # Enable with: docker compose --profile google up -d mcp-google

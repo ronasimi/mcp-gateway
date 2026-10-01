@@ -41,7 +41,8 @@ for spec in \
   "Playwright MCP|${PLAYWRIGHT_HOST_PORT:-8931}|/mcp" \
   "Memory MCP|${MEMORY_HOST_PORT:-8932}|/mcp" \
   "System Tools MCP|${SYSTEM_TOOLS_HOST_PORT:-8933}|/mcp" \
-  "Google MCP|${GOOGLE_MCP_HOST_PORT:-8934}|/mcp"; do
+  "Google MCP|${GOOGLE_MCP_HOST_PORT:-8934}|/mcp" \
+  "Security MCP|${SECURITY_MCP_HOST_PORT:-8935}|/mcp"; do
   IFS='|' read -r name port path <<<"$spec"
   code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 3 "http://127.0.0.1:${port}${path}" 2>/dev/null || true)"
   if [[ -n "$code" && "$code" != "000" ]]; then
@@ -56,6 +57,7 @@ echo "== ai-local DNS =="
 docker compose exec -T mcp-gateway getent hosts mcp-searxng 2>/dev/null || echo "mcp-searxng not resolvable from ai-local"
 docker compose exec -T mcp-gateway getent hosts mcp-system 2>/dev/null || echo "mcp-system not resolvable from ai-local"
 docker compose exec -T mcp-gateway getent hosts mcp-google 2>/dev/null || echo "mcp-google not running/resolvable (optional)"
+docker compose exec -T mcp-gateway getent hosts mcp-security 2>/dev/null || echo "mcp-security not resolvable from ai-local"
 
 echo
 echo "== Persistent data =="
@@ -64,6 +66,7 @@ printf 'Playwright:%s\n' "$(du -sh data/playwright 2>/dev/null | cut -f1 || echo
 printf 'Memory:    %s\n' "$(du -sh data/memory 2>/dev/null | cut -f1 || echo 0)"
 printf 'Workspace: %s\n' "$(du -sh data/workspace 2>/dev/null | cut -f1 || echo 0)"
 printf 'Google:    %s\n' "$(du -sh data/google 2>/dev/null | cut -f1 || echo 0)"
+printf 'Security:  %s\n' "$(du -sh data/security 2>/dev/null | cut -f1 || echo 0)"
 
 echo
 echo "== Client endpoints =="
@@ -73,3 +76,4 @@ echo "Container Playwright:http://mcp-gateway:8931/mcp"
 echo "Container Memory:    http://mcp-gateway:8932/mcp"
 echo "Container System:    http://mcp-system:8933/mcp"
 echo "Container Google:    http://mcp-google:8934/mcp (when enabled)"
+echo "Container Security:  http://mcp-security:8935/mcp"

@@ -1,0 +1,98 @@
+FROM node:22-bookworm-slim
+
+ARG SUPERGATEWAY_VERSION=4.0.0
+ARG NUCLEI_VERSION=3.11.1
+ARG FFUF_VERSION=2.3.0
+ARG GITLEAKS_VERSION=8.30.1
+ARG TRIVY_VERSION=0.74.0
+ARG SYFT_VERSION=1.52.0
+ARG SEMGREP_VERSION=1.178.0
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    NODE_ENV=production \
+    HOME=/data/security \
+    PATH=/opt/semgrep/bin:${PATH}
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+       binutils \
+       ca-certificates \
+       clamav \
+       clamav-freshclam \
+       curl \
+       dirb \
+       dnsutils \
+       file \
+       git \
+       iproute2 \
+       iputils-ping \
+       jq \
+       lynis \
+       nikto \
+       nmap \
+       openssl \
+       python3 \
+       python3-venv \
+       sslscan \
+       suricata \
+       tcpdump \
+       tshark \
+       tini \
+       unzip \
+       yara \
+    && rm -rf /var/lib/apt/lists/* \
+    && npm install -g --omit=dev "supergateway@${SUPERGATEWAY_VERSION}" \
+    && npm cache clean --force
+
+# Security analyzers are version-pinned so rebuilds do not silently move the toolchain.
+RUN set -eux; \
+    arch="$(dpkg --print-architecture)"; \
+    case "$arch" in amd64) goarch=amd64; ffarch=amd64; glarch=x64; trivyarch=64bit; syftarch=amd64 ;; arm64) goarch=arm64; ffarch=arm64; glarch=arm64; trivyarch=ARM64; syftarch=arm64 ;; *) echo "unsupported architecture: $arch" >&2; exit 1 ;; esac; \
+    tmp="$(mktemp -d)"; cd "$tmp"; \
+    curl -fsSLO "https://github.com/projectdiscovery/nuclei/releases/download/v${NUCLEI_VERSION}/nuclei_${NUCLEI_VERSION}_linux_${goarch}.zip"; \
+    unzip -q "nuclei_${NUCLEI_VERSION}_linux_${goarch}.zip" nuclei; install -m 0755 nuclei /usr/local/bin/nuclei; \
+    curl -fsSLO "https://github.com/ffuf/ffuf/releases/download/v${FFUF_VERSION}/ffuf_${FFUF_VERSION}_linux_${ffarch}.tar.gz"; \
+    tar -xzf "ffuf_${FFUF_VERSION}_linux_${ffarch}.tar.gz" ffuf; install -m 0755 ffuf /usr/local/bin/ffuf; \
+    curl -fsSLO "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_${glarch}.tar.gz"; \
+    tar -xzf "gitleaks_${GITLEAKS_VERSION}_linux_${glarch}.tar.gz" gitleaks; install -m 0755 gitleaks /usr/local/bin/gitleaks; \
+    curl -fsSLO "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-${trivyarch}.tar.gz"; \
+    tar -xzf "trivy_${TRIVY_VERSION}_Linux-${trivyarch}.tar.gz" trivy; install -m 0755 trivy /usr/local/bin/trivy; \
+    curl -fsSLO "https://github.com/anchore/syft/releases/download/v${SYFT_VERSION}/syft_${SYFT_VERSION}_linux_${syftarch}.tar.gz"; \
+    tar -xzf "syft_${SYFT_VERSION}_linux_${syftarch}.tar.gz" syft; install -m 0755 syft /usr/local/bin/syft; \
+    rm -rf "$tmp"
+
+RUN python3 -m venv /opt/semgrep \
+    && /opt/semgrep/bin/pip install --no-cache-dir --upgrade pip \
+    && /opt/semgrep/bin/pip install --no-cache-dir "semgrep==${SEMGREP_VERSION}" \
+    && mkdir -p /workspace /data/security /opt/security/rules
+
+COPY scripts/security-tools.mjs /opt/mcp/security-tools.mjs
+COPY security-rules/default.yar /opt/security/rules/default.yar
+RUN chmod 0755 /opt/mcp/security-tools.mjs \
+    && command -v supergateway \
+    && command -v nmap \
+    && command -v sslscan \
+    && command -v nikto \
+    && command -v nuclei \
+    && command -v ffuf \
+    && command -v trivy \
+    && command -v gitleaks \
+    && command -v semgrep \
+    && command -v syft \
+    && command -v yara \
+    && command -v tshark \
+    && command -v suricata
+
+# Best-effort rule/template/bootstrap data. Runtime scans still return a clear error if an upstream feed is unavailable.
+RUN mkdir -p /data/security \
+    && (HOME=/opt/security nuclei -update-templates -update-template-dir /opt/security/nuclei-templates -silent || true) \
+    && (suricata-update || true) \
+    && (freshclam || true)
+
+EXPOSE 8935
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+  CMD ["sh", "-c", "curl -sS -o /dev/null --max-time 3 http://127.0.0.1:${SECURITY_MCP_PORT:-8935}/mcp"]
+
+ENTRYPOINT ["/usr/bin/tini", "--"]
+CMD ["sh", "-c", "exec supergateway --stdio 'node /opt/mcp/security-tools.mjs' --outputTransport streamableHttp --port ${SECURITY_MCP_PORT:-8935} --streamableHttpPath /mcp --logLevel info"]

@@ -18,3 +18,7 @@ data/ssh/*
 secrets/*
 data/google/*
 !data/google/.gitkeep
+
+# Security scanner runtime data/templates/cache.
+data/security/*
+!data/security/.gitkeep

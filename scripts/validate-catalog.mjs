@@ -21,7 +21,7 @@ for (const [name, server] of Object.entries(adapter.mcpServers || {})) {
   if (!server.searchKeywords || Object.keys(server.searchKeywords).length === 0) fail(`${name}: missing searchKeywords`);
 }
 
-for (const [serverName, script] of [['system', 'scripts/system-tools.mjs'], ['google', 'scripts/google-tools.mjs']]) {
+for (const [serverName, script] of [['system', 'scripts/system-tools.mjs'], ['security', 'scripts/security-tools.mjs'], ['google', 'scripts/google-tools.mjs']]) {
   const tools = listTools(script);
   const keywords = adapter.mcpServers?.[serverName]?.searchKeywords || {};
   console.log(`${serverName}: ${tools.length} tools`);

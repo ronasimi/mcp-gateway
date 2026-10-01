@@ -286,3 +286,49 @@ data/ssh/         OpenWrt SSH config and keys (ignored by git)
 data/google/      Encrypted Google OAuth token state (ignored by git)
 secrets/          OAuth client JSON + token-encryption key (ignored by git)
 ```
+
+## Security MCP
+
+`mcp-security` exposes a bounded red-team/blue-team security toolkit at `http://mcp-security:8935/mcp`. Schemas remain behind `mcp_search` (`directTools=false`). Active network/web tools are limited to private or explicitly allowlisted targets by default; the server does not expose arbitrary shell, credential spraying, password cracking, persistence, or exploit-payload execution.
+
+Core active tools include Nmap discovery/port/service scans, TLS auditing, HTTP security-header checks, Nikto, Nuclei, ffuf content discovery, and DNS enumeration. Defensive tools include Trivy, Gitleaks, Semgrep, Syft SBOMs, YARA, ClamAV, tshark/PCAP analysis, optional tcpdump capture, Suricata offline IDS, host log search, IOC search, and Lynis hardening review.
+
+Key controls:
+
+```dotenv
+SECURITY_ALLOW_ACTIVE=true
+SECURITY_ALLOW_PUBLIC_TARGETS=false
+SECURITY_TARGET_ALLOWLIST="127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,169.254.0.0/16,::1/128,fc00::/7,fe80::/10"
+SECURITY_ALLOW_PACKET_CAPTURE=false
+```
+
+`SECURITY_TARGET_ALLOWLIST` is the enforcement boundary for active scans. Add a public CIDR/host network only when you are explicitly authorized to assess it. Packet capture is separately disabled by default.
+
+Build/start and validate:
+
+```bash
+docker compose build mcp-security
+docker compose up -d mcp-security
+node scripts/validate-catalog.mjs
+./scripts/status.sh
+```
+
+Install the updated Pi bounded-discovery configuration with:
+
+```bash
+./scripts/install-pi-bounded-config.sh ~/Projects/pi-docker
+```
+
+### Pi / WhiteRabbitNeo prompt compatibility
+
+The Pi addendum distinguishes domain knowledge from runtime execution tools so security-oriented models do not answer a request for a security-tool wishlist with Pi's internal `read`/`bash`/`mcp_*` interfaces. It also forbids inventing model provider, cutoff, or family metadata.
+
+`./scripts/install-pi-bounded-config.sh ~/Projects/pi-docker` now also attempts to patch two known native Pi prompt strings in the host checkout, while backing up every changed source file with a timestamped `.bak.*` suffix:
+
+- the generic `expert coding assistant` preamble becomes model-neutral;
+- the native `mcp_search` description advertises `security`, `system`, `google`, `playwright`, `searxng`, and `memory`.
+
+Reference replacements are stored in `pi/BASE_PREAMBLE.txt` and `pi/MCP_SEARCH_DESCRIPTION.txt`. If your Pi version generates those strings elsewhere, use the reference files to update that source manually.
+
+For the manually selected WhiteRabbitNeo security model, `pi/Modelfile.whiterabbitneo` provides the recommended 16K-context system prompt. It identifies the local role without claiming a remote provider and tells the model to distinguish security knowledge from executable runtime tools.
+
