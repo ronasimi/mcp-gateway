@@ -9,7 +9,7 @@ A local MCP stack for Pi with **bounded/semantic tool discovery**. The normal mo
 | SearXNG MCP | `127.0.0.1:8888/mcp/` | Web search |
 | Playwright MCP | `127.0.0.1:8931/mcp` | Browser navigation, snapshots, screenshots |
 | Memory MCP | `127.0.0.1:8932/mcp` | Persistent graph memory |
-| System Tools MCP | `127.0.0.1:8933/mcp` | Docker, host, network, OpenWrt, image, and document tools |
+| System Tools MCP | `127.0.0.1:8933/mcp` | Local briefing, Docker, host, network, OpenWrt, image, and document tools |
 | Google Workspace MCP | `127.0.0.1:8934/mcp` | Gmail, Calendar, and Drive account tools (optional) |
 
 Containers on the external `ai-local` network use `mcp-searxng:8888`, `mcp-gateway:8931/8932`, and `mcp-system:8933`. When enabled, Google Workspace is `mcp-google:8934`.
@@ -23,9 +23,22 @@ The catalog is optimized for semantic/lexical discovery in two layers:
 1. **Tool names and MCP descriptions** use explicit domain + action names such as `docker_container_logs`, `network_dns_lookup`, `openwrt_uci_get`, `image_resize`, and `document_extract_text`.
 2. **`searchKeywords` aliases** add likely user/model phrasing such as `docker logs`, `container error`, `router clients`, `wifi status`, `find in pdf`, `resize image`, `host memory`, and `port scan`.
 
-This keeps all 53 system-tool schemas and all 23 Google Workspace schemas out of the steady-state prompt while making them easy for a small local model to retrieve. Tool definitions also include MCP read-only/destructive/idempotent/open-world annotations where applicable.
+
+Large heterogeneous catalogs (`system`, `google`, and `security`) intentionally
+do **not** use a wildcard `searchKeywords["*"]` bucket. Broad server-wide aliases
+make every tool appear relevant to generic words such as `router` or `file`.
+Pi's bounded gate instead retrieves metadata candidates, applies per-tool alias
+reranking/family filtering, and expands schemas only for the top bounded results.
+
+This keeps all 54 system-tool schemas and all 23 Google Workspace schemas out of the steady-state prompt while making them easy for a small local model to retrieve. Tool definitions also include MCP read-only/destructive/idempotent/open-world annotations where applicable.
 
 ## System tools
+
+### London daily briefing
+
+- `local_daily_briefing`
+
+Fetches London, Ontario current weather and a seven-day forecast from Open-Meteo plus the latest CBC London RSS headlines, then returns a preformatted Markdown blockquote card with weather/news icons. It requires no API key and accepts only an optional `headline_count` from 5 to 7. Weather and news are fetched independently, so a failure in one source is shown inline while the other section still renders.
 
 ### Docker
 

@@ -6,6 +6,7 @@ import os from 'node:os';
 import http from 'node:http';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
+import { buildLondonDailyBriefing } from './local-briefing.mjs';
 
 const execFileAsync = promisify(execFile);
 const WORKSPACE = path.resolve(process.env.MCP_WORKSPACE || '/workspace');
@@ -25,6 +26,8 @@ const bool = (description) => ({ type: 'boolean', description });
 const arr = (description, items) => ({ type: 'array', description, items });
 
 const TOOLS = [
+  // Local briefing
+  { name:'local_daily_briefing', description:'London Ontario daily briefing: fetch current weather plus a 7-day Open-Meteo forecast and the latest CBC London RSS headlines, then return a polished Markdown blockquote card with weather/news icons. Use for London local weather, local news, morning briefing, daily briefing, or a combined weather-and-headlines card.', inputSchema:s('Build a Markdown daily briefing card for London, Ontario using Open-Meteo and CBC London RSS.', {headline_count:{type:'integer',description:'Number of CBC London headlines to include; default 7, minimum 5, maximum 7.',minimum:5,maximum:7}}) },
   // Docker
   { name:'docker_list_containers', description:'Docker container summary: list running containers by default with compact names, image, state, status, health, ports, networks, and Compose project/service. Use for docker ps, what containers are running, container inventory, or finding a container before logs/inspect. Set all=true only when stopped containers are also requested.', inputSchema:s('List Docker containers in a compact normalized form.', {all:bool('Include stopped containers too; default false.')}) },
   { name:'docker_inspect_container', description:'Docker container inspect: return detailed configuration, mounts, networks, health, state, environment, labels, and runtime metadata for one container by name or ID.', inputSchema:s('Inspect one Docker container.', {container:str('Container name or ID.')}, ['container']) },
@@ -101,6 +104,7 @@ const SYSTEM_MUTATING = new Set([
 ]);
 const SYSTEM_DESTRUCTIVE = new Set(['docker_remove_container','docker_remove_image']);
 const SYSTEM_OPEN_WORLD = new Set([
+  'local_daily_briefing',
   'network_dns_lookup','network_ping','network_trace_route','network_http_probe','network_port_check','network_scan_ports',
   'openwrt_status','openwrt_uci_show','openwrt_uci_get','openwrt_ubus_call','openwrt_logread','openwrt_wifi_status','openwrt_clients','openwrt_package_query','openwrt_service_action','openwrt_uci_set',
 ]);
@@ -245,6 +249,7 @@ async function extractText(file,maxChars=60000){
 
 async function callTool(name,a={}){
   switch(name){
+    case 'local_daily_briefing': return buildLondonDailyBriefing({ headlineCount: Math.max(5, Math.min(7, Number(a.headline_count ?? 7))) });
     case 'docker_list_containers': {
       const includeAll=a.all===true; const rows=await dockerReq('GET',`/containers/json?all=${includeAll?1:0}`);
       const containers=(Array.isArray(rows)?rows:[]).map(c=>({
