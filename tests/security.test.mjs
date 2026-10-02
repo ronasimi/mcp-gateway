@@ -420,6 +420,24 @@ test('network map writes DOT/SVG/HTML in the confined workspace', async () => {
 });
 
 
+test('network map prefers direct data over an invalid caller workspace input_path', async () => {
+  const api=await networkReconFixture(async(cmd,args)=>{
+    if(cmd==='dot'){const out=args[args.indexOf('-o')+1];await fs.writeFile(out,'<svg xmlns="http://www.w3.org/2000/svg"></svg>');return ok('');}
+    return {code:1,stdout:'',stderr:'fixture unavailable'};
+  });
+  try {
+    const r=await api.call('generate_graphical_network_map',{
+      data:{discovery:{cidrs:['127.0.0.0/24'],hosts:[{address:'127.0.0.2',hostname:'direct-data-host'}]}},
+      input_path:'caller-only/network_data.json',
+      output_base:'maps/direct-data-wins',
+      format:'svg'
+    });
+    assert.equal(r.host_count,1);
+    const dot=await fs.readFile(path.join(api.workspace,'maps/direct-data-wins.dot'),'utf8');
+    assert.match(dot,/direct-data-host/);
+  } finally { await api.cleanup(); }
+});
+
 test('host helper disables recursive delegation to its own Unix socket', async () => {
   const helper=await fs.readFile(path.join(root,'scripts/security-host-recon-helper.mjs'),'utf8');
   const recon=await fs.readFile(path.join(root,'scripts/security-network-recon.mjs'),'utf8');
