@@ -4,7 +4,7 @@ A local MCP stack for Pi with **bounded/semantic tool discovery**. The normal mo
 
 ## Multi-step MCP completion
 
-Pi installs a completion/evidence contract with the bounded MCP gate: each explicitly requested capability must either have a successful relevant MCP call or its own exhausted discovery before finalization. `mcp_search` results are ranked matches for one query, never a complete server catalog, so unrelated outstanding capabilities require separate searches. Unknown/not-tested fields stay unknown; network synthesis must not infer remote attachment medium, topology links, Wi-Fi security from HE/NSS/GI, or stability from a single sample.
+Pi installs a completion/evidence contract with the bounded MCP gate: each explicitly requested capability must either have a successful relevant MCP call or its own exhausted discovery before finalization. `mcp_search` results are ranked matches for one query, never a complete server catalog, so unrelated outstanding capabilities require separate searches. Unknown/not-tested fields stay unknown; network synthesis must not infer remote attachment medium, topology links, Wi-Fi security from HE/NSS/GI, or stability from a single sample. The Pi runtime additionally blocks no-progress repeats of successful read-only MCP calls and performs one hidden continuation when a small model stops with reasoning only before emitting its intended tool call/final answer.
 
 ## Services
 

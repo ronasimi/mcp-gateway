@@ -15,6 +15,8 @@ test('Pi bounded config enforces multi-step discovery completion and evidence gr
   assert.match(prompt, /## Evidence grounding/);
   assert.match(prompt, /Unknown stays unknown/i);
   assert.match(prompt, /HE\/NSS\/GI are PHY fields/i);
+  assert.match(prompt, /runtime blocks that no-progress loop/i);
+  assert.match(prompt, /emit the tool call immediately/i);
   assert.match(searchDescription, /not a server catalog/i);
   assert.match(searchDescription, /different outstanding capability/i);
   assert.match(installer, /not a server catalog/i);
