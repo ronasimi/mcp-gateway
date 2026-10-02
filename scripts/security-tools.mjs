@@ -8,6 +8,8 @@ import crypto from 'node:crypto';
 import { isIP, BlockList } from 'node:net';
 import { runStatus as execute, confinedPath, validateArguments } from './security-runtime.mjs';
 import { EXTENDED_TOOLS, createExtendedSecurity } from './security-extended.mjs';
+import { PROTOCOL_TOOLS, PROTOCOL_TOOL_NAMES, createProtocolSecurity } from './security-protocols.mjs';
+import { NETWORK_RECON_TOOLS, NETWORK_RECON_TOOL_NAMES, NETWORK_RECON_ACTIVE_TOOL_NAMES, NETWORK_RECON_WORKSPACE_WRITES, createNetworkRecon } from './security-network-recon.mjs';
 
 const WORKSPACE = path.resolve(process.env.MCP_WORKSPACE || '/workspace');
 const HOST_ROOT = path.resolve(process.env.MCP_HOST_ROOT || '/host');
@@ -28,6 +30,8 @@ const arr = (description, items, extra={}) => ({ type:'array', description, item
 
 const TOOLS = [
   ...EXTENDED_TOOLS,
+  ...PROTOCOL_TOOLS,
+  ...NETWORK_RECON_TOOLS,
   // Active / red-team assessment
   { name:'security_network_discover', description:'Authorized network discovery: find live hosts on a private or explicitly allowlisted IP/CIDR using Nmap host discovery. Use for LAN asset discovery, subnet inventory, host discovery, or identifying reachable hosts before deeper assessment. This scans the supplied target; do not substitute security_network_interfaces, which only describes the container namespace.', inputSchema:s('Discover live hosts on an authorized network target.', {target:str('Hostname, IP address, or CIDR such as 192.168.1.0/24.')}, ['target']) },
   { name:'security_port_scan', description:'Authorized TCP port scan: identify open ports on a private or explicitly allowlisted host using bounded Nmap connect scanning. Use for open ports, exposed services, attack-surface inventory, or red-team reconnaissance.', inputSchema:s('Scan TCP ports on an authorized target.', {target:str('Hostname or IP address.'), ports:str('Nmap port expression such as 22,80,443 or 1-1024; default top 1000 ports.'), timeout_seconds:num('Maximum scan duration; default 60, maximum 180.',{minimum:5,maximum:180})}, ['target']) },
@@ -58,8 +62,8 @@ const TOOLS = [
   { name:'security_host_audit', description:'Read-only host hardening audit: run Lynis against the mounted host root and return warnings, suggestions, and a compact audit summary. Use for blue-team configuration/hardening review; host filesystem is mounted read-only.', inputSchema:s('Run a bounded Lynis host hardening audit.', {timeout_seconds:num('Maximum runtime; default 180, maximum 300.',{minimum:30,maximum:300})}) },
 ];
 
-const ACTIVE = new Set(['security_network_discover','security_port_scan','security_service_detect','security_tls_audit','security_http_headers_audit','security_web_server_audit','security_vulnerability_scan','security_web_content_discover']);
-const WRITES_WORKSPACE = new Set(['security_generate_sbom','security_packet_capture','security_suricata_analyze_pcap']);
+const ACTIVE = new Set([...PROTOCOL_TOOL_NAMES,...NETWORK_RECON_ACTIVE_TOOL_NAMES,'security_network_discover','security_port_scan','security_service_detect','security_tls_audit','security_http_headers_audit','security_web_server_audit','security_vulnerability_scan','security_web_content_discover']);
+const WRITES_WORKSPACE = new Set(['security_generate_sbom','security_packet_capture','security_suricata_analyze_pcap',...NETWORK_RECON_WORKSPACE_WRITES]);
 const OPEN_WORLD = new Set([...ACTIVE,'security_dns_records']);
 for (const tool of TOOLS) {
   if (tool.annotations) continue;
@@ -72,6 +76,8 @@ for (const tool of TOOLS) {
 }
 const toolMap=new Map(TOOLS.map(t=>[t.name,t]));
 const extended = createExtendedSecurity({ runStatus, safeWorkspace, assertAuthorizedTarget, assertAuthorizedUrl });
+const protocol = createProtocolSecurity({ runStatus, assertAuthorizedTarget, requireActive, requireCapture });
+const networkRecon = createNetworkRecon({ runStatus, safeWorkspace, assertAuthorizedTarget, requireActive, requireCapture, hostRoot: HOST_ROOT });
 const extendedNames = new Set(EXTENDED_TOOLS.map(t => t.name));
 process.on('exit', () => extended.jobs.stopAll());
 for (const signal of ['SIGTERM', 'SIGINT']) process.on(signal, () => { extended.jobs.stopAll(); process.exit(0); });
@@ -84,6 +90,13 @@ function clip(value,max=MAX_OUTPUT){
 async function runStatus(cmd,args=[],opts={}){
   return execute(cmd,args,{timeout:DEFAULT_TIMEOUT,...opts});
 }
+function requireActive(){
+  if(!ALLOW_ACTIVE) throw new Error('active security tools are disabled; set SECURITY_ALLOW_ACTIVE=true');
+}
+function requireCapture(){
+  if(!ALLOW_CAPTURE) throw new Error('packet capture disabled; set SECURITY_ALLOW_PACKET_CAPTURE=true');
+}
+
 async function run(cmd,args=[],opts={}){
   const r=await runStatus(cmd,args,opts);
   if(r.code!==0) throw new Error(`${cmd} exited ${r.code}: ${clip((r.stderr||r.stdout).trim(),4000)}`);
@@ -188,6 +201,8 @@ function countBy(items,keyFn){const out={}; for(const x of items){const k=keyFn(
 
 async function callTool(name,a={}){
   if (extendedNames.has(name)) return extended.call(name,a);
+  if (PROTOCOL_TOOL_NAMES.has(name)) return protocol.call(name,a);
+  if (NETWORK_RECON_TOOL_NAMES.has(name)) return networkRecon.call(name,a);
   switch(name){
     case 'security_network_discover': {
       const target=await assertAuthorizedTarget(a.target,{allowCidr:true});
@@ -306,4 +321,4 @@ async function encodeResult(value) {
 function response(id,result){process.stdout.write(JSON.stringify({jsonrpc:'2.0',id,result})+'\n');}
 function errorResponse(id,code,message,data){process.stdout.write(JSON.stringify({jsonrpc:'2.0',id,error:{code,message,...(data?{data}:{})}})+'\n');}
 let input=''; process.stdin.setEncoding('utf8'); process.stdin.on('data',chunk=>{input+=chunk; let idx; while((idx=input.indexOf('\n'))>=0){const line=input.slice(0,idx).trim(); input=input.slice(idx+1); if(line) handle(line);}});
-async function handle(line){let msg; try{msg=JSON.parse(line);}catch{return;} if(msg.method==='notifications/initialized'||msg.method==='notifications/cancelled')return; if(msg.id==null)return; try{if(msg.method==='initialize')return response(msg.id,{protocolVersion:msg.params?.protocolVersion||'2025-06-18',capabilities:{tools:{listChanged:false}},serverInfo:{name:'local-security-tools',version:'1.1.0'}}); if(msg.method==='ping')return response(msg.id,{}); if(msg.method==='tools/list')return response(msg.id,{tools:TOOLS}); if(msg.method==='tools/call'){const name=msg.params?.name,args=msg.params?.arguments||{}; if(!toolMap.has(name))throw new Error(`unknown tool: ${name}`); try{validateArguments(toolMap.get(name).inputSchema,args); const out=await callTool(name,args); return response(msg.id,{content:[{type:'text',text:await encodeResult(out)}],isError:false});}catch(e){return response(msg.id,{content:[{type:'text',text:clip(e?.message||String(e))}],isError:true});}} return errorResponse(msg.id,-32601,`Method not found: ${msg.method}`);}catch(e){return errorResponse(msg.id,-32603,e?.message||String(e));}}
+async function handle(line){let msg; try{msg=JSON.parse(line);}catch{return;} if(msg.method==='notifications/initialized'||msg.method==='notifications/cancelled')return; if(msg.id==null)return; try{if(msg.method==='initialize')return response(msg.id,{protocolVersion:msg.params?.protocolVersion||'2025-06-18',capabilities:{tools:{listChanged:false}},serverInfo:{name:'local-security-tools',version:'1.2.0'}}); if(msg.method==='ping')return response(msg.id,{}); if(msg.method==='tools/list')return response(msg.id,{tools:TOOLS}); if(msg.method==='tools/call'){const name=msg.params?.name,args=msg.params?.arguments||{}; if(!toolMap.has(name))throw new Error(`unknown tool: ${name}`); try{validateArguments(toolMap.get(name).inputSchema,args); const out=await callTool(name,args); return response(msg.id,{content:[{type:'text',text:await encodeResult(out)}],isError:false});}catch(e){return response(msg.id,{content:[{type:'text',text:clip(e?.message||String(e))}],isError:true});}} return errorResponse(msg.id,-32601,`Method not found: ${msg.method}`);}catch(e){return errorResponse(msg.id,-32603,e?.message||String(e));}}

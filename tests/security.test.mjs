@@ -8,10 +8,44 @@ import { createInterface } from 'node:readline';
 import { fileURLToPath } from 'node:url';
 import { runStatus, confinedPath, validateArguments, JobManager } from '../scripts/security-runtime.mjs';
 import { createExtendedSecurity, EXTENDED_TOOLS } from '../scripts/security-extended.mjs';
+import { createProtocolSecurity, PROTOCOL_TOOLS } from '../scripts/security-protocols.mjs';
+import { createNetworkRecon, NETWORK_RECON_TOOLS, NETWORK_RECON_HOST_TOOL_NAMES } from '../scripts/security-network-recon.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 const ok = stdout => ({ code: 0, stdout, stderr: '' });
+
+function protocolFixture(run, { capture=true }={}) {
+  const calls=[];
+  const api=createProtocolSecurity({
+    runStatus: async (command,args,options) => { calls.push({command,args,options}); return run(command,args,options); },
+    assertAuthorizedTarget: async (target,options={}) => {
+      if (target === '127.0.0.1' || (options.allowCidr && target === '127.0.0.0/8')) return target;
+      throw new Error('unauthorized target');
+    },
+    requireActive: () => {},
+    requireCapture: () => { if(!capture) throw new Error('packet capture disabled'); },
+  });
+  return {...api,calls};
+}
+
+function networkReconFixture(run, { capture=true }={}) {
+  const calls=[];
+  return fs.mkdtemp(path.join(os.tmpdir(),'network-recon-')).then(workspace=>{
+    const api=createNetworkRecon({
+      runStatus: async (command,args,options) => { calls.push({command,args,options}); return run(command,args,options,workspace); },
+      safeWorkspace: (p,options) => confinedPath(workspace,p,options),
+      assertAuthorizedTarget: async (target,options={}) => {
+        if (target === '127.0.0.1' || target === '127.0.0.2' || (options.allowCidr && ['127.0.0.0/24','127.0.0.0/8'].includes(target))) return target;
+        throw new Error('unauthorized target');
+      },
+      requireActive: () => {},
+      requireCapture: () => { if(!capture) throw new Error('packet capture disabled'); },
+      hostRoot: path.join(workspace,'host'),
+    });
+    return {...api,calls,workspace,cleanup:()=>fs.rm(workspace,{recursive:true,force:true})};
+  });
+}
 
 async function fixture(fn, run = runStatus) {
   const workspace = await fs.mkdtemp(path.join(os.tmpdir(), 'security-test-'));
@@ -145,6 +179,205 @@ test('Firecrawl uses Markdown/JSON modes; credentials are never tool arguments',
   } finally { if(old===undefined) delete process.env.FIRECRAWL_API_URL; else process.env.FIRECRAWL_API_URL=old; }
 });
 
+
+test('protocol schemas are strict and keep dangerous behavior out of the model-facing API', () => {
+  const dns = PROTOCOL_TOOLS.find(t=>t.name==='security_dns_audit').inputSchema;
+  const lldp = PROTOCOL_TOOLS.find(t=>t.name==='security_lldp_observe').inputSchema;
+  assert.throws(()=>validateArguments(dns,{server:'127.0.0.1',domain:'example.com',command:'dig any'}));
+  assert.throws(()=>validateArguments(lldp,{interface:'eth0',duration_seconds:31}));
+  validateArguments(dns,{server:'127.0.0.1',domain:'example.com',check_axfr:false});
+});
+
+test('protocol discovery uses bounded targeted NSE scripts and parses script output', async () => {
+  const xml='<?xml version="1.0"?><nmaprun><host><ports><port><script id="dns-service-discovery" output="80/tcp http&#xa;Address: 127.0.0.1&#xa;Machine Name: fixture"/></port></ports></host></nmaprun>';
+  const api=protocolFixture(async()=>ok(xml));
+  const r=await api.call('security_mdns_discover',{target:'127.0.0.1',timeout_seconds:7});
+  assert.equal(r.scope,'target-scan'); assert.equal(r.mode,'target');
+  assert.equal(r.scripts[0].id,'dns-service-discovery'); assert.equal(r.scripts[0].fields.address,'127.0.0.1');
+  assert.ok(api.calls[0].args.includes('-sU')); assert.ok(api.calls[0].args.includes('5353')); assert.ok(api.calls[0].args.includes('dns-service-discovery'));
+  assert.ok(!api.calls[0].args.some(x=>/[;&|`$<>]/.test(x)));
+});
+
+test('broadcast protocol discovery is explicitly container scoped', async () => {
+  const xml='<?xml version="1.0"?><nmaprun><prescript><script id="broadcast-dhcp-discover" output="Server Identifier: 172.20.0.1"/></prescript></nmaprun>';
+  const api=protocolFixture(async()=>ok(xml));
+  const r=await api.call('security_dhcp_discover',{interface:'eth0'});
+  assert.equal(r.scope,'security-container-network'); assert.match(r.warning,/Docker bridge/i);
+  assert.equal(r.scripts[0].fields.server_identifier,'172.20.0.1');
+  assert.ok(api.calls[0].args.includes('broadcast-dhcp-discover')); assert.ok(api.calls[0].args.includes('-e')); assert.ok(api.calls[0].args.includes('eth0'));
+});
+
+test('DNS audit keeps target authorization, makes AXFR explicit, and reports recursion/DNSSEC evidence', async () => {
+  const api=protocolFixture(async(cmd,args)=>{
+    assert.equal(cmd,'dig'); assert.ok(args[0].startsWith('@127.0.0.1'));
+    if(args.includes('AXFR')) return ok('example.com. 3600 IN SOA ns.example.com. hostmaster.example.com. 1 1 1 1 1\nexample.com. 3600 IN SOA ns.example.com. hostmaster.example.com. 1 1 1 1 1\n');
+    if(args.includes('version.bind')) return ok('"BIND 9"\n');
+    if(args.includes('id.server')) return ok(';; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 1\n;; flags: qr ra; QUERY: 1, ANSWER: 0\n');
+    if(args.includes('+dnssec')) return ok(';; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 1\n;; flags: qr rd ra ad; QUERY: 1, ANSWER: 1\nexample.com. 300 IN RRSIG A 13 2 300 0 0 0 example.com. sig\n');
+    return ok(';; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 1\n;; flags: qr rd ra; QUERY: 1, ANSWER: 1\nexample.com. 300 IN A 127.0.0.1\n');
+  });
+  const r=await api.call('security_dns_audit',{server:'127.0.0.1',domain:'example.com',check_axfr:true});
+  assert.equal(r.response.recursion_available,true); assert.equal(r.dnssec.authenticated_data,true); assert.equal(r.dnssec.rrsig_present,true); assert.equal(r.axfr.succeeded,true);
+  assert.equal(api.calls.length,5);
+});
+
+test('passive L2/name-resolution observation respects the packet-capture gate and never starts a responder', async () => {
+  const blocked=protocolFixture(async()=>ok('[]'),{capture:false});
+  await assert.rejects(blocked.call('security_llmnr_nbns_observe',{interface:'eth0'}),/packet capture disabled/);
+  const packet=[{_source:{layers:{frame:{'frame.time_epoch':'1.0'},eth:{'eth.src':'00:11:22:33:44:55'},ip:{'ip.src':'127.0.0.1'},llmnr:{'llmnr.id':'1'}}}}];
+  const api=protocolFixture(async()=>ok(JSON.stringify(packet)));
+  const r=await api.call('security_llmnr_nbns_observe',{interface:'eth0',duration_seconds:1,max_packets:2});
+  assert.equal(r.mode,'passive-only'); assert.equal(r.packet_count,1); assert.equal(r.packets[0].source_mac,'00:11:22:33:44:55');
+  assert.equal(api.calls[0].command,'tshark'); assert.ok(api.calls[0].args.includes('llmnr || nbns')); assert.ok(!api.calls[0].args.some(x=>/responder/i.test(x)));
+});
+
+test('ARP and NDP tools preserve network-namespace scope and parse compact neighbor results', async () => {
+  const api=protocolFixture(async(cmd,args)=>{
+    if(cmd==='nmap') return ok('Host: 127.0.0.1 ()\tStatus: Up\tMAC: 00:11:22:33:44:55 (Fixture)\n');
+    if(cmd==='ip') return ok('fe80::1 dev eth0 lladdr 00:11:22:33:44:55 REACHABLE\n');
+    throw new Error('unexpected command');
+  });
+  const arp=await api.call('security_arp_discover',{target:'127.0.0.0/8'}); assert.equal(arp.count,1); assert.equal(arp.hosts[0].mac,'00:11:22:33:44:55');
+  const ndp=await api.call('security_ndp_discover',{interface:'eth0'}); assert.equal(ndp.count,1); assert.equal(ndp.neighbors[0].address,'fe80::1'); assert.equal(ndp.scope,'security-container-network');
+});
+
+test('high-level network recon schemas are strict and bounded', () => {
+  const discover=NETWORK_RECON_TOOLS.find(t=>t.name==='perform_network_discovery').inputSchema;
+  const wireless=NETWORK_RECON_TOOLS.find(t=>t.name==='analyze_wireless_environment').inputSchema;
+  validateArguments(discover,{cidrs:['127.0.0.0/24'],max_hosts:16,port_profile:'standard'});
+  assert.throws(()=>validateArguments(discover,{cidrs:['a','b','c','d','e']}));
+  assert.throws(()=>validateArguments(discover,{port_profile:'unbounded'}));
+  assert.throws(()=>validateArguments(wireless,{duration_seconds:31}));
+  assert.throws(()=>validateArguments(wireless,{interface:'wlan0',command:'airmon-ng start wlan0'}));
+});
+
+test('host interface inventory identifies Wi-Fi/default gateway without shell execution', async () => {
+  const api=await networkReconFixture(async(cmd,args)=>{
+    if(cmd==='ip'&&args[0]==='-j'&&args[1]==='addr') return ok(JSON.stringify([{ifname:'wlan0',operstate:'UP',link_type:'ether',address:'00:11:22:33:44:55',mtu:1500,addr_info:[{family:'inet',local:'127.0.0.2',prefixlen:24,scope:'global'},{family:'inet6',local:'fe80::1',prefixlen:64,scope:'link'}]}]));
+    if(cmd==='ip'&&args[0]==='-j'&&args[1]==='route') return ok(JSON.stringify([{dst:'default',gateway:'127.0.0.1',dev:'wlan0',metric:600},{dst:'127.0.0.0/24',dev:'wlan0',scope:'link',protocol:'kernel'}]));
+    if(cmd==='ip'&&args[0]==='-d') return ok('[]');
+    if(cmd==='iw'&&args.length===1) return ok('phy#0\n\tInterface wlan0\n\t\ttype managed\n');
+    if(cmd==='iw'&&args.includes('link')) return ok('Connected to aa:bb:cc:dd:ee:ff (on wlan0)\n\tSSID: FixtureWiFi\n\tfreq: 5180\n\tsignal: -45 dBm\n\ttx bitrate: 866.7 MBit/s VHT-MCS 9\n');
+    if(cmd==='ping') return ok('1 packets transmitted, 1 received');
+    if(cmd==='getent') return ok('93.184.216.34 STREAM example.com\n');
+    return {code:1,stdout:'',stderr:'fixture unavailable'};
+  });
+  try {
+    const r=await api.call('get_host_interface_info',{});
+    assert.equal(r.selected_interface,'wlan0'); assert.equal(r.connection_type,'wifi'); assert.equal(r.default_routes[0].gateway,'127.0.0.1'); assert.equal(r.internet.status,'online'); assert.equal(r.interfaces[0].link.phy,'802.11ac');
+    assert.ok(api.calls.every(c=>!['sh','bash'].includes(c.command)));
+  } finally { await api.cleanup(); }
+});
+
+test('comprehensive discovery parses OS/services while preserving bounded argv', async () => {
+  const xml='<?xml version="1.0"?><nmaprun><host><status state="up"/><address addr="127.0.0.2" addrtype="ipv4"/><address addr="00:11:22:33:44:55" addrtype="mac" vendor="Fixture"/><hostnames><hostname name="fixture.local"/></hostnames><ports><port protocol="tcp" portid="22"><state state="open"/><service name="ssh" product="OpenSSH" version="9.9"/></port><port protocol="tcp" portid="32400"><state state="open"/><service name="http" product="Plex Media Server"/></port></ports><os><osmatch name="Linux 6.x" accuracy="96"/></os></host></nmaprun>';
+  const api=await networkReconFixture(async(cmd,args)=>{
+    if(cmd==='ip'&&args[0]==='-j'&&args[1]==='addr') return ok(JSON.stringify([{ifname:'eth0',operstate:'UP',link_type:'ether',address:'00:aa:bb:cc:dd:ee',addr_info:[{family:'inet',local:'127.0.0.1',prefixlen:24}]}]));
+    if(cmd==='ip'&&args[0]==='-j'&&args[1]==='route') return ok(JSON.stringify([{dst:'127.0.0.0/24',dev:'eth0',scope:'link'}]));
+    if(cmd==='ip'&&args[0]==='-d') return ok('[]');
+    if(cmd==='iw') return ok('');
+    if(cmd==='ethtool') return ok('Speed: 1000Mb/s\nDuplex: Full\nLink detected: yes\n');
+    if(cmd==='nmap'&&args.includes('-oG')) return ok('Host: 127.0.0.2 (fixture.local)\tStatus: Up\tMAC: 00:11:22:33:44:55 (Fixture)\n');
+    if(cmd==='nmap'&&args.includes('-oX')) return ok(xml);
+    return {code:1,stdout:'',stderr:'unexpected'};
+  });
+  try {
+    const r=await api.call('perform_network_discovery',{cidrs:['127.0.0.0/24'],max_hosts:4,port_profile:'quick',resolve_names:false,include_shares:false,include_media:false});
+    assert.equal(r.processed_count,1); assert.equal(r.hosts[0].os.name,'Linux 6.x'); assert.equal(r.hosts[0].open_ports[0].port,22); assert.equal(r.hosts[0].media_services[0].port,32400);
+    const nmapCalls=api.calls.filter(c=>c.command==='nmap'); assert.ok(nmapCalls.length>=2); assert.ok(nmapCalls.every(c=>c.args.every(x=>!/[;&|`$<>]/.test(String(x)))));
+  } finally { await api.cleanup(); }
+});
+
+test('wireless analysis is passive and never enables monitor mode or deauthenticates', async () => {
+  const api=await networkReconFixture(async(cmd,args)=>{
+    if(cmd==='ip'&&args[0]==='-j'&&args[1]==='addr') return ok('[]');
+    if(cmd==='ip'&&args[0]==='-j'&&args[1]==='route') return ok('[]');
+    if(cmd==='ip'&&args[0]==='-d') return ok('[]');
+    if(cmd==='iw'&&args.length===1) return ok('phy#0\n\tInterface wlan0\n\t\ttype managed\n');
+    if(cmd==='iw'&&args.includes('link')) return ok('Connected to aa:bb:cc:dd:ee:ff (on wlan0)\n\tSSID: Fixture\n\tfreq: 2412\n\tsignal: -43 dBm\n\ttx bitrate: 144.4 MBit/s HE-MCS 7\n');
+    if(cmd==='iw'&&args.includes('info')) return ok('Interface wlan0\n\ttype managed\n\tchannel 1 (2412 MHz), width: 20 MHz\n');
+    if(cmd==='iw'&&args.includes('station')) return ok('Station aa:bb:cc:dd:ee:ff (on wlan0)\n\tsignal: -43 dBm\n\ttx bitrate: 144.4 MBit/s HE-MCS 7\n');
+    if(cmd==='nmcli') return ok('*:AA\\:BB\\:CC\\:DD\\:EE\\:FF:Fixture:1:2412:144 Mbit/s:80:WPA2\n:11\\:22\\:33\\:44\\:55\\:66:Neighbor:6:2437:72 Mbit/s:55:WPA2\n');
+    return {code:1,stdout:'',stderr:'fixture unavailable'};
+  });
+  try {
+    const r=await api.call('analyze_wireless_environment',{interface:'wlan0'});
+    assert.equal(r.current_connection.phy,'802.11ax'); assert.equal(r.nearby_access_points.length,2); assert.ok(r.channel_analysis.length>=1);
+    assert.ok(api.calls.every(c=>c.command!=='airmon-ng')); assert.ok(api.calls.every(c=>!c.args.some(x=>/deauth|monitor|set\s+type/i.test(String(x)))));
+  } finally { await api.cleanup(); }
+});
+
+test('topology analysis marks client isolation as possible only with control evidence', async () => {
+  const api=await networkReconFixture(async(cmd,args)=>{
+    if(cmd==='ip'&&args[0]==='-j'&&args[1]==='addr') return ok(JSON.stringify([{ifname:'wlan0',operstate:'UP',addr_info:[{family:'inet',local:'127.0.0.2',prefixlen:24}]}]));
+    if(cmd==='ip'&&args[0]==='-j'&&args[1]==='route') return ok(JSON.stringify([{dst:'default',gateway:'127.0.0.1',dev:'wlan0'},{dst:'127.0.0.0/24',dev:'wlan0',scope:'link'}]));
+    if(cmd==='ip'&&args[0]==='-d') return ok(JSON.stringify([{ifname:'wlan0',operstate:'UP'}]));
+    if(cmd==='iw'&&args.length===1) return ok('phy#0\n\tInterface wlan0\n\t\ttype managed\n');
+    if(cmd==='timeout'&&args.includes('avahi-browse')) return ok('=;wlan0;IPv4;Remote Service;_http._tcp;local;remote.local;192.168.50.5;80;\n');
+    if(cmd==='ping'&&args.at(-1)==='127.0.0.1') return ok('reachable');
+    if(cmd==='ping') return {code:1,stdout:'',stderr:''};
+    if(cmd==='nmap') return ok('Host: 127.0.0.2 ()\tStatus: Down\n');
+    return {code:1,stdout:'',stderr:'fixture unavailable'};
+  });
+  try {
+    const r=await api.call('analyze_network_topology',{interface:'wlan0',peer_targets:['127.0.0.2'],observe_mdns:true});
+    assert.equal(r.client_isolation_assessment.status,'possible_client_isolation_or_peer_filtering'); assert.equal(r.mdns_reflector_assessment.possible_reflector,true);
+  } finally { await api.cleanup(); }
+});
+
+test('host recon helper delegation excludes graphical map generation', async () => {
+  assert.deepEqual([...NETWORK_RECON_HOST_TOOL_NAMES].sort(), [
+    'analyze_network_topology',
+    'analyze_wireless_environment',
+    'get_host_interface_info',
+    'perform_network_discovery'
+  ]);
+  assert.equal(NETWORK_RECON_HOST_TOOL_NAMES.has('generate_graphical_network_map'), false);
+  const installer=await fs.readFile(path.join(root,'scripts/install-security-host-recon-helper.sh'),'utf8');
+  assert.match(installer,/SECURITY_HOST_RECON_STATE_DIR:-\/var\/lib\/mcp-security-host/);
+  assert.match(installer,/ProtectHome=true/);
+  assert.doesNotMatch(installer,/MCP_WORKSPACE_PATH:-\$ROOT\/data\/workspace/);
+});
+
+test('network map writes DOT/SVG/HTML in the confined workspace', async () => {
+  const api=await networkReconFixture(async(cmd,args)=>{
+    if(cmd==='dot'){const out=args[args.indexOf('-o')+1];await fs.writeFile(out,'<svg xmlns="http://www.w3.org/2000/svg"></svg>');return ok('');}
+    return {code:1,stdout:'',stderr:'fixture unavailable'};
+  });
+  try {
+    const r=await api.call('generate_graphical_network_map',{data:{interface_info:{selected_interface:'eth0',connection_type:'ethernet',default_routes:[{interface:'eth0',gateway:'127.0.0.1'}]},discovery:{cidrs:['127.0.0.0/24'],hosts:[{address:'127.0.0.2',hostname:'fixture',os:{name:'Linux'},open_ports:[{port:22,protocol:'tcp',service:'ssh'}],shares:[{type:'smb',name:'public'}]}]}},output_base:'maps/client-network',format:'both'});
+    assert.equal(r.host_count,1); assert.equal(r.outputs.svg,'maps/client-network.svg'); assert.equal(r.outputs.html,'maps/client-network.html');
+    const dot=await fs.readFile(path.join(api.workspace,'maps/client-network.dot'),'utf8'); assert.match(dot,/fixture/); assert.match(dot,/Ports: 22\/tcp ssh/); assert.match(dot,/Subnet 127\.0\.0\.0\/24/); assert.match(dot,/Recon Laptop/);
+  } finally { await api.cleanup(); }
+});
+
+
+test('host recon helper queues concurrent requests instead of rejecting them as busy', async () => {
+  const helper=await fs.readFile(path.join(root,'scripts/security-host-recon-helper.mjs'),'utf8');
+  assert.match(helper,/SECURITY_HOST_RECON_MAX_QUEUE/);
+  assert.match(helper,/async function schedule\(name,args\)/);
+  assert.match(helper,/queued>=MAX_QUEUE/);
+  assert.match(helper,/req\.url==='\/status'/);
+  assert.doesNotMatch(helper,/host recon helper is busy/);
+  assert.doesNotMatch(helper,/if\(busy\)/);
+  const recon=await fs.readFile(path.join(root,'scripts/security-network-recon.mjs'),'utf8');
+  assert.match(recon,/SECURITY_HOST_RECON_REQUIRED/);
+  assert.match(recon,/refusing to substitute the mcp-security container namespace/);
+});
+
+test('wireless reconnaissance aliases cover passive assessment and spectrum survey phrasing', async () => {
+  const adapter=JSON.parse(await fs.readFile(path.join(root,'pi/mcp-adapter.json.example'),'utf8'));
+  const sec=adapter?.mcpServers?.security || adapter?.servers?.security || adapter?.security || adapter;
+  const aliases=sec?.searchKeywords?.analyze_wireless_environment || sec?.searchAliases?.analyze_wireless_environment || [];
+  const joined=aliases.join(' ').toLowerCase();
+  assert.match(joined,/passive wireless assessment/);
+  assert.match(joined,/wireless network assessment/);
+  assert.match(joined,/spectrum survey/);
+  const containerAliases=(sec?.searchKeywords?.security_network_interfaces || []).join(' ').toLowerCase();
+  assert.doesNotMatch(containerAliases,/(^| )network interfaces( |$)/);
+  assert.match(containerAliases,/security container interfaces/);
+});
+
 test('MCP protocol validates calls, parses Nmap/ffuf, preserves large JSON and rejects target bypasses', async () => {
   const dir=await fs.mkdtemp(path.join(os.tmpdir(),'security-protocol-'));
   await fs.mkdir(path.join(dir,'bin')); await fs.mkdir(path.join(dir,'workspace'));
@@ -157,7 +390,7 @@ test('MCP protocol validates calls, parses Nmap/ffuf, preserves large JSON and r
   const rpc=(method,params)=>new Promise(resolve=>{const id=++seq;pending.set(id,resolve);child.stdin.write(JSON.stringify({jsonrpc:'2.0',id,method,params})+'\n');});
   const call=(name,args)=>rpc('tools/call',{name,arguments:args});
   try {
-    const catalog=await rpc('tools/list',{}); assert.equal(catalog.tools.length,43);
+    const catalog=await rpc('tools/list',{}); assert.equal(catalog.tools.length,65);
     const interfaceTool=catalog.tools.find(t=>t.name==='security_network_interfaces');
     assert.match(interfaceTool.description,/container.*namespace/i); assert.match(interfaceTool.description,/LAN[- ]host enumeration/i);
     const bad=await call('security_sqlmap',{}); assert.equal(bad.isError,true);

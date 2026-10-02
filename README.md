@@ -304,7 +304,7 @@ secrets/          OAuth client JSON + token-encryption key (ignored by git)
 
 `mcp-security` exposes a bounded red-team/blue-team security toolkit at `http://mcp-security:8935/mcp`. Schemas remain behind `mcp_search` (`directTools=false`). Active network/web tools are limited to private or explicitly allowlisted targets by default; typed sqlmap, Metasploit and listener operations are available alongside the scanners.
 
-Core active tools include Nmap discovery/port/service scans, TLS auditing, HTTP security-header checks, Nikto, Nuclei, ffuf content discovery, and DNS enumeration. Defensive tools include Trivy, Gitleaks, Semgrep, Syft SBOMs, YARA, ClamAV, tshark/PCAP analysis, optional tcpdump capture, Suricata offline IDS, host log search, IOC search, and Lynis hardening review.
+Core active tools include Nmap discovery/port/service scans, TLS auditing, HTTP security-header checks, Nikto, Nuclei, ffuf content discovery, DNS enumeration/auditing, and dedicated mDNS/DNS-SD, UPnP/SSDP, DHCP/DHCPv6, SNMP, SMB, NTP, LDAP, WS-Discovery, ARP and IPv6 NDP inspection. Passive LLDP, CDP and LLMNR/NBNS observation is also available when packet capture is enabled. Five high-level network-recon tools (`get_host_interface_info`, `perform_network_discovery`, `analyze_network_topology`, `analyze_wireless_environment`, `generate_graphical_network_map`) orchestrate these primitives for newly connected client networks; an optional systemd host helper gives them the laptop's real network namespace over a Unix socket without exposing another MCP TCP endpoint. See `docs/NETWORK-RECON-MCP.md`. Defensive tools include Trivy, Gitleaks, Semgrep, Syft SBOMs, YARA, ClamAV, tshark/PCAP analysis, optional tcpdump capture, Suricata offline IDS, host log search, IOC search, and Lynis hardening review.
 
 Key controls:
 
@@ -316,6 +316,14 @@ SECURITY_ALLOW_PACKET_CAPTURE=false
 ```
 
 `SECURITY_TARGET_ALLOWLIST` checks active target addresses; it is an application policy, not a network sandbox. Add a public CIDR/host network only when you are explicitly authorized to assess it. Packet capture is separately disabled by default.
+
+For real laptop Ethernet/Wi-Fi visibility while keeping `mcp-security` on the Docker bridge, install the optional Unix-socket host helper:
+
+```bash
+./scripts/install-security-host-recon-helper.sh --install-deps
+```
+
+The helper exposes only the four host-observation recon operations locally at `/run/mcp-security-host/recon.sock`; graphical map generation stays inside `mcp-security` and writes to the shared MCP workspace. See `docs/NETWORK-RECON-MCP.md` for permissions and package details.
 
 Build/start and validate:
 
@@ -351,4 +359,4 @@ For the manually selected WhiteRabbitNeo security model, `pi/Modelfile.whiterabb
 
 ## Expanded security CLI suite
 
-The security catalog now has 43 tools. See [SECURITY-SUITE.md](docs/SECURITY-SUITE.md) for the full tool mapping, Firecrawl setup, background jobs, namespace visibility, dependency versions and offline image checks.
+The security catalog now has 65 tools. See [SECURITY-SUITE.md](docs/SECURITY-SUITE.md) for the full tool mapping, Firecrawl setup, background jobs, namespace visibility, dependency versions and offline image checks.

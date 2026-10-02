@@ -14,7 +14,7 @@ const seconds = integer('Deadline in seconds; defaults vary by tool, maximum 300
 const file = text('Workspace-relative input file.');
 
 export const EXTENDED_TOOLS = [
-  tool('security_tool_status', 'Inspect installed security binaries, Firecrawl configuration status, job capacity, and container visibility without starting scans.', {}),
+  tool('security_tool_status', 'Inspect installed security binaries, host-recon helper availability, Firecrawl configuration status, job capacity, and execution visibility without starting scans.', {}),
   tool('security_firecrawl_scrape', 'Firecrawl CLI: scrape one HTTP/HTTPS URL to clean Markdown using the configured Firecrawl backend. API credentials remain server-side.', { url: text('URL to scrape.'), max_chars: integer('Maximum Markdown characters returned; default 12000.', 100, 20000) }, ['url'], { openWorldHint: true }),
   tool('security_firecrawl_map', 'Firecrawl CLI: map website URLs with JSON output and a bounded result limit using the configured backend.', { url: text('Website URL to map.'), limit: integer('Maximum discovered URLs; default 100.', 1, 500) }, ['url'], { openWorldHint: true }),
   tool('security_subdomain_enum', 'Passive Subfinder OSINT: enumerate subdomains from public sources with JSONL output, bounded runtime and rate. Does not run active DNS enumeration.', { domain: text('Domain whose subdomains are requested.'), timeout_seconds: seconds, max_results: integer('Maximum names returned; default 100.', 1, 500) }, ['domain'], { openWorldHint: true }),
@@ -37,7 +37,7 @@ export const EXTENDED_TOOLS = [
 export function createExtendedSecurity(ctx) {
   const { runStatus, safeWorkspace, assertAuthorizedTarget, assertAuthorizedUrl } = ctx;
   const jobs = new JobManager();
-  const binaries = ['nmap', 'firecrawl', 'ffuf', 'subfinder', 'searchsploit', 'sqlmap', 'msfconsole', 'nc', 'socat', 'jq', 'tshark', 'suricata', 'osqueryi', 'yara', 'r2'];
+  const binaries = ['nmap', 'dig', 'ip', 'iw', 'nmcli', 'airodump-ng', 'avahi-browse', 'dot', 'ethtool', 'firecrawl', 'ffuf', 'subfinder', 'searchsploit', 'sqlmap', 'msfconsole', 'nc', 'socat', 'jq', 'tshark', 'suricata', 'osqueryi', 'yara', 'r2'];
   const stripAnsi = s => String(s).replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '');
   function parsed(result) {
     if (result.code !== 0) throw new Error(`command failed (${result.code}): ${result.stderr.slice(0,2000) || result.stdout.slice(0,2000)}`);
@@ -85,8 +85,11 @@ export function createExtendedSecurity(ctx) {
             try { await fs.access(path.join(dir, binary), 1); installed[binary] = true; break; } catch {}
           }
         }
+        let host_recon_helper=false; const helper=process.env.SECURITY_HOST_RECON_SOCKET;
+        if(helper){try{await fs.access(helper);host_recon_helper=true;}catch{}}
         return { installed, firecrawl: { backend: process.env.FIRECRAWL_API_URL || 'https://api.firecrawl.dev', credential_configured: Boolean(process.env.FIRECRAWL_API_KEY) },
-          visibility: 'container process/network/filesystem namespace; host files mounted separately at /host', max_background_jobs: jobs.maxJobs, running_jobs: [...jobs.jobs.values()].filter(j => j.status === 'running').map(j => j.id) };
+          host_recon_helper:{configured:Boolean(helper),available:host_recon_helper,socket:helper||null},
+          visibility: host_recon_helper ? 'high-level network recon delegates through a local Unix socket to the host helper; other tools retain their documented container/target scope' : 'container process/network/filesystem namespace; host files mounted separately at /host', max_background_jobs: jobs.maxJobs, running_jobs: [...jobs.jobs.values()].filter(j => j.status === 'running').map(j => j.id) };
       }
       case 'security_firecrawl_scrape': {
         const url = await firecrawlUrl(a.url);

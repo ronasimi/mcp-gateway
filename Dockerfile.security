@@ -34,6 +34,8 @@ RUN set -eux; \
       > /etc/apt/sources.list.d/bookworm-backports.sources; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
+       aircrack-ng \
+       avahi-utils \
        binutils \
        ca-certificates \
        clamav \
@@ -41,20 +43,26 @@ RUN set -eux; \
        curl \
        dirb \
        dnsutils \
+       ethtool \
        file \
        git \
        gnupg \
+       graphviz \
        iproute2 \
        iputils-ping \
+       iw \
        jq \
        lynis \
        nikto \
        nmap \
        netcat-openbsd \
+       network-manager \
+       nfs-common \
        openssl \
        python3 \
        python3-venv \
        sslscan \
+       smbclient \
        socat \
        sqlmap \
        suricata-update \
@@ -93,12 +101,20 @@ RUN python3 -m venv /opt/semgrep \
 COPY scripts/install-security-extras.sh /opt/mcp/install-security-extras.sh
 COPY config/metasploit-release.asc /opt/mcp/metasploit-release.asc
 RUN sh /opt/mcp/install-security-extras.sh
-COPY scripts/security-tools.mjs scripts/security-runtime.mjs scripts/security-extended.mjs /opt/mcp/
+COPY scripts/security-tools.mjs scripts/security-runtime.mjs scripts/security-extended.mjs scripts/security-protocols.mjs scripts/security-network-recon.mjs /opt/mcp/
 COPY scripts/smoke-security.mjs /opt/mcp/smoke-security.mjs
 COPY security-rules/default.yar /opt/security/rules/default.yar
 RUN chmod 0755 /opt/mcp/security-tools.mjs \
     && command -v supergateway \
     && command -v nmap \
+    && command -v iw \
+    && command -v nmcli \
+    && command -v airodump-ng \
+    && command -v avahi-browse \
+    && command -v ethtool \
+    && command -v dot \
+    && command -v dig \
+    && command -v ip \
     && command -v sslscan \
     && command -v nikto \
     && command -v nuclei \

@@ -164,6 +164,8 @@ services:
       SECURITY_TIMEOUT_MS: ${SECURITY_TIMEOUT_MS:-60000}
       SECURITY_MAX_OUTPUT: ${SECURITY_MAX_OUTPUT:-10000}
       SECURITY_FFUF_WORDLIST: ${SECURITY_FFUF_WORDLIST:-/usr/share/dirb/wordlists/common.txt}
+      SECURITY_HOST_RECON_SOCKET: ${SECURITY_HOST_RECON_SOCKET:-/run/mcp-security-host/recon.sock}
+      SECURITY_HOST_RECON_REQUIRED: ${SECURITY_HOST_RECON_REQUIRED:-true}
       FIRECRAWL_API_URL: ${FIRECRAWL_API_URL:-https://api.firecrawl.dev}
       FIRECRAWL_API_KEY: ${FIRECRAWL_API_KEY:-}
       FIRECRAWL_NO_TELEMETRY: "1"
@@ -184,6 +186,12 @@ services:
         source: ${MCP_WORKSPACE_PATH:-./data/workspace}
         target: /workspace
       - ./data/security:/data/security
+      # Optional host-network recon helper socket. If the helper is not running,
+      # the four host-observation recon tools fall back to the container namespace; map rendering stays local to mcp-security.
+      - type: bind
+        source: ${SECURITY_HOST_RECON_DIR:-/run/mcp-security-host}
+        target: /run/mcp-security-host
+        read_only: true
 
     mem_limit: ${SECURITY_MCP_MEMORY:-1536m}
     cpus: ${SECURITY_MCP_CPUS:-2.0}

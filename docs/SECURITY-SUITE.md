@@ -1,6 +1,6 @@
 # Security CLI suite — 2026-10-01
 
-The security MCP now exposes **43 tools**, discovered through Pi's existing
+The security MCP now exposes **65 tools**, discovered through Pi's existing
 `mcp_search` / `mcp_call` gate. No additional native schemas are added to Pi's
 standing prompt. The new CLI dependencies are installed during image build.
 
@@ -27,6 +27,48 @@ standing prompt. The new CLI dependencies are installed during image build.
 `security_job_status`, `security_job_send`, and `security_job_stop` manage jobs.
 FFuF filtering is performed directly on JSON records, equivalent to a jq status
 filter, without an intermediate shell pipeline.
+
+
+## Protocol-specific network tools
+
+Seventeen bounded protocol tools complement generic host/port/service scanning:
+
+| Protocol | MCP tools | Behavior |
+|---|---|---|
+| mDNS / DNS-SD | `security_mdns_discover` | Targeted UDP/5353 or multicast DNS-SD enumeration |
+| UPnP / SSDP | `security_upnp_discover` | Targeted UDP/1900 or multicast device/service metadata |
+| DHCP / DHCPv6 | `security_dhcp_discover`, `security_dhcp6_discover` | DHCPINFORM or bounded broadcast/multicast option discovery; no starvation |
+| DNS | `security_dns_audit` | Recursion/DNSSEC/NSID/version checks; AXFR only when explicitly requested |
+| SNMP | `security_snmp_discover`, `security_snmp_interfaces` | Read-only system/interface enumeration; no brute force or SET |
+| SMB | `security_smb_audit`, `security_smb_shares` | Dialects/signing/OS metadata plus separate read-only share enumeration |
+| NTP | `security_ntp_discover` | Time, stratum, reference and implementation metadata |
+| LDAP | `security_ldap_discover` | Unauthenticated RootDSE capabilities/naming contexts |
+| LLDP / CDP | `security_lldp_observe`, `security_cdp_observe` | Passive bounded observation; packet-capture gate required |
+| LLMNR / NBNS | `security_llmnr_nbns_observe` | Passive-only observation; never responds or poisons |
+| WS-Discovery | `security_wsd_discover` | Targeted UDP/3702 or multicast Windows/printer/WCF discovery |
+| ARP | `security_arp_discover` | Bounded IPv4 ARP host discovery on directly connected links |
+| IPv6 NDP | `security_ndp_discover` | Read-only neighbor-cache inspection |
+
+## High-level network reconnaissance
+
+Five orchestration tools sit above the generic/protocol primitives:
+
+| MCP tool | Purpose |
+|---|---|
+| `get_host_interface_info` | Host Ethernet/Wi-Fi state, IPs, gateway, link metadata and bounded Internet check |
+| `perform_network_discovery` | Host discovery, OS/service/port enrichment, hostname resolution, SMB/NFS shares and common media services |
+| `analyze_network_topology` | Subnets, VLANs, gateways, mDNS reflector evidence and opt-in peer/client-isolation checks |
+| `analyze_wireless_environment` | Passive `iw`/`nmcli` Wi-Fi health/security/channel analysis; optional existing monitor-interface `airodump-ng` |
+| `generate_graphical_network_map` | Confined Graphviz DOT/SVG/HTML output from aggregated recon JSON |
+
+For correct laptop interface visibility while keeping the main security container isolated, run `scripts/install-security-host-recon-helper.sh`. The helper exposes only the four host-observation operations over `/run/mcp-security-host/recon.sock`; graphical map generation stays inside `mcp-security`. The Docker MCP mounts the socket read-only. If the helper is absent, the observation tools fall back to container visibility and report that scope. Full schemas, dependencies and permission details are in `docs/NETWORK-RECON-MCP.md`.
+
+Targeted probes remain subject to `SECURITY_ALLOW_ACTIVE` and the existing target
+allowlist. Broadcast/multicast/L2 operations intentionally stay inside the
+`mcp-security` network namespace; their results include an explicit scope warning
+because Docker bridge networking may not expose the host's physical LAN. No host
+network mode, host PID namespace, `SYS_ADMIN`, or privileged-container mode is
+introduced by this update.
 
 ## Build and verify
 
