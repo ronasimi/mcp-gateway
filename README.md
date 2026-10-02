@@ -2,6 +2,10 @@
 
 A local MCP stack for Pi with **bounded/semantic tool discovery**. The normal model prompt stays small: MCP tools are not exposed directly and are granted only after `mcp_search` finds a relevant capability.
 
+## Multi-step MCP completion
+
+Pi installs a completion/evidence contract with the bounded MCP gate: each explicitly requested capability must either have a successful relevant MCP call or its own exhausted discovery before finalization. `mcp_search` results are ranked matches for one query, never a complete server catalog, so unrelated outstanding capabilities require separate searches. Unknown/not-tested fields stay unknown; network synthesis must not infer remote attachment medium, topology links, Wi-Fi security from HE/NSS/GI, or stability from a single sample.
+
 ## Services
 
 | Service | Endpoint | Purpose |
