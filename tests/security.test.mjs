@@ -29,7 +29,7 @@ function protocolFixture(run, { capture=true }={}) {
   return {...api,calls};
 }
 
-function networkReconFixture(run, { capture=true }={}) {
+function networkReconFixture(run, { capture=true, physicalInterfaceExists=()=>true }={}) {
   const calls=[];
   return fs.mkdtemp(path.join(os.tmpdir(),'network-recon-')).then(workspace=>{
     const api=createNetworkRecon({
@@ -42,6 +42,7 @@ function networkReconFixture(run, { capture=true }={}) {
       requireActive: () => {},
       requireCapture: () => { if(!capture) throw new Error('packet capture disabled'); },
       hostRoot: path.join(workspace,'host'),
+      physicalInterfaceExists,
     });
     return {...api,calls,workspace,cleanup:()=>fs.rm(workspace,{recursive:true,force:true})};
   });
@@ -304,6 +305,37 @@ test('high-level recon filters virtual interfaces and routes from physical-netwo
   } finally { await api.cleanup(); }
 });
 
+
+
+test('physical interface selection requires sysfs device backing for non-Wi-Fi links', async () => {
+  const api=await networkReconFixture(async(cmd,args)=>{
+    if(cmd==='ip'&&args[0]==='-j'&&args[1]==='addr') return ok(JSON.stringify([
+      {ifname:'eth0',operstate:'UP',link_type:'ether',address:'00:aa:bb:cc:dd:ee',addr_info:[{family:'inet',local:'192.168.1.10',prefixlen:24}]},
+      {ifname:'mystery0',operstate:'UP',link_type:'ether',address:'02:11:22:33:44:55',addr_info:[{family:'inet',local:'172.31.9.1',prefixlen:24}]}
+    ]));
+    if(cmd==='ip'&&args[0]==='-j'&&args[1]==='route') return ok(JSON.stringify([
+      {dst:'default',gateway:'192.168.1.1',dev:'eth0'},
+      {dst:'192.168.1.0/24',dev:'eth0',scope:'link'},
+      {dst:'172.31.9.0/24',dev:'mystery0',scope:'link'}
+    ]));
+    if(cmd==='ip'&&args[0]==='-d') return ok(JSON.stringify([
+      {ifname:'eth0',link_type:'ether'},
+      {ifname:'mystery0',link_type:'ether'}
+    ]));
+    if(cmd==='iw') return ok('');
+    if(cmd==='ethtool') return ok('Speed: 1000Mb/s\nDuplex: Full\nLink detected: yes\n');
+    return {code:1,stdout:'',stderr:'fixture unavailable'};
+  }, { physicalInterfaceExists:name=>name==='eth0' });
+  try {
+    const r=await api.call('get_host_interface_info',{internet_check:false});
+    assert.deepEqual(r.interfaces.map(x=>x.name),['eth0']);
+    assert.equal(r.selected_interface,'eth0');
+    assert.equal(r.physical_detection,'iw-or-sysfs-device-backed');
+    assert.ok(r.ignored_virtual_interfaces.some(x=>x.name==='mystery0'&&/sysfs device backing/.test(x.reason)));
+    assert.ok(!api.calls.some(c=>c.command==='ethtool'&&c.args[0]==='mystery0'));
+  } finally { await api.cleanup(); }
+});
+
 test('comprehensive discovery parses OS/services while preserving bounded argv', async () => {
   const xml='<?xml version="1.0"?><nmaprun><host><status state="up"/><address addr="127.0.0.2" addrtype="ipv4"/><address addr="00:11:22:33:44:55" addrtype="mac" vendor="Fixture"/><hostnames><hostname name="fixture.local"/></hostnames><ports><port protocol="tcp" portid="22"><state state="open"/><service name="ssh" product="OpenSSH" version="9.9"/></port><port protocol="tcp" portid="32400"><state state="open"/><service name="http" product="Plex Media Server"/></port></ports><os><osmatch name="Linux 6.x" accuracy="96"/></os></host></nmaprun>';
   const api=await networkReconFixture(async(cmd,args)=>{
@@ -387,6 +419,55 @@ test('network map writes DOT/SVG/HTML in the confined workspace', async () => {
   } finally { await api.cleanup(); }
 });
 
+
+test('host helper disables recursive delegation to its own Unix socket', async () => {
+  const helper=await fs.readFile(path.join(root,'scripts/security-host-recon-helper.mjs'),'utf8');
+  const recon=await fs.readFile(path.join(root,'scripts/security-network-recon.mjs'),'utf8');
+  assert.match(helper,/disableHostDelegation:true/);
+  assert.match(recon,/ctx\.disableHostDelegation===true/);
+
+  const oldSocket=process.env.SECURITY_HOST_RECON_SOCKET;
+  process.env.SECURITY_HOST_RECON_SOCKET='/tmp/should-not-be-used.sock';
+  const workspace=await fs.mkdtemp(path.join(os.tmpdir(),'host-helper-direct-'));
+  const calls=[];
+  const fakeRun=async(command,args,options)=>{
+    calls.push({command,args,options});
+    if(command==='ip'&&args[0]==='-j'&&args[1]==='addr') return ok(JSON.stringify([{ifname:'eth0',operstate:'UP',link_type:'ether',address:'00:aa:bb:cc:dd:ee',addr_info:[{family:'inet',local:'192.168.1.10',prefixlen:24}]}]));
+    if(command==='ip'&&args[0]==='-j'&&args[1]==='route') return ok(JSON.stringify([{dst:'default',gateway:'192.168.1.1',dev:'eth0'}]));
+    if(command==='ip'&&args[0]==='-d') return ok(JSON.stringify([{ifname:'eth0',link_type:'ether'}]));
+    if(command==='iw') return ok('');
+    if(command==='ethtool') return ok('Speed: 1000Mb/s\nDuplex: Full\nLink detected: yes\n');
+    return {code:1,stdout:'',stderr:'fixture unavailable'};
+  };
+  const api=createNetworkRecon({
+    runStatus:fakeRun,
+    safeWorkspace:(rel,options)=>confinedPath(workspace,rel,options),
+    assertAuthorizedTarget:async t=>t,
+    requireActive:()=>{},
+    requireCapture:()=>{},
+    hostRoot:path.join(workspace,'host'),
+    physicalInterfaceExists:name=>name==='eth0',
+    disableHostDelegation:true,
+  });
+  try {
+    const oldScope=process.env.SECURITY_NETWORK_SCOPE;
+    process.env.SECURITY_NETWORK_SCOPE='host-network';
+    const r=await api.call('get_host_interface_info',{internet_check:false});
+    if(oldScope===undefined) delete process.env.SECURITY_NETWORK_SCOPE; else process.env.SECURITY_NETWORK_SCOPE=oldScope;
+    assert.equal(r.selected_interface,'eth0');
+    assert.equal(r.warning,null);
+    assert.ok(calls.some(c=>c.command==='ip'));
+  } finally {
+    if(oldSocket===undefined) delete process.env.SECURITY_HOST_RECON_SOCKET; else process.env.SECURITY_HOST_RECON_SOCKET=oldSocket;
+    await fs.rm(workspace,{recursive:true,force:true});
+  }
+});
+
+test('host helper installer restarts updated code instead of only enabling an existing service', async () => {
+  const installer=await fs.readFile(path.join(root,'scripts/install-security-host-recon-helper.sh'),'utf8');
+  assert.match(installer,/systemctl restart mcp-security-host-recon\.service/);
+  assert.doesNotMatch(installer,/enable --now mcp-security-host-recon\.service/);
+});
 
 test('host recon helper queues concurrent requests instead of rejecting them as busy', async () => {
   const helper=await fs.readFile(path.join(root,'scripts/security-host-recon-helper.mjs'),'utf8');

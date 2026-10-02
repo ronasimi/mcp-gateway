@@ -360,3 +360,8 @@ For the manually selected WhiteRabbitNeo security model, `pi/Modelfile.whiterabb
 ## Expanded security CLI suite
 
 The security catalog now has 65 tools. See [SECURITY-SUITE.md](docs/SECURITY-SUITE.md) for the full tool mapping, Firecrawl setup, background jobs, namespace visibility, dependency versions and offline image checks.
+
+
+### Physical interface provenance
+
+Physical-interface filtering now requires Linux sysfs device backing (`/sys/class/net/<iface>/device`) for non-Wi-Fi Ethernet interfaces; `iw` remains authoritative for Wi-Fi. This deliberately fails closed on ambiguous software links so automatic reconnaissance does not scan virtual/container networks.

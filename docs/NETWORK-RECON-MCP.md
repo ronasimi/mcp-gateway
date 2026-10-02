@@ -343,3 +343,8 @@ For a map, aggregate the prior results into an object such as:
 ### Host helper concurrency
 
 The host helper serializes privileged reconnaissance operations through a bounded queue instead of returning an immediate `busy` error when another scan is active. The default queue depth is 8 (`SECURITY_HOST_RECON_MAX_QUEUE`). `GET /health` and `GET /status` over the Unix socket report the active tool and queued request count. This keeps long-running Nmap discovery from causing unrelated follow-up calls to fail spuriously.
+
+
+### Physical interface provenance
+
+Physical-interface filtering now requires Linux sysfs device backing (`/sys/class/net/<iface>/device`) for non-Wi-Fi Ethernet interfaces; `iw` remains authoritative for Wi-Fi. This deliberately fails closed on ambiguous software links so automatic reconnaissance does not scan virtual/container networks.

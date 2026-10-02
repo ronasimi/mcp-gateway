@@ -76,6 +76,7 @@ export const NETWORK_RECON_ACTIVE_TOOL_NAMES = new Set(['perform_network_discove
 export const NETWORK_RECON_WORKSPACE_WRITES = new Set(['generate_graphical_network_map']);
 
 const HOST_SCOPE_WARNING = 'Full laptop/LAN visibility requires mcp-security to run with the host network namespace. Under ordinary Docker bridge networking, interfaces, routes, multicast/broadcast discovery, ARP/NDP, iw/nmcli and packet observations describe only what that namespace can see.';
+const scopeWarning = () => process.env.SECURITY_NETWORK_SCOPE === 'host-network' ? null : HOST_SCOPE_WARNING;
 const MEDIA_PORTS = [1900,32400,32410,32412,32413,32414,8008,8009,8096,8200,8443,8920];
 const SHARE_PORTS = [111,139,445,548,873,2049];
 
@@ -188,11 +189,23 @@ function extractShareMedia(host){
 }
 
 export function createNetworkRecon(ctx){
-  const { runStatus, safeWorkspace, assertAuthorizedTarget, requireActive, requireCapture, hostRoot='/host' }=ctx;
+  const { runStatus, safeWorkspace, assertAuthorizedTarget, requireActive, requireCapture, hostRoot='/host', physicalInterfaceExists }=ctx;
   if(typeof runStatus!=='function'||typeof safeWorkspace!=='function'||typeof assertAuthorizedTarget!=='function'||typeof requireActive!=='function'||typeof requireCapture!=='function')throw new Error('invalid network recon context');
   const workspaceRoot=safeWorkspace('.');
-  const delegateSocket=String(process.env.SECURITY_HOST_RECON_SOCKET||'').trim();
+  // The normal mcp-security process delegates host-scoped tools over the Unix
+  // socket. The host helper itself must explicitly disable delegation or it
+  // will recursively call its own /call endpoint and deadlock behind its
+  // serialized queue.
+  const delegateSocket=ctx.disableHostDelegation===true
+    ? ''
+    : String(process.env.SECURITY_HOST_RECON_SOCKET||'').trim();
   const requireHostHelper=/^(1|true|yes)$/i.test(String(process.env.SECURITY_HOST_RECON_REQUIRED||'false'));
+  const hasPhysicalDevice = typeof physicalInterfaceExists==='function'
+    ? physicalInterfaceExists
+    : name => {
+        try { return fs.existsSync(path.join(hostRoot,'sys/class/net',name,'device')); }
+        catch { return false; }
+      };
 
   async function delegateToHost(name,args){
     if(!delegateSocket) return null;
@@ -221,9 +234,11 @@ export function createNetworkRecon(ctx){
     if(VIRTUAL_LINK_KINDS.has(kind))return`virtual link kind: ${kind}`;
     // A real Wi-Fi interface is authoritative even though ip commonly reports link_type=ether.
     if(wifiSet.has(name))return null;
-    // For non-Wi-Fi, keep ordinary Ethernet/physical-looking devices and reject known
-    // software kinds above. This deliberately favors false negatives over scanning a
-    // virtual network when interface provenance is ambiguous.
+    // For Ethernet, require a kernel device backing under /sys/class/net/<if>/device.
+    // Name/link-kind heuristics alone are insufficient: some software interfaces present
+    // as ordinary `ether` links and can otherwise slip into the scan set. On Linux, real
+    // PCI/USB/SoC NICs have a device symlink while bridges/veth/tunnels generally do not.
+    if(!hasPhysicalDevice(name))return'no physical sysfs device backing';
     const linkType=String(record?.link_type||link?.link_type||'').toLowerCase();
     if(linkType&&linkType!=='ether'&&linkType!=='none')return`non-physical link type: ${linkType}`;
     return null;
@@ -244,7 +259,7 @@ export function createNetworkRecon(ctx){
     }
     // iw can report a physical wireless interface before it has an address. Keep it eligible.
     for(const w of wireless){if(!VIRTUAL_IFACE_NAME.test(w.interface))physicalNames.add(w.interface);}
-    return{addresses,routes,links,wireless,physicalNames,ignoredVirtualInterfaces,diagnostics:{ip_addr:clip(addrR.stderr,500),ip_route:clip(routeR.stderr,500),iw:clip(iwR.stderr,500)}};
+    return{addresses,routes,links,wireless,physicalNames,ignoredVirtualInterfaces,physical_detection:'iw-or-sysfs-device-backed',diagnostics:{ip_addr:clip(addrR.stderr,500),ip_route:clip(routeR.stderr,500),iw:clip(iwR.stderr,500)}};
   }
   function chooseInterface(state,requested){
     const req=validInterface(requested);
@@ -262,7 +277,7 @@ export function createNetworkRecon(ctx){
     }
     let internet={checked:false,status:'not_checked'};
     if(a.internet_check!==false){const [ping,dns]=await Promise.all([optional('ping',['-n','-c','1','-W','2','1.1.1.1'],{timeout:4000,maxBuffer:128*1024}),optional('getent',['ahosts','example.com'],{timeout:4000,maxBuffer:128*1024})]);const hasDefault=defaults.length>0,icmp=ping.code===0,dnsOk=dns.code===0&&Boolean(dns.stdout.trim());internet={checked:true,default_route:hasDefault,icmp_reachable:icmp,dns_resolution:dnsOk,status:(hasDefault&&(icmp||dnsOk))?'online':hasDefault?'limited':'offline'};}
-    return{scope:process.env.SECURITY_NETWORK_SCOPE||'security-container-network',warning:HOST_SCOPE_WARNING,physical_interfaces_only:true,ignored_virtual_interfaces:state.ignoredVirtualInterfaces,selected_interface:selected,connection_type:interfaces.find(x=>x.name===selected)?.type||null,interfaces,default_routes:defaults,internet,complete:true};
+    return{scope:process.env.SECURITY_NETWORK_SCOPE||'security-container-network',warning:scopeWarning(),physical_interfaces_only:true,physical_detection:state.physical_detection,ignored_virtual_interfaces:state.ignoredVirtualInterfaces,selected_interface:selected,connection_type:interfaces.find(x=>x.name===selected)?.type||null,interfaces,default_routes:defaults,internet,complete:true};
   }
   function inferredCidrs(info){
     const ifaceName=info.selected_interface,record=info.interfaces.find(x=>x.name===ifaceName),notes=[],out=[];
@@ -286,7 +301,7 @@ export function createNetworkRecon(ctx){
     const cidrs=[];for(const c of requested){const parts=String(c).split('/'),prefix=Number(parts[1]);if(parts.length!==2||isIP(parts[0])!==4||!Number.isInteger(prefix)||prefix<20||prefix>32)throw new Error(`CIDR must be IPv4 /20 or smaller network range (/20..../32): ${c}`);cidrs.push(await assertAuthorizedTarget(c,{allowCidr:true}));}
     const maxHosts=Math.max(1,Math.min(128,Number(a.max_hosts||64))),profile=a.port_profile||'standard',sec=Math.max(30,Math.min(600,Number(a.timeout_seconds||180)));if(profile==='full'&&maxHosts>16)throw new Error('full port profile is limited to max_hosts <= 16');
     const discovered=[];for(const c of cidrs){const r=await runStatus('nmap',['-sn','-n','-PR','-PE','-PS22,80,443','-PA80,443','--host-timeout','10s','-oG','-',c],{timeout:Math.min(sec*1000,180000),maxBuffer:8*1024*1024});if(r.code!==0)throw new Error(`nmap discovery failed for ${c}: ${clip(r.stderr||r.stdout,3000)}`);discovered.push(...parseGrepHosts(r.stdout).filter(h=>h.status==='Up'));}
-    const dedup=[...new Map(discovered.map(h=>[h.address,h])).values()],limited=dedup.slice(0,maxHosts),targets=limited.map(h=>h.address);if(!targets.length)return{scope:'target-scan',warning:HOST_SCOPE_WARNING,cidrs,selected_interface:info.selected_interface,discovered_count:0,hosts:[],complete:true,inference_notes:a.cidrs?.length?[]:inferred.notes};
+    const dedup=[...new Map(discovered.map(h=>[h.address,h])).values()],limited=dedup.slice(0,maxHosts),targets=limited.map(h=>h.address);if(!targets.length)return{scope:'target-scan',warning:scopeWarning(),cidrs,selected_interface:info.selected_interface,discovered_count:0,hosts:[],complete:true,inference_notes:a.cidrs?.length?[]:inferred.notes};
     const scanArgs=[profile==='full'?'-sS':'-sS','-sV','--version-light','-Pn','-n','--open','-T4','--max-retries','1','--host-timeout',`${Math.min(sec,180)}s`];if(profile==='quick')scanArgs.push('--top-ports','100');else if(profile==='standard')scanArgs.push('--top-ports','1000');else scanArgs.push('-p-');if(a.os_detection!==false)scanArgs.push('-O','--osscan-limit','--max-os-tries','1');scanArgs.push(...targets);
     let scan=await nmapXml(scanArgs,Math.min(sec*1000+30000,650000));
     // Some environments allow connect scans but not raw SYN/OS probes. Preserve useful results with a bounded fallback.
@@ -299,7 +314,7 @@ export function createNetworkRecon(ctx){
     const values=[...hosts.values()];
     if(a.resolve_names!==false){let index=0;const workers=Array.from({length:Math.min(8,values.length)},async()=>{while(index<values.length){const i=index++,h=values[i];const r=await resolveHostName(h.address,gateway,leases);if(r.name){h.hostname=r.name;h.hostname_source=r.source;}const lease=leases.get(h.address);if(!h.mac&&lease?.mac)h.mac=lease.mac;}});await Promise.all(workers);}
     const enriched=values.map(h=>{const sm=extractShareMedia(h);return{...h,...sm,open_ports:(h.ports||[]).map(p=>({port:p.port,protocol:p.protocol,service:p.service,product:p.product})),ports:undefined,scripts:undefined};});
-    return{scope:'target-scan',warning:HOST_SCOPE_WARNING,selected_interface:info.selected_interface,cidrs,inference_notes:a.cidrs?.length?[]:inferred.notes,discovered_count:dedup.length,processed_count:enriched.length,truncated_hosts:dedup.length>maxHosts,port_profile:profile,hosts:enriched,complete:scan.complete};
+    return{scope:'target-scan',warning:scopeWarning(),selected_interface:info.selected_interface,cidrs,inference_notes:a.cidrs?.length?[]:inferred.notes,discovered_count:dedup.length,processed_count:enriched.length,truncated_hosts:dedup.length>maxHosts,port_profile:profile,hosts:enriched,complete:scan.complete};
   }
   async function browseMdns(dev,seconds){
     const args=['-artp'];if(dev)args.push('-i',dev);const r=await optional('timeout',[`${seconds}s`,'avahi-browse',...args],{timeout:(seconds+2)*1000,maxBuffer:4*1024*1024}),services=[];
@@ -315,7 +330,7 @@ export function createNetworkRecon(ctx){
     const peerResults=[];for(const raw of a.peer_targets||[]){const target=await assertAuthorizedTarget(raw),same=localCidrs.some(c=>ipv4InCidr(target,c));if(!same){peerResults.push({target,same_subnet:false,classification:'not_tested',reason:'target is not in a selected-interface IPv4 subnet'});continue;}const p=await optional('ping',['-n','-c','1','-W','2',target],{timeout:4000,maxBuffer:128*1024}),arp=await optional('nmap',['-sn','-PR','-PE','-n','-e',dev,'-oG','-',target],{timeout:10000,maxBuffer:512*1024}),arpUp=parseGrepHosts(arp.stdout).some(h=>h.status==='Up');peerResults.push({target,same_subnet:true,icmp_reachable:p.code===0,arp_or_host_discovery_reachable:arpUp,reachable:p.code===0||arpUp});}
     let isolation={status:'not_tested',gateway_reachable:gatewayReachable,peers:peerResults,note:'A single station cannot prove AP/client isolation unless known-live same-subnet peer targets are supplied.'};if(peerResults.some(x=>x.same_subnet)){if(peerResults.some(x=>x.reachable))isolation.status='not_detected_for_tested_peers';else if(gatewayReachable===true)isolation.status='possible_client_isolation_or_peer_filtering';else isolation.status='inconclusive';}
     let l2={observed:false};if(a.observe_l2===true){requireCapture();if(!dev)throw new Error('interface is required for L2 observation');const r=await optional('tshark',['-n','-p','-i',dev,'-a',`duration:${sec}`,'-c','100','-Y','lldp || cdp','-T','fields','-E','separator=|','-e','frame.time_epoch','-e','eth.src','-e','lldp.chassis.id','-e','lldp.port.id','-e','cdp.deviceid','-e','cdp.portid'],{timeout:(sec+5)*1000,maxBuffer:2*1024*1024});const packets=r.stdout.split(/\r?\n/).filter(Boolean).slice(0,100).map(line=>{const f=line.split('|');return{timestamp:f[0]||null,source_mac:f[1]||null,lldp_chassis:f[2]||null,lldp_port:f[3]||null,cdp_device:f[4]||null,cdp_port:f[5]||null};});l2={observed:true,packet_count:packets.length,packets,diagnostics:clip(r.stderr,1000)};}
-    return{scope:process.env.SECURITY_NETWORK_SCOPE||'security-container-network',warning:HOST_SCOPE_WARNING,physical_interfaces_only:true,ignored_virtual_interfaces:state.ignoredVirtualInterfaces,selected_interface:dev,local_subnets:localCidrs,connected_subnets:subnets,default_routes:state.routes.filter(r=>r.dst==='default'&&r.dev&&state.physicalNames.has(r.dev)),vlans,multiple_subnets:uniq(subnets.map(x=>x.subnet)).length>1,mdns_reflector_assessment:mdns,client_isolation_assessment:isolation,l2_discovery:l2,complete:true};
+    return{scope:process.env.SECURITY_NETWORK_SCOPE||'security-container-network',warning:scopeWarning(),physical_interfaces_only:true,physical_detection:state.physical_detection,ignored_virtual_interfaces:state.ignoredVirtualInterfaces,selected_interface:dev,local_subnets:localCidrs,connected_subnets:subnets,default_routes:state.routes.filter(r=>r.dst==='default'&&r.dev&&state.physicalNames.has(r.dev)),vlans,multiple_subnets:uniq(subnets.map(x=>x.subnet)).length>1,mdns_reflector_assessment:mdns,client_isolation_assessment:isolation,l2_discovery:l2,complete:true};
   }
   async function wireless(a={}){
     const state=await networkState(),wirelessIfs=state.wireless.filter(x=>state.physicalNames.has(x.interface)),requested=validInterface(a.interface);if(requested&&!state.physicalNames.has(requested))throw new Error(`interface is virtual/non-physical or unavailable: ${requested}`);const dev=requested||wirelessIfs.find(x=>x.type==='managed')?.interface||wirelessIfs[0]?.interface;if(!dev)throw new Error('no physical Wi-Fi interface is visible; host-network mode is required for laptop wireless analysis');if(!wirelessIfs.some(x=>x.interface===dev))throw new Error(`interface is not reported by iw as physical Wi-Fi: ${dev}`);
@@ -324,7 +339,7 @@ export function createNetworkRecon(ctx){
     if(!aps.length&&a.rescan!==false){const iwscan=await optional('iw',['dev',dev,'scan'],{timeout:25000,maxBuffer:8*1024*1024});let cur=null;for(const raw of iwscan.stdout.split(/\r?\n/)){const line=raw.trim();const b=/^BSS\s+([0-9a-f:]{17})/i.exec(line);if(b){cur={bssid:b[1].toUpperCase(),ssid:null,frequency_mhz:null,channel:null,signal:null,security:null};aps.push(cur);continue;}if(!cur)continue;if(line.startsWith('SSID:'))cur.ssid=line.slice(5).trim();else if(/^freq:/.test(line)){cur.frequency_mhz=Number(line.split(':')[1].trim())||null;cur.band=freqBand(cur.frequency_mhz);}else if(/^signal:/.test(line))cur.signal=Number(line.split(':')[1].trim().split(/\s+/)[0])||null;else if(/DS Parameter set: channel/.test(line))cur.channel=Number(line.match(/channel\s+(\d+)/)?.[1])||null;else if(/^RSN:|^WPA:/.test(line))cur.security=uniq([cur.security,line.replace(':','')]).filter(Boolean).join('+');}}
     let airodump=null;if(a.use_airodump===true){requireCapture();const mon=validInterface(a.monitor_interface);if(!mon)throw new Error('monitor_interface is required when use_airodump=true; the tool will not create or alter monitor mode');const sec=Math.max(3,Math.min(30,Number(a.duration_seconds||10))),dir=await fsp.mkdtemp(path.join(os.tmpdir(),'airodump-')),prefix=path.join(dir,'capture');try{const r=await optional('timeout',['--signal=INT',`${sec}s`,'airodump-ng','--write',prefix,'--output-format','csv','--write-interval','1',mon],{timeout:(sec+5)*1000,maxBuffer:2*1024*1024});let csv='';try{csv=await fsp.readFile(prefix+'-01.csv','utf8');}catch{}airodump={interface:mon,...parseAirodumpCsv(csv),complete:[0,124,130].includes(r.code),diagnostics:clip(r.stderr,1000)};}finally{await fsp.rm(dir,{recursive:true,force:true});}}
     const phy=phyFromText(`${linkR.stdout}\n${stationR.stdout}`)||current.phy||null,channel=/channel\s+(\d+)\s+\((\d+)\s+MHz\)/i.exec(infoR.stdout),channelAnalysis=analyzeChannels(aps);
-    return{scope:process.env.SECURITY_NETWORK_SCOPE||'security-container-network',warning:HOST_SCOPE_WARNING,physical_interfaces_only:true,ignored_virtual_interfaces:state.ignoredVirtualInterfaces,interface:dev,mode,current_connection:{...current,phy,channel:channel?Number(channel[1]):null,frequency_mhz:channel?Number(channel[2]):current.frequency_mhz},nearby_access_points:aps,channel_analysis:channelAnalysis,visible_stations:stations,station_visibility_note:mode==='AP'?'AP mode can expose associated client stations supported by the driver.':'Managed/client mode normally exposes only the connected AP/peer, not every Wi-Fi client on the LAN.',airodump,complete:true};
+    return{scope:process.env.SECURITY_NETWORK_SCOPE||'security-container-network',warning:scopeWarning(),physical_interfaces_only:true,physical_detection:state.physical_detection,ignored_virtual_interfaces:state.ignoredVirtualInterfaces,interface:dev,mode,current_connection:{...current,phy,channel:channel?Number(channel[1]):null,frequency_mhz:channel?Number(channel[2]):current.frequency_mhz},nearby_access_points:aps,channel_analysis:channelAnalysis,visible_stations:stations,station_visibility_note:mode==='AP'?'AP mode can expose associated client stations supported by the driver.':'Managed/client mode normally exposes only the connected AP/peer, not every Wi-Fi client on the LAN.',airodump,complete:true};
   }
   function normalizeMapData(data){
     const discovery=data.perform_network_discovery||data.discovery||data.network_discovery||data,interfaceInfo=data.get_host_interface_info||data.interface_info||data.host_interface||{},topology=data.analyze_network_topology||data.topology||{},wirelessData=data.analyze_wireless_environment||data.wireless||{};return{discovery,interfaceInfo,topology,wireless:wirelessData};

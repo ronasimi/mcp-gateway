@@ -27,7 +27,10 @@ function requireActive(){if(!ALLOW_ACTIVE)throw new Error('active security tools
 function requireCapture(){if(!ALLOW_CAPTURE)throw new Error('packet capture disabled; set SECURITY_ALLOW_PACKET_CAPTURE=true');}
 
 await fsp.mkdir(WORKSPACE,{recursive:true,mode:0o700});
-const api=createNetworkRecon({runStatus,safeWorkspace,assertAuthorizedTarget,requireActive,requireCapture,hostRoot:'/'});
+const api=createNetworkRecon({
+  runStatus, safeWorkspace, assertAuthorizedTarget, requireActive, requireCapture,
+  hostRoot:'/', disableHostDelegation:true,
+});
 const MAX_QUEUE=Math.max(1,Math.min(16,Number(process.env.SECURITY_HOST_RECON_MAX_QUEUE||8)));
 let active=null;
 let queued=0;

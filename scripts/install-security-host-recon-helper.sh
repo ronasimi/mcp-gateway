@@ -84,7 +84,8 @@ sudo install -m 0644 "$ROOT/scripts/security-network-recon.mjs" /opt/mcp-securit
 sudo install -m 0644 "$ROOT/scripts/security-runtime.mjs" /opt/mcp-security-host/security-runtime.mjs
 sudo install -m 0644 "$tmp" "$UNIT"
 sudo systemctl daemon-reload
-sudo systemctl enable --now mcp-security-host-recon.service
+sudo systemctl enable mcp-security-host-recon.service
+sudo systemctl restart mcp-security-host-recon.service
 sudo systemctl --no-pager --full status mcp-security-host-recon.service || true
 printf '\nHost recon helper socket: /run/mcp-security-host/recon.sock\n'
 printf 'Host helper state workspace: %s\n' "$WORKSPACE"
