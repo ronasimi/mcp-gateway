@@ -269,6 +269,41 @@ test('host interface inventory identifies Wi-Fi/default gateway without shell ex
   } finally { await api.cleanup(); }
 });
 
+test('high-level recon filters virtual interfaces and routes from physical-network selection', async () => {
+  const api=await networkReconFixture(async(cmd,args)=>{
+    if(cmd==='ip'&&args[0]==='-j'&&args[1]==='addr') return ok(JSON.stringify([
+      {ifname:'wlan0',operstate:'UP',link_type:'ether',address:'00:11:22:33:44:55',mtu:1500,addr_info:[{family:'inet',local:'192.168.1.10',prefixlen:24,scope:'global'}]},
+      {ifname:'docker0',operstate:'UP',link_type:'ether',address:'02:42:aa:bb:cc:dd',mtu:1500,addr_info:[{family:'inet',local:'172.17.0.1',prefixlen:16,scope:'global'}]},
+      {ifname:'br-deadbeef',operstate:'UP',link_type:'ether',address:'02:42:11:22:33:44',mtu:1500,addr_info:[{family:'inet',local:'172.19.0.1',prefixlen:16,scope:'global'}]},
+      {ifname:'veth1234',operstate:'UP',link_type:'ether',address:'02:42:55:66:77:88',mtu:1500,addr_info:[]}
+    ]));
+    if(cmd==='ip'&&args[0]==='-j'&&args[1]==='route') return ok(JSON.stringify([
+      {dst:'default',gateway:'192.168.1.1',dev:'wlan0',metric:600},
+      {dst:'192.168.1.0/24',dev:'wlan0',scope:'link',protocol:'kernel'},
+      {dst:'172.17.0.0/16',dev:'docker0',scope:'link',protocol:'kernel'},
+      {dst:'172.19.0.0/16',dev:'br-deadbeef',scope:'link',protocol:'kernel'}
+    ]));
+    if(cmd==='ip'&&args[0]==='-d') return ok(JSON.stringify([
+      {ifname:'wlan0',operstate:'UP',link_type:'ether'},
+      {ifname:'docker0',operstate:'UP',link_type:'ether',linkinfo:{info_kind:'bridge'}},
+      {ifname:'br-deadbeef',operstate:'UP',link_type:'ether',linkinfo:{info_kind:'bridge'}},
+      {ifname:'veth1234',operstate:'UP',link_type:'ether',linkinfo:{info_kind:'veth'}}
+    ]));
+    if(cmd==='iw'&&args.length===1) return ok('phy#0\n\tInterface wlan0\n\t\ttype managed\n');
+    if(cmd==='iw'&&args.includes('link')) return ok('Connected to aa:bb:cc:dd:ee:ff (on wlan0)\n\tSSID: FixtureWiFi\n\tfreq: 5180\n\tsignal: -45 dBm\n');
+    return {code:1,stdout:'',stderr:'fixture unavailable'};
+  });
+  try {
+    const r=await api.call('get_host_interface_info',{internet_check:false});
+    assert.equal(r.physical_interfaces_only,true);
+    assert.deepEqual(r.interfaces.map(x=>x.name),['wlan0']);
+    assert.deepEqual(r.default_routes.map(x=>x.interface),['wlan0']);
+    assert.deepEqual(r.ignored_virtual_interfaces.map(x=>x.name).sort(),['br-deadbeef','docker0','veth1234']);
+    assert.ok(api.calls.every(c=>!(c.command==='ethtool'&&['docker0','br-deadbeef','veth1234'].includes(c.args[0]))));
+    await assert.rejects(api.call('get_host_interface_info',{interface:'docker0',internet_check:false}),/virtual\/non-physical/);
+  } finally { await api.cleanup(); }
+});
+
 test('comprehensive discovery parses OS/services while preserving bounded argv', async () => {
   const xml='<?xml version="1.0"?><nmaprun><host><status state="up"/><address addr="127.0.0.2" addrtype="ipv4"/><address addr="00:11:22:33:44:55" addrtype="mac" vendor="Fixture"/><hostnames><hostname name="fixture.local"/></hostnames><ports><port protocol="tcp" portid="22"><state state="open"/><service name="ssh" product="OpenSSH" version="9.9"/></port><port protocol="tcp" portid="32400"><state state="open"/><service name="http" product="Plex Media Server"/></port></ports><os><osmatch name="Linux 6.x" accuracy="96"/></os></host></nmaprun>';
   const api=await networkReconFixture(async(cmd,args)=>{
@@ -336,6 +371,7 @@ test('host recon helper delegation excludes graphical map generation', async () 
   const installer=await fs.readFile(path.join(root,'scripts/install-security-host-recon-helper.sh'),'utf8');
   assert.match(installer,/SECURITY_HOST_RECON_STATE_DIR:-\/var\/lib\/mcp-security-host/);
   assert.match(installer,/ProtectHome=true/);
+  assert.match(installer,/RuntimeDirectoryPreserve=restart/);
   assert.doesNotMatch(installer,/MCP_WORKSPACE_PATH:-\$ROOT\/data\/workspace/);
 });
 

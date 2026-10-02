@@ -53,6 +53,7 @@ Environment="SECURITY_ALLOW_PUBLIC_TARGETS=${SECURITY_ALLOW_PUBLIC_TARGETS:-fals
 Environment="SECURITY_TARGET_ALLOWLIST=${SECURITY_TARGET_ALLOWLIST:-127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,169.254.0.0/16,::1/128,fc00::/7,fe80::/10}"
 RuntimeDirectory=mcp-security-host
 RuntimeDirectoryMode=0755
+RuntimeDirectoryPreserve=restart
 StateDirectory=mcp-security-host
 StateDirectoryMode=0700
 ExecStartPre=/usr/bin/install -d -m 0700 $WORKSPACE
