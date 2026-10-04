@@ -19,6 +19,9 @@ for (const [serverName, script] of [['system', 'scripts/system-tools.mjs'], ['se
   catalogs.set(serverName, tools);
   console.log(`${serverName}: ${tools.length} tools`);
   for (const tool of tools) {
+    if (!TOOL_CATALOG[tool.name]) fail(`${serverName}.${tool.name}: missing curated entry`);
+    if (tool.name.startsWith(serverName+'_')) fail(`${serverName}.${tool.name}: redundant namespace prefix`);
+    if (tool.description.length > 550) fail(`${serverName}.${tool.name}: description exceeds budget`);
     if (!tool.description || tool.description.length < 35) fail(`${serverName}.${tool.name}: weak tool description`);
     if (!tool.inputSchema?.description) fail(`${serverName}.${tool.name}: input schema missing description`);
     if (!tool.annotations) fail(`${serverName}.${tool.name}: missing MCP tool annotations`);
@@ -41,12 +44,12 @@ for (const [name, expected] of Object.entries(TOOL_CATALOG)) {
   const meta = tool._meta?.['ai.catalog'];
   if (expected.aliases?.length && meta?.aliases?.length !== expected.aliases.length) fail(`${name}: aliases not published`);
   if (expected.overlapGroup && meta?.overlapGroup !== expected.overlapGroup) fail(`${name}: overlapGroup mismatch`);
-  if (expected.preferredFor && meta?.preferredFor !== expected.preferredFor) fail(`${name}: preferredFor mismatch`);
-  if (expected.scope && !tool.description.includes('Scope:')) fail(`${name}: scope missing from searchable description`);
-  if (expected.aliases?.length && !tool.description.includes('Search terms:')) fail(`${name}: aliases missing from searchable description`);
+  if (expected.description && meta?.preferredFor !== expected.description) fail(`${name}: preferredFor mismatch`);
+  if (!tool.description.startsWith(expected.description)) fail(`${name}: curated description missing`);
+  if (expected.aliases?.length && !tool.description.includes('Aliases:')) fail(`${name}: aliases missing from searchable description`);
 }
 
-const requiredOverlapGroups = ['network-recon','host-enumeration','system-network','openwrt','documents','images','gmail','calendar','drive'];
+const requiredOverlapGroups = ['network-recon','host-health','http','openwrt','documents','images','gmail','calendar','drive','pcap','artifact','web-content'];
 for (const group of requiredOverlapGroups) {
   const members = [...all.values()].filter((t) => t._meta?.['ai.catalog']?.overlapGroup === group);
   if (members.length < 2) fail(`overlap group ${group}: expected at least two tools`);

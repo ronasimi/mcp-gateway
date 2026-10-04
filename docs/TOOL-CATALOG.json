@@ -1,0 +1,5816 @@
+{
+  "system": [
+    {
+      "name": "local_daily_briefing",
+      "description": "London Ontario daily briefing: current weather, seven-day forecast and CBC London headlines in a Markdown card. Aliases: morning briefing; London local weather news.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for local daily briefing.",
+        "properties": {
+          "headline_count": {
+            "type": "integer",
+            "description": "Number of CBC London headlines to include; default 7, minimum 5, maximum 7.",
+            "minimum": 5,
+            "maximum": 7
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "morning briefing",
+            "London local weather news"
+          ],
+          "scope": "London Ontario daily briefing: current weather, seven-day forecast and CBC London headlines in a Markdown card.",
+          "preferredFor": "London Ontario daily briefing: current weather, seven-day forecast and CBC London headlines in a Markdown card."
+        }
+      }
+    },
+    {
+      "name": "docker_list_containers",
+      "description": "List Docker containers with names, state, health, ports and Compose service. Running containers by default. Aliases: docker ps; running containers.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for docker list containers.",
+        "properties": {
+          "all": {
+            "type": "boolean",
+            "description": "Include stopped containers too; default false."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "docker ps",
+            "running containers"
+          ],
+          "scope": "List Docker containers with names, state, health, ports and Compose service. Running containers by default.",
+          "preferredFor": "List Docker containers with names, state, health, ports and Compose service. Running containers by default."
+        }
+      }
+    },
+    {
+      "name": "docker_inspect_container",
+      "description": "Inspect one Docker container: configuration, mounts, networks, environment and health. Aliases: container details.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for docker inspect container.",
+        "properties": {
+          "container": {
+            "type": "string",
+            "description": "Container name or ID."
+          }
+        },
+        "required": [
+          "container"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "container details"
+          ],
+          "scope": "Inspect one Docker container: configuration, mounts, networks, environment and health.",
+          "preferredFor": "Inspect one Docker container: configuration, mounts, networks, environment and health."
+        }
+      }
+    },
+    {
+      "name": "docker_container_logs",
+      "description": "Read recent stdout/stderr logs from a Docker container. Aliases: container startup errors.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for docker container logs.",
+        "properties": {
+          "container": {
+            "type": "string",
+            "description": "Container name or ID."
+          },
+          "tail": {
+            "type": "number",
+            "description": "Number of log lines; default 200.",
+            "minimum": 1,
+            "maximum": 5000
+          },
+          "since": {
+            "type": "string",
+            "description": "Docker-compatible time or duration, e.g. 10m, 2h, 2026-09-30T12:00:00Z."
+          }
+        },
+        "required": [
+          "container"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "container startup errors"
+          ],
+          "scope": "Read recent stdout/stderr logs from a Docker container.",
+          "preferredFor": "Read recent stdout/stderr logs from a Docker container."
+        }
+      }
+    },
+    {
+      "name": "docker_container_stats",
+      "description": "Measure one Docker container\u2019s CPU, memory, network and disk I/O. Aliases: container resource usage.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for docker container stats.",
+        "properties": {
+          "container": {
+            "type": "string",
+            "description": "Container name or ID."
+          }
+        },
+        "required": [
+          "container"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "container resource usage"
+          ],
+          "scope": "Measure one Docker container\u2019s CPU, memory, network and disk I/O.",
+          "preferredFor": "Measure one Docker container\u2019s CPU, memory, network and disk I/O."
+        }
+      }
+    },
+    {
+      "name": "docker_list_images",
+      "description": "List local Docker images, tags, IDs and sizes. Aliases: docker image inventory.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for docker list images.",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "docker image inventory"
+          ],
+          "scope": "List local Docker images, tags, IDs and sizes.",
+          "preferredFor": "List local Docker images, tags, IDs and sizes."
+        }
+      }
+    },
+    {
+      "name": "docker_inspect_image",
+      "description": "Inspect a Docker image\u2019s architecture, layers, entrypoint and labels. Aliases: image configuration.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for docker inspect image.",
+        "properties": {
+          "image": {
+            "type": "string",
+            "description": "Image name, tag, digest, or ID."
+          }
+        },
+        "required": [
+          "image"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "image configuration"
+          ],
+          "scope": "Inspect a Docker image\u2019s architecture, layers, entrypoint and labels.",
+          "preferredFor": "Inspect a Docker image\u2019s architecture, layers, entrypoint and labels."
+        }
+      }
+    },
+    {
+      "name": "docker_list_networks",
+      "description": "List Docker virtual networks and their drivers. Aliases: container network inventory.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for docker list networks.",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "container network inventory"
+          ],
+          "scope": "List Docker virtual networks and their drivers.",
+          "preferredFor": "List Docker virtual networks and their drivers."
+        }
+      }
+    },
+    {
+      "name": "docker_inspect_network",
+      "description": "Inspect one Docker network: IPAM subnets, attached containers and options. Aliases: docker bridge attachments.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for docker inspect network.",
+        "properties": {
+          "network": {
+            "type": "string",
+            "description": "Docker network name or ID."
+          }
+        },
+        "required": [
+          "network"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "docker bridge attachments"
+          ],
+          "scope": "Inspect one Docker network: IPAM subnets, attached containers and options.",
+          "preferredFor": "Inspect one Docker network: IPAM subnets, attached containers and options."
+        }
+      }
+    },
+    {
+      "name": "docker_list_volumes",
+      "description": "List Docker named volumes and storage drivers. Aliases: persistent container storage.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for docker list volumes.",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "persistent container storage"
+          ],
+          "scope": "List Docker named volumes and storage drivers.",
+          "preferredFor": "List Docker named volumes and storage drivers."
+        }
+      }
+    },
+    {
+      "name": "docker_inspect_volume",
+      "description": "Inspect one Docker volume\u2019s mountpoint, driver and labels. Aliases: volume location.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for docker inspect volume.",
+        "properties": {
+          "volume": {
+            "type": "string",
+            "description": "Docker volume name."
+          }
+        },
+        "required": [
+          "volume"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "volume location"
+          ],
+          "scope": "Inspect one Docker volume\u2019s mountpoint, driver and labels.",
+          "preferredFor": "Inspect one Docker volume\u2019s mountpoint, driver and labels."
+        }
+      }
+    },
+    {
+      "name": "docker_exec",
+      "description": "Execute a bounded command inside a named Docker container. Requires DOCKER_ALLOW_EXEC=true. Aliases: container command.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for docker exec.",
+        "properties": {
+          "container": {
+            "type": "string",
+            "description": "Container name or ID."
+          },
+          "command": {
+            "type": "string",
+            "description": "Command string executed with /bin/sh -lc."
+          },
+          "timeout": {
+            "type": "number",
+            "description": "Timeout seconds; default 30.",
+            "minimum": 1,
+            "maximum": 300
+          }
+        },
+        "required": [
+          "container",
+          "command"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "container command"
+          ],
+          "scope": "Execute a bounded command inside a named Docker container. Requires DOCKER_ALLOW_EXEC=true.",
+          "preferredFor": "Execute a bounded command inside a named Docker container. Requires DOCKER_ALLOW_EXEC=true."
+        }
+      }
+    },
+    {
+      "name": "docker_container_action",
+      "description": "Start, stop, restart, pause, unpause or kill a Docker container. Requires DOCKER_ALLOW_WRITE=true. Aliases: container lifecycle.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for docker container action.",
+        "properties": {
+          "container": {
+            "type": "string",
+            "description": "Container name or ID."
+          },
+          "action": {
+            "type": "string",
+            "description": "Lifecycle action.",
+            "enum": [
+              "start",
+              "stop",
+              "restart",
+              "pause",
+              "unpause",
+              "kill"
+            ]
+          },
+          "timeout": {
+            "type": "number",
+            "description": "Stop/restart timeout seconds.",
+            "minimum": 0,
+            "maximum": 300
+          }
+        },
+        "required": [
+          "container",
+          "action"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "container lifecycle"
+          ],
+          "scope": "Start, stop, restart, pause, unpause or kill a Docker container. Requires DOCKER_ALLOW_WRITE=true.",
+          "preferredFor": "Start, stop, restart, pause, unpause or kill a Docker container. Requires DOCKER_ALLOW_WRITE=true."
+        }
+      }
+    },
+    {
+      "name": "docker_remove_container",
+      "description": "Delete a Docker container, optionally forced. Requires DOCKER_ALLOW_WRITE=true. Aliases: remove stopped container.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for docker remove container.",
+        "properties": {
+          "container": {
+            "type": "string",
+            "description": "Container name or ID."
+          },
+          "force": {
+            "type": "boolean",
+            "description": "Force removal of a running container."
+          }
+        },
+        "required": [
+          "container"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "remove stopped container"
+          ],
+          "scope": "Delete a Docker container, optionally forced. Requires DOCKER_ALLOW_WRITE=true.",
+          "preferredFor": "Delete a Docker container, optionally forced. Requires DOCKER_ALLOW_WRITE=true."
+        }
+      }
+    },
+    {
+      "name": "docker_remove_image",
+      "description": "Delete a local Docker image by name or ID. Requires DOCKER_ALLOW_WRITE=true. Aliases: remove image tag.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for docker remove image.",
+        "properties": {
+          "image": {
+            "type": "string",
+            "description": "Image name, tag, digest, or ID."
+          },
+          "force": {
+            "type": "boolean",
+            "description": "Force removal."
+          }
+        },
+        "required": [
+          "image"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "remove image tag"
+          ],
+          "scope": "Delete a local Docker image by name or ID. Requires DOCKER_ALLOW_WRITE=true.",
+          "preferredFor": "Delete a local Docker image by name or ID. Requires DOCKER_ALLOW_WRITE=true."
+        }
+      }
+    },
+    {
+      "name": "host_snapshot",
+      "description": "Summarize mounted-host health: OS, uptime, CPU load, memory and disk capacity. Aliases: host health overview.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for host snapshot.",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "host health overview"
+          ],
+          "scope": "Summarize mounted-host health: OS, uptime, CPU load, memory and disk capacity.",
+          "preferredFor": "Summarize mounted-host health: OS, uptime, CPU load, memory and disk capacity.",
+          "overlapGroup": "host-health"
+        }
+      }
+    },
+    {
+      "name": "host_cpu_info",
+      "description": "Read mounted-host CPU model, features, load and per-CPU counters. Aliases: processor capabilities.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for host cpu info.",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "processor capabilities"
+          ],
+          "scope": "Read mounted-host CPU model, features, load and per-CPU counters.",
+          "preferredFor": "Read mounted-host CPU model, features, load and per-CPU counters.",
+          "overlapGroup": "host-health"
+        }
+      }
+    },
+    {
+      "name": "host_memory_info",
+      "description": "Read mounted-host memory, cache, swap and commit accounting. Aliases: RAM pressure.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for host memory info.",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "RAM pressure"
+          ],
+          "scope": "Read mounted-host memory, cache, swap and commit accounting.",
+          "preferredFor": "Read mounted-host memory, cache, swap and commit accounting.",
+          "overlapGroup": "host-health"
+        }
+      }
+    },
+    {
+      "name": "host_processes",
+      "description": "List mounted-host processes, sorted by memory, CPU, PID or name. Aliases: process inventory.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for host processes.",
+        "properties": {
+          "limit": {
+            "type": "number",
+            "description": "Maximum processes returned; default 80.",
+            "minimum": 1,
+            "maximum": 500
+          },
+          "sort_by": {
+            "type": "string",
+            "description": "Sort key.",
+            "enum": [
+              "rss",
+              "cpu",
+              "pid",
+              "name"
+            ]
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "process inventory"
+          ],
+          "scope": "List mounted-host processes, sorted by memory, CPU, PID or name.",
+          "preferredFor": "List mounted-host processes, sorted by memory, CPU, PID or name."
+        }
+      }
+    },
+    {
+      "name": "host_process_info",
+      "description": "Inspect one mounted-host PID: status, command, threads, limits and file count. Aliases: process details.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for host process info.",
+        "properties": {
+          "pid": {
+            "type": "number",
+            "description": "Host PID.",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "pid"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "process details"
+          ],
+          "scope": "Inspect one mounted-host PID: status, command, threads, limits and file count.",
+          "preferredFor": "Inspect one mounted-host PID: status, command, threads, limits and file count."
+        }
+      }
+    },
+    {
+      "name": "host_disk_usage",
+      "description": "Report capacity, used and free space for the mounted host filesystem. Aliases: disk full.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for host disk usage.",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "disk full"
+          ],
+          "scope": "Report capacity, used and free space for the mounted host filesystem.",
+          "preferredFor": "Report capacity, used and free space for the mounted host filesystem.",
+          "overlapGroup": "host-health"
+        }
+      }
+    },
+    {
+      "name": "host_read_file",
+      "description": "Read a bounded diagnostic text file under mounted-host /etc, /proc, /sys, /var/log or /run. Aliases: host config file.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for host read file.",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Absolute host path such as /etc/os-release or /proc/loadavg."
+          },
+          "max_bytes": {
+            "type": "number",
+            "description": "Maximum bytes to read; default 32768.",
+            "minimum": 1,
+            "maximum": 131072
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "host config file"
+          ],
+          "scope": "Read a bounded diagnostic text file under mounted-host /etc, /proc, /sys, /var/log or /run.",
+          "preferredFor": "Read a bounded diagnostic text file under mounted-host /etc, /proc, /sys, /var/log or /run."
+        }
+      }
+    },
+    {
+      "name": "network_dns_lookup",
+      "description": "Query one or multiple DNS record types, including PTR and CAA. Returns records grouped by type. Aliases: DNS records; mail policy TXT MX; reverse lookup.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for network dns lookup.",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Hostname, domain, or reverse-DNS name."
+          },
+          "type": {
+            "type": "string",
+            "description": "Single record type; default A. Use types for multiple records.",
+            "enum": [
+              "A",
+              "AAAA",
+              "CNAME",
+              "MX",
+              "TXT",
+              "NS",
+              "SOA",
+              "PTR",
+              "CAA"
+            ]
+          },
+          "types": {
+            "type": "array",
+            "description": "Record types to query together; mutually exclusive with type.",
+            "items": {
+              "type": "string",
+              "description": "DNS record type.",
+              "enum": [
+                "A",
+                "AAAA",
+                "CNAME",
+                "MX",
+                "TXT",
+                "NS",
+                "SOA",
+                "PTR",
+                "CAA"
+              ]
+            }
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "DNS records",
+            "mail policy TXT MX",
+            "reverse lookup"
+          ],
+          "scope": "Query one or multiple DNS record types, including PTR and CAA. Returns records grouped by type.",
+          "preferredFor": "Query one or multiple DNS record types, including PTR and CAA. Returns records grouped by type."
+        }
+      }
+    },
+    {
+      "name": "network_ping",
+      "description": "Measure ICMP reachability, loss and latency to a supplied host from the System container. Aliases: ping latency.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for network ping.",
+        "properties": {
+          "host": {
+            "type": "string",
+            "description": "Hostname or IP address."
+          },
+          "count": {
+            "type": "number",
+            "description": "Packets; default 4.",
+            "minimum": 1,
+            "maximum": 20
+          },
+          "timeout": {
+            "type": "number",
+            "description": "Per-packet timeout seconds; default 2.",
+            "minimum": 1,
+            "maximum": 10
+          }
+        },
+        "required": [
+          "host"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "ping latency"
+          ],
+          "scope": "Measure ICMP reachability, loss and latency to a supplied host from the System container.",
+          "preferredFor": "Measure ICMP reachability, loss and latency to a supplied host from the System container."
+        }
+      }
+    },
+    {
+      "name": "network_trace_route",
+      "description": "Trace routed hops to a supplied host from the System container. Aliases: traceroute path.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for network trace route.",
+        "properties": {
+          "host": {
+            "type": "string",
+            "description": "Hostname or IP address."
+          },
+          "max_hops": {
+            "type": "number",
+            "description": "Maximum hops; default 20.",
+            "minimum": 1,
+            "maximum": 64
+          }
+        },
+        "required": [
+          "host"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "traceroute path"
+          ],
+          "scope": "Trace routed hops to a supplied host from the System container.",
+          "preferredFor": "Trace routed hops to a supplied host from the System container."
+        }
+      }
+    },
+    {
+      "name": "network_http_probe",
+      "description": "Fetch HTTP status, raw headers, redirects, timing and optional body from a URL using curl. Aliases: HTTP connectivity; response timing.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for network http probe.",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "http:// or https:// URL."
+          },
+          "method": {
+            "type": "string",
+            "description": "HTTP method.",
+            "enum": [
+              "GET",
+              "HEAD"
+            ]
+          },
+          "body": {
+            "type": "boolean",
+            "description": "Include a bounded response body for GET."
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "HTTP connectivity",
+            "response timing"
+          ],
+          "scope": "Fetch HTTP status, raw headers, redirects, timing and optional body from a URL using curl.",
+          "preferredFor": "Fetch HTTP status, raw headers, redirects, timing and optional body from a URL using curl.",
+          "overlapGroup": "http"
+        }
+      }
+    },
+    {
+      "name": "network_port_check",
+      "description": "Check whether a single TCP port accepts a connection from the System container. Aliases: TCP connection test.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for network port check.",
+        "properties": {
+          "host": {
+            "type": "string",
+            "description": "Hostname or IP."
+          },
+          "port": {
+            "type": "number",
+            "description": "TCP port.",
+            "minimum": 1,
+            "maximum": 65535
+          },
+          "timeout": {
+            "type": "number",
+            "description": "Timeout seconds; default 3.",
+            "minimum": 1,
+            "maximum": 30
+          }
+        },
+        "required": [
+          "host",
+          "port"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "TCP connection test"
+          ],
+          "scope": "Check whether a single TCP port accepts a connection from the System container.",
+          "preferredFor": "Check whether a single TCP port accepts a connection from the System container."
+        }
+      }
+    },
+    {
+      "name": "openwrt_targets",
+      "description": "List configured OpenWrt SSH target aliases. Start here when the router target is unknown. Aliases: configured routers; SSH aliases.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for openwrt targets.",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "configured routers",
+            "SSH aliases"
+          ],
+          "scope": "List configured OpenWrt SSH target aliases. Start here when the router target is unknown.",
+          "preferredFor": "List configured OpenWrt SSH target aliases. Start here when the router target is unknown.",
+          "overlapGroup": "openwrt"
+        }
+      }
+    },
+    {
+      "name": "openwrt_status",
+      "description": "Read OpenWrt router status: board, uptime, memory, routes and interface state from a known SSH target. Aliases: OpenWrt router health.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for openwrt status.",
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "Configured SSH alias returned by openwrt_targets."
+          }
+        },
+        "required": [
+          "target"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "OpenWrt router health"
+          ],
+          "scope": "Read OpenWrt router status: board, uptime, memory, routes and interface state from a known SSH target.",
+          "preferredFor": "Read OpenWrt router status: board, uptime, memory, routes and interface state from a known SSH target.",
+          "overlapGroup": "openwrt"
+        }
+      }
+    },
+    {
+      "name": "openwrt_uci_show",
+      "description": "Read an OpenWrt UCI package or all UCI configuration from a known SSH target. Aliases: router config sections.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for openwrt uci show.",
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "Configured SSH alias returned by openwrt_targets."
+          },
+          "package": {
+            "type": "string",
+            "description": "Optional UCI package name such as network, wireless, firewall, dhcp, system."
+          }
+        },
+        "required": [
+          "target"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "router config sections"
+          ],
+          "scope": "Read an OpenWrt UCI package or all UCI configuration from a known SSH target.",
+          "preferredFor": "Read an OpenWrt UCI package or all UCI configuration from a known SSH target.",
+          "overlapGroup": "openwrt"
+        }
+      }
+    },
+    {
+      "name": "openwrt_uci_get",
+      "description": "Read one OpenWrt UCI key from a known SSH target. Aliases: router config value.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for openwrt uci get.",
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "Configured SSH alias returned by openwrt_targets."
+          },
+          "key": {
+            "type": "string",
+            "description": "UCI key."
+          }
+        },
+        "required": [
+          "target",
+          "key"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "router config value"
+          ],
+          "scope": "Read one OpenWrt UCI key from a known SSH target.",
+          "preferredFor": "Read one OpenWrt UCI key from a known SSH target.",
+          "overlapGroup": "openwrt"
+        }
+      }
+    },
+    {
+      "name": "openwrt_ubus_call",
+      "description": "Call an OpenWrt ubus object/method on a known SSH target. Aliases: router ubus RPC.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for openwrt ubus call.",
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "Configured SSH alias returned by openwrt_targets."
+          },
+          "object": {
+            "type": "string",
+            "description": "ubus object."
+          },
+          "method": {
+            "type": "string",
+            "description": "ubus method."
+          },
+          "args": {
+            "type": "string",
+            "description": "JSON object string; default {}."
+          }
+        },
+        "required": [
+          "target",
+          "object",
+          "method"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "router ubus RPC"
+          ],
+          "scope": "Call an OpenWrt ubus object/method on a known SSH target.",
+          "preferredFor": "Call an OpenWrt ubus object/method on a known SSH target.",
+          "overlapGroup": "openwrt"
+        }
+      }
+    },
+    {
+      "name": "openwrt_logread",
+      "description": "Read recent OpenWrt system log lines from a known SSH target. Aliases: router logs.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for openwrt logread.",
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "Configured SSH alias returned by openwrt_targets."
+          },
+          "lines": {
+            "type": "number",
+            "description": "Recent lines; default 200.",
+            "minimum": 1,
+            "maximum": 3000
+          },
+          "filter": {
+            "type": "string",
+            "description": "Optional grep text."
+          }
+        },
+        "required": [
+          "target"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "router logs"
+          ],
+          "scope": "Read recent OpenWrt system log lines from a known SSH target.",
+          "preferredFor": "Read recent OpenWrt system log lines from a known SSH target.",
+          "overlapGroup": "openwrt"
+        }
+      }
+    },
+    {
+      "name": "openwrt_wifi_status",
+      "description": "Read OpenWrt radio, SSID and associated-station metrics from a known SSH target. Aliases: router radio metrics.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for openwrt wifi status.",
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "Configured SSH alias returned by openwrt_targets."
+          }
+        },
+        "required": [
+          "target"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "router radio metrics"
+          ],
+          "scope": "Read OpenWrt radio, SSID and associated-station metrics from a known SSH target.",
+          "preferredFor": "Read OpenWrt radio, SSID and associated-station metrics from a known SSH target.",
+          "overlapGroup": "openwrt"
+        }
+      }
+    },
+    {
+      "name": "openwrt_clients",
+      "description": "Read DHCP leases, neighbors and associated stations from a known OpenWrt SSH target. Aliases: OpenWrt connected clients.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for openwrt clients.",
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "Configured SSH alias returned by openwrt_targets."
+          }
+        },
+        "required": [
+          "target"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "OpenWrt connected clients"
+          ],
+          "scope": "Read DHCP leases, neighbors and associated stations from a known OpenWrt SSH target.",
+          "preferredFor": "Read DHCP leases, neighbors and associated stations from a known OpenWrt SSH target.",
+          "overlapGroup": "openwrt"
+        }
+      }
+    },
+    {
+      "name": "openwrt_package_query",
+      "description": "List installed or available packages on a known OpenWrt SSH target. Aliases: router opkg packages.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for openwrt package query.",
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "Configured SSH alias returned by openwrt_targets."
+          },
+          "mode": {
+            "type": "string",
+            "description": "Query mode.",
+            "enum": [
+              "installed",
+              "search"
+            ]
+          },
+          "query": {
+            "type": "string",
+            "description": "Optional case-insensitive package filter."
+          }
+        },
+        "required": [
+          "target",
+          "mode"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "router opkg packages"
+          ],
+          "scope": "List installed or available packages on a known OpenWrt SSH target.",
+          "preferredFor": "List installed or available packages on a known OpenWrt SSH target.",
+          "overlapGroup": "openwrt"
+        }
+      }
+    },
+    {
+      "name": "openwrt_service_action",
+      "description": "Control an OpenWrt service on a known SSH target. Requires OPENWRT_ALLOW_WRITE=true. Aliases: restart router service.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for openwrt service action.",
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "Configured SSH alias returned by openwrt_targets."
+          },
+          "service": {
+            "type": "string",
+            "description": "Init script/service name."
+          },
+          "action": {
+            "type": "string",
+            "description": "Service action.",
+            "enum": [
+              "start",
+              "stop",
+              "restart",
+              "reload",
+              "enable",
+              "disable"
+            ]
+          }
+        },
+        "required": [
+          "target",
+          "service",
+          "action"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "restart router service"
+          ],
+          "scope": "Control an OpenWrt service on a known SSH target. Requires OPENWRT_ALLOW_WRITE=true.",
+          "preferredFor": "Control an OpenWrt service on a known SSH target. Requires OPENWRT_ALLOW_WRITE=true.",
+          "overlapGroup": "openwrt"
+        }
+      }
+    },
+    {
+      "name": "openwrt_uci_set",
+      "description": "Set and optionally commit an OpenWrt UCI key on a known SSH target. Requires OPENWRT_ALLOW_WRITE=true. Aliases: change router setting.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for openwrt uci set.",
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "Configured SSH alias returned by openwrt_targets."
+          },
+          "key": {
+            "type": "string",
+            "description": "UCI key."
+          },
+          "value": {
+            "type": "string",
+            "description": "New value."
+          },
+          "commit": {
+            "type": "boolean",
+            "description": "Commit the containing UCI package after setting."
+          }
+        },
+        "required": [
+          "target",
+          "key",
+          "value"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "change router setting"
+          ],
+          "scope": "Set and optionally commit an OpenWrt UCI key on a known SSH target. Requires OPENWRT_ALLOW_WRITE=true.",
+          "preferredFor": "Set and optionally commit an OpenWrt UCI key on a known SSH target. Requires OPENWRT_ALLOW_WRITE=true.",
+          "overlapGroup": "openwrt"
+        }
+      }
+    },
+    {
+      "name": "image_list",
+      "description": "List workspace images, optionally recursively. Aliases: list image files.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for image list.",
+        "properties": {
+          "directory": {
+            "type": "string",
+            "description": "Workspace-relative directory; default ."
+          },
+          "recursive": {
+            "type": "boolean",
+            "description": "Recurse into subdirectories."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "list image files"
+          ],
+          "scope": "List workspace images, optionally recursively.",
+          "preferredFor": "List workspace images, optionally recursively.",
+          "overlapGroup": "images"
+        }
+      }
+    },
+    {
+      "name": "image_info",
+      "description": "Inspect image format, dimensions, color space, alpha and frames. Aliases: pixel geometry.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for image info.",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Workspace-relative image path."
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "pixel geometry"
+          ],
+          "scope": "Inspect image format, dimensions, color space, alpha and frames.",
+          "preferredFor": "Inspect image format, dimensions, color space, alpha and frames.",
+          "overlapGroup": "images"
+        }
+      }
+    },
+    {
+      "name": "image_metadata",
+      "description": "Read embedded EXIF, XMP and ICC metadata, camera details and GPS tags. Aliases: photo metadata.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for image metadata.",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Workspace-relative image path."
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "photo metadata"
+          ],
+          "scope": "Read embedded EXIF, XMP and ICC metadata, camera details and GPS tags.",
+          "preferredFor": "Read embedded EXIF, XMP and ICC metadata, camera details and GPS tags.",
+          "overlapGroup": "images"
+        }
+      }
+    },
+    {
+      "name": "image_resize",
+      "description": "Resize an image or create a proportional thumbnail. Thumbnail mode defaults to shrinking only. Aliases: image thumbnail; scale image.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for image resize.",
+        "properties": {
+          "input": {
+            "type": "string",
+            "description": "Workspace-relative input image."
+          },
+          "output": {
+            "type": "string",
+            "description": "Workspace-relative output image."
+          },
+          "geometry": {
+            "type": "string",
+            "description": "Resize geometry, e.g. 1024x1024, 1920x1080>, 50%. Required in resize mode."
+          },
+          "mode": {
+            "type": "string",
+            "description": "Processing mode; default resize.",
+            "enum": [
+              "resize",
+              "thumbnail"
+            ]
+          },
+          "width": {
+            "type": "number",
+            "description": "Thumbnail maximum width.",
+            "minimum": 1
+          },
+          "height": {
+            "type": "number",
+            "description": "Thumbnail maximum height.",
+            "minimum": 1
+          },
+          "enlarge": {
+            "type": "boolean",
+            "description": "Allow thumbnail enlargement; default false."
+          }
+        },
+        "required": [
+          "input",
+          "output"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "image thumbnail",
+            "scale image"
+          ],
+          "scope": "Resize an image or create a proportional thumbnail. Thumbnail mode defaults to shrinking only.",
+          "preferredFor": "Resize an image or create a proportional thumbnail. Thumbnail mode defaults to shrinking only.",
+          "overlapGroup": "images"
+        }
+      }
+    },
+    {
+      "name": "image_crop",
+      "description": "Crop a rectangular region from a workspace image and write a new image. Aliases: extract image region.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for image crop.",
+        "properties": {
+          "input": {
+            "type": "string",
+            "description": "Workspace-relative input image."
+          },
+          "output": {
+            "type": "string",
+            "description": "Workspace-relative output image."
+          },
+          "width": {
+            "type": "number",
+            "description": "Crop width pixels.",
+            "minimum": 1
+          },
+          "height": {
+            "type": "number",
+            "description": "Crop height pixels.",
+            "minimum": 1
+          },
+          "x": {
+            "type": "number",
+            "description": "Left offset pixels.",
+            "minimum": 0
+          },
+          "y": {
+            "type": "number",
+            "description": "Top offset pixels.",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "input",
+          "output",
+          "width",
+          "height",
+          "x",
+          "y"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "extract image region"
+          ],
+          "scope": "Crop a rectangular region from a workspace image and write a new image.",
+          "preferredFor": "Crop a rectangular region from a workspace image and write a new image.",
+          "overlapGroup": "images"
+        }
+      }
+    },
+    {
+      "name": "image_convert",
+      "description": "Encode a workspace image in another format with optional quality control. Aliases: image format conversion.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for image convert.",
+        "properties": {
+          "input": {
+            "type": "string",
+            "description": "Workspace-relative input image."
+          },
+          "output": {
+            "type": "string",
+            "description": "Workspace-relative output image."
+          },
+          "quality": {
+            "type": "number",
+            "description": "Optional quality 1-100 for lossy formats.",
+            "minimum": 1,
+            "maximum": 100
+          }
+        },
+        "required": [
+          "input",
+          "output"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "image format conversion"
+          ],
+          "scope": "Encode a workspace image in another format with optional quality control.",
+          "preferredFor": "Encode a workspace image in another format with optional quality control.",
+          "overlapGroup": "images"
+        }
+      }
+    },
+    {
+      "name": "image_compare",
+      "description": "Compare two images using RMSE and optionally write a difference image. Aliases: pixel difference.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for image compare.",
+        "properties": {
+          "left": {
+            "type": "string",
+            "description": "First workspace-relative image."
+          },
+          "right": {
+            "type": "string",
+            "description": "Second workspace-relative image."
+          },
+          "diff_output": {
+            "type": "string",
+            "description": "Optional workspace-relative diff image path."
+          }
+        },
+        "required": [
+          "left",
+          "right"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "pixel difference"
+          ],
+          "scope": "Compare two images using RMSE and optionally write a difference image.",
+          "preferredFor": "Compare two images using RMSE and optionally write a difference image.",
+          "overlapGroup": "images"
+        }
+      }
+    },
+    {
+      "name": "document_list",
+      "description": "List workspace documents, optionally including subdirectories. Aliases: find document files.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for document list.",
+        "properties": {
+          "directory": {
+            "type": "string",
+            "description": "Workspace-relative directory; default ."
+          },
+          "recursive": {
+            "type": "boolean",
+            "description": "Recurse into subdirectories."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "find document files"
+          ],
+          "scope": "List workspace documents, optionally including subdirectories.",
+          "preferredFor": "List workspace documents, optionally including subdirectories.",
+          "overlapGroup": "documents"
+        }
+      }
+    },
+    {
+      "name": "document_info",
+      "description": "Inspect document format, file size and PDF metadata/page count. Aliases: document properties.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for document info.",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Workspace-relative document path."
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "document properties"
+          ],
+          "scope": "Inspect document format, file size and PDF metadata/page count.",
+          "preferredFor": "Inspect document format, file size and PDF metadata/page count.",
+          "overlapGroup": "documents"
+        }
+      }
+    },
+    {
+      "name": "document_extract_text",
+      "description": "Extract readable text from a workspace document for reading or summarization. Aliases: read PDF DOCX text.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for document extract text.",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Workspace-relative document path."
+          },
+          "max_chars": {
+            "type": "number",
+            "description": "Maximum characters returned; default 60000.",
+            "minimum": 100,
+            "maximum": 200000
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "read PDF DOCX text"
+          ],
+          "scope": "Extract readable text from a workspace document for reading or summarization.",
+          "preferredFor": "Extract readable text from a workspace document for reading or summarization.",
+          "overlapGroup": "documents"
+        }
+      }
+    },
+    {
+      "name": "document_search_text",
+      "description": "Search document text for a phrase or regex and return matching context. Aliases: search inside document.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for document search text.",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Workspace-relative document path."
+          },
+          "query": {
+            "type": "string",
+            "description": "Search text or regular expression."
+          },
+          "regex": {
+            "type": "boolean",
+            "description": "Treat query as a regular expression."
+          },
+          "context": {
+            "type": "number",
+            "description": "Context lines around each match; default 2.",
+            "minimum": 0,
+            "maximum": 10
+          },
+          "max_matches": {
+            "type": "number",
+            "description": "Maximum matches; default 50.",
+            "minimum": 1,
+            "maximum": 200
+          }
+        },
+        "required": [
+          "path",
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "search inside document"
+          ],
+          "scope": "Search document text for a phrase or regex and return matching context.",
+          "preferredFor": "Search document text for a phrase or regex and return matching context.",
+          "overlapGroup": "documents"
+        }
+      }
+    },
+    {
+      "name": "document_convert",
+      "description": "Convert a document with Pandoc and write the requested output format. Aliases: document format conversion.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for document convert.",
+        "properties": {
+          "input": {
+            "type": "string",
+            "description": "Workspace-relative input file."
+          },
+          "output": {
+            "type": "string",
+            "description": "Workspace-relative output file."
+          },
+          "to": {
+            "type": "string",
+            "description": "Optional pandoc output format override, e.g. markdown, plain, html, docx, epub."
+          }
+        },
+        "required": [
+          "input",
+          "output"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "document format conversion"
+          ],
+          "scope": "Convert a document with Pandoc and write the requested output format.",
+          "preferredFor": "Convert a document with Pandoc and write the requested output format.",
+          "overlapGroup": "documents"
+        }
+      }
+    },
+    {
+      "name": "document_render_pdf_page",
+      "description": "Render one PDF page to a PNG image at a chosen resolution. Aliases: PDF page preview.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for document render pdf page.",
+        "properties": {
+          "input": {
+            "type": "string",
+            "description": "Workspace-relative PDF path."
+          },
+          "page": {
+            "type": "number",
+            "description": "1-based page number.",
+            "minimum": 1
+          },
+          "output": {
+            "type": "string",
+            "description": "Workspace-relative PNG output path."
+          },
+          "dpi": {
+            "type": "number",
+            "description": "Render DPI; default 144.",
+            "minimum": 36,
+            "maximum": 600
+          }
+        },
+        "required": [
+          "input",
+          "page",
+          "output"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "PDF page preview"
+          ],
+          "scope": "Render one PDF page to a PNG image at a chosen resolution.",
+          "preferredFor": "Render one PDF page to a PNG image at a chosen resolution.",
+          "overlapGroup": "documents"
+        }
+      }
+    }
+  ],
+  "security": [
+    {
+      "name": "status",
+      "description": "Check installed executables, host-helper availability, Firecrawl configuration and background-job capacity. Aliases: backend availability.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for status.",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "backend availability"
+          ],
+          "scope": "Check installed executables, host-helper availability, Firecrawl configuration and background-job capacity.",
+          "preferredFor": "Check installed executables, host-helper availability, Firecrawl configuration and background-job capacity."
+        }
+      }
+    },
+    {
+      "name": "firecrawl_scrape",
+      "description": "Fetch one web page as clean Markdown through the configured Firecrawl backend; credentials stay server-side. Aliases: website readable content.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for firecrawl scrape.",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "URL to scrape."
+          },
+          "max_chars": {
+            "type": "integer",
+            "description": "Maximum Markdown characters returned; default 12000.",
+            "minimum": 100,
+            "maximum": 20000
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "website readable content"
+          ],
+          "scope": "Fetch one web page as clean Markdown through the configured Firecrawl backend; credentials stay server-side.",
+          "preferredFor": "Fetch one web page as clean Markdown through the configured Firecrawl backend; credentials stay server-side.",
+          "overlapGroup": "web-content"
+        }
+      }
+    },
+    {
+      "name": "firecrawl_map",
+      "description": "Enumerate website URLs through the configured Firecrawl backend. Aliases: website URL inventory.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for firecrawl map.",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Website URL to map."
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum discovered URLs; default 100.",
+            "minimum": 1,
+            "maximum": 500
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "website URL inventory"
+          ],
+          "scope": "Enumerate website URLs through the configured Firecrawl backend.",
+          "preferredFor": "Enumerate website URLs through the configured Firecrawl backend.",
+          "overlapGroup": "web-content"
+        }
+      }
+    },
+    {
+      "name": "subdomain_enum",
+      "description": "Find subdomains in public sources with passive Subfinder OSINT. Aliases: passive subdomains.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for subdomain enum.",
+        "properties": {
+          "domain": {
+            "type": "string",
+            "description": "Domain whose subdomains are requested."
+          },
+          "timeout_seconds": {
+            "type": "integer",
+            "description": "Deadline in seconds; defaults vary by tool, maximum 300.",
+            "minimum": 5,
+            "maximum": 300
+          },
+          "max_results": {
+            "type": "integer",
+            "description": "Maximum names returned; default 100.",
+            "minimum": 1,
+            "maximum": 500
+          }
+        },
+        "required": [
+          "domain"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "passive subdomains"
+          ],
+          "scope": "Find subdomains in public sources with passive Subfinder OSINT.",
+          "preferredFor": "Find subdomains in public sources with passive Subfinder OSINT."
+        }
+      }
+    },
+    {
+      "name": "exploit_search",
+      "description": "Search the local Exploit-DB catalogue by CVE or service version; returns references only. Aliases: Searchsploit lookup.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for exploit search.",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Search words, service version or CVE.",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum records returned; default 20.",
+            "minimum": 1,
+            "maximum": 100
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "Searchsploit lookup"
+          ],
+          "scope": "Search the local Exploit-DB catalogue by CVE or service version; returns references only.",
+          "preferredFor": "Search the local Exploit-DB catalogue by CVE or service version; returns references only."
+        }
+      }
+    },
+    {
+      "name": "exploit_source",
+      "description": "Read an Exploit-DB source excerpt by EDB ID for analysis. Aliases: review exploit code.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for exploit source.",
+        "properties": {
+          "edb_id": {
+            "type": "integer",
+            "description": "Numeric Exploit-DB ID.",
+            "minimum": 1,
+            "maximum": 999999
+          },
+          "start_line": {
+            "type": "integer",
+            "description": "First source line, one-based; default 1.",
+            "minimum": 1,
+            "maximum": 100000
+          },
+          "max_lines": {
+            "type": "integer",
+            "description": "Maximum source lines returned; default 120.",
+            "minimum": 1,
+            "maximum": 300
+          }
+        },
+        "required": [
+          "edb_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "review exploit code"
+          ],
+          "scope": "Read an Exploit-DB source excerpt by EDB ID for analysis.",
+          "preferredFor": "Read an Exploit-DB source excerpt by EDB ID for analysis."
+        }
+      }
+    },
+    {
+      "name": "sqlmap",
+      "description": "Run bounded SQL-injection detection or explicitly requested database-name enumeration on an authorized URL. Aliases: sqlmap injection test.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for sqlmap.",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Authorized URL including the parameter to test."
+          },
+          "parameter": {
+            "type": "string",
+            "description": "Specific GET/POST parameter name, if known.",
+            "maxLength": 100
+          },
+          "data": {
+            "type": "string",
+            "description": "Optional URL-encoded POST body.",
+            "maxLength": 4096
+          },
+          "action": {
+            "type": "string",
+            "description": "Default detect; database names require enumerate_databases.",
+            "enum": [
+              "detect",
+              "current_database",
+              "enumerate_databases"
+            ]
+          },
+          "timeout_seconds": {
+            "type": "integer",
+            "description": "Deadline in seconds; defaults vary by tool, maximum 300.",
+            "minimum": 5,
+            "maximum": 300
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "sqlmap injection test"
+          ],
+          "scope": "Run bounded SQL-injection detection or explicitly requested database-name enumeration on an authorized URL.",
+          "preferredFor": "Run bounded SQL-injection detection or explicitly requested database-name enumeration on an authorized URL."
+        }
+      }
+    },
+    {
+      "name": "metasploit_info",
+      "description": "Inspect a Metasploit module\u2019s help and options. Aliases: msfconsole module details.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for metasploit info.",
+        "properties": {
+          "module": {
+            "type": "string",
+            "description": "Full auxiliary/scanner/... or exploit/... module path."
+          }
+        },
+        "required": [
+          "module"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "msfconsole module details"
+          ],
+          "scope": "Inspect a Metasploit module\u2019s help and options.",
+          "preferredFor": "Inspect a Metasploit module\u2019s help and options."
+        }
+      }
+    },
+    {
+      "name": "metasploit_run",
+      "description": "Check or run a Metasploit module on one authorized target. Returns a background job ID for job_status. Aliases: Metasploit module execution.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for metasploit run.",
+        "properties": {
+          "module": {
+            "type": "string",
+            "description": "Full auxiliary/scanner/... or exploit/... module path."
+          },
+          "target": {
+            "type": "string",
+            "description": "One authorized target IP or hostname, never a range."
+          },
+          "action": {
+            "type": "string",
+            "description": "Default check. run explicitly launches the module.",
+            "enum": [
+              "check",
+              "run"
+            ]
+          },
+          "options": {
+            "type": "object",
+            "description": "Module settings such as RPORT, TARGETURI, PAYLOAD, LHOST or LPORT; RHOST/RHOSTS are supplied from target.",
+            "additionalProperties": {
+              "type": "string",
+              "description": "Single console-safe setting value.",
+              "maxLength": 512
+            }
+          },
+          "timeout_seconds": {
+            "type": "integer",
+            "description": "Deadline in seconds; defaults vary by tool, maximum 300.",
+            "minimum": 5,
+            "maximum": 300
+          }
+        },
+        "required": [
+          "module",
+          "target"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "Metasploit module execution"
+          ],
+          "scope": "Check or run a Metasploit module on one authorized target. Returns a background job ID for job_status.",
+          "preferredFor": "Check or run a Metasploit module on one authorized target. Returns a background job ID for job_status."
+        }
+      }
+    },
+    {
+      "name": "listener_start",
+      "description": "Start a bounded Netcat or Socat callback listener on a published container port. Returns a background job ID. Aliases: TCP callback listener.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for listener start.",
+        "properties": {
+          "engine": {
+            "type": "string",
+            "description": "Listener implementation; default nc.",
+            "enum": [
+              "nc",
+              "socat"
+            ]
+          },
+          "port": {
+            "type": "integer",
+            "description": "Published container port, 4444 through 4453.",
+            "minimum": 4444,
+            "maximum": 4453
+          },
+          "timeout_seconds": {
+            "type": "integer",
+            "description": "Deadline in seconds; defaults vary by tool, maximum 300.",
+            "minimum": 5,
+            "maximum": 300
+          }
+        },
+        "required": [
+          "port"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "TCP callback listener"
+          ],
+          "scope": "Start a bounded Netcat or Socat callback listener on a published container port. Returns a background job ID.",
+          "preferredFor": "Start a bounded Netcat or Socat callback listener on a published container port. Returns a background job ID."
+        }
+      }
+    },
+    {
+      "name": "job_status",
+      "description": "Read a background job\u2019s status and output page; continue using next_offset. Aliases: poll job output.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for job status.",
+        "properties": {
+          "job_id": {
+            "type": "string",
+            "description": "ID returned by a background tool."
+          },
+          "offset": {
+            "type": "integer",
+            "description": "Absolute output byte offset; default 0.",
+            "minimum": 0,
+            "maximum": 2147483647
+          },
+          "max_bytes": {
+            "type": "integer",
+            "description": "Maximum output bytes; default 8000.",
+            "minimum": 128,
+            "maximum": 12000
+          }
+        },
+        "required": [
+          "job_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "poll job output"
+          ],
+          "scope": "Read a background job\u2019s status and output page; continue using next_offset.",
+          "preferredFor": "Read a background job\u2019s status and output page; continue using next_offset."
+        }
+      }
+    },
+    {
+      "name": "job_send",
+      "description": "Send text to an existing interactive listener job. Aliases: write listener input.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for job send.",
+        "properties": {
+          "job_id": {
+            "type": "string",
+            "description": "Listener job ID."
+          },
+          "input": {
+            "type": "string",
+            "description": "Text to send, including any required newline.",
+            "maxLength": 4096
+          }
+        },
+        "required": [
+          "job_id",
+          "input"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "write listener input"
+          ],
+          "scope": "Send text to an existing interactive listener job.",
+          "preferredFor": "Send text to an existing interactive listener job."
+        }
+      }
+    },
+    {
+      "name": "job_stop",
+      "description": "Stop a background job and its child processes. Aliases: cancel running job.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for job stop.",
+        "properties": {
+          "job_id": {
+            "type": "string",
+            "description": "ID returned by a background tool."
+          }
+        },
+        "required": [
+          "job_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "cancel running job"
+          ],
+          "scope": "Stop a background job and its child processes.",
+          "preferredFor": "Stop a background job and its child processes."
+        }
+      }
+    },
+    {
+      "name": "jq",
+      "description": "Filter a workspace JSON or JSONL file with a bounded jq expression. Aliases: JSON query.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for jq.",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Workspace-relative input file."
+          },
+          "filter": {
+            "type": "string",
+            "description": "jq expression; default .",
+            "maxLength": 4096
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum output JSON records; default 100.",
+            "minimum": 1,
+            "maximum": 500
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "JSON query"
+          ],
+          "scope": "Filter a workspace JSON or JSONL file with a bounded jq expression.",
+          "preferredFor": "Filter a workspace JSON or JSONL file with a bounded jq expression."
+        }
+      }
+    },
+    {
+      "name": "pcap_analyze",
+      "description": "Analyze a saved PCAP with Tshark: protocol hierarchy, endpoint conversations or selected packet fields. Aliases: analyze PCAP; top talkers; packet field extraction.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for pcap analyze.",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Workspace-relative input file."
+          },
+          "view": {
+            "type": "string",
+            "description": "Analysis view; default summary.",
+            "enum": [
+              "summary",
+              "conversations",
+              "fields"
+            ]
+          },
+          "protocol": {
+            "type": "string",
+            "description": "Conversation type; default ip.",
+            "enum": [
+              "ip",
+              "ipv6",
+              "tcp",
+              "udp"
+            ]
+          },
+          "display_filter": {
+            "type": "string",
+            "description": "Wireshark display filter such as dns or tcp.flags.syn == 1.",
+            "maxLength": 1000
+          },
+          "fields": {
+            "type": "array",
+            "description": "Fields to extract; default timestamp, source, destination, ports and protocol.",
+            "items": {
+              "type": "string",
+              "description": "Tshark field such as ip.src or dns.qry.name."
+            },
+            "minItems": 1,
+            "maxItems": 16
+          },
+          "packet_limit": {
+            "type": "integer",
+            "description": "Maximum packets to examine, before display filtering; default 1000.",
+            "minimum": 1,
+            "maximum": 20000
+          },
+          "max_rows": {
+            "type": "integer",
+            "description": "Maximum matching rows returned; default 100.",
+            "minimum": 1,
+            "maximum": 300
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "analyze PCAP",
+            "top talkers",
+            "packet field extraction"
+          ],
+          "scope": "Analyze a saved PCAP with Tshark: protocol hierarchy, endpoint conversations or selected packet fields.",
+          "preferredFor": "Analyze a saved PCAP with Tshark: protocol hierarchy, endpoint conversations or selected packet fields.",
+          "overlapGroup": "pcap"
+        }
+      }
+    },
+    {
+      "name": "suricata_test_rules",
+      "description": "Validate Suricata rules and optionally replay only those rules against a saved PCAP with hit statistics. Aliases: IDS rule testing.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for suricata test rules.",
+        "properties": {
+          "rules": {
+            "type": "string",
+            "description": "Workspace-relative .rules file."
+          },
+          "pcap": {
+            "type": "string",
+            "description": "Optional workspace-relative PCAP/PCAPNG."
+          },
+          "max_alerts": {
+            "type": "integer",
+            "description": "Maximum alert records returned; default 100.",
+            "minimum": 1,
+            "maximum": 300
+          }
+        },
+        "required": [
+          "rules"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "IDS rule testing"
+          ],
+          "scope": "Validate Suricata rules and optionally replay only those rules against a saved PCAP with hit statistics.",
+          "preferredFor": "Validate Suricata rules and optionally replay only those rules against a saved PCAP with hit statistics.",
+          "overlapGroup": "pcap"
+        }
+      }
+    },
+    {
+      "name": "osquery",
+      "description": "Run a read-only SQL query through osqueryi inside the Security container. Aliases: container osquery SQL.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for osquery.",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "SQL, e.g. SELECT * FROM listening_ports;",
+            "maxLength": 8192
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum rows returned; default 100.",
+            "minimum": 1,
+            "maximum": 500
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "container osquery SQL"
+          ],
+          "scope": "Run a read-only SQL query through osqueryi inside the Security container.",
+          "preferredFor": "Run a read-only SQL query through osqueryi inside the Security container."
+        }
+      }
+    },
+    {
+      "name": "binary_analyze",
+      "description": "Inspect binary metadata, imports, exports, section strings, functions or disassembly using sandboxed Radare2. Aliases: binary structure analysis.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for binary analyze.",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Workspace-relative input file."
+          },
+          "operation": {
+            "type": "string",
+            "description": "Analysis operation; default info.",
+            "enum": [
+              "info",
+              "imports",
+              "exports",
+              "strings",
+              "functions",
+              "disassemble"
+            ]
+          },
+          "address": {
+            "type": "string",
+            "description": "Disassembly virtual address as decimal or 0x hex; default entry0."
+          },
+          "count": {
+            "type": "integer",
+            "description": "Maximum disassembly instructions; default 64.",
+            "minimum": 1,
+            "maximum": 256
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "binary structure analysis"
+          ],
+          "scope": "Inspect binary metadata, imports, exports, section strings, functions or disassembly using sandboxed Radare2.",
+          "preferredFor": "Inspect binary metadata, imports, exports, section strings, functions or disassembly using sandboxed Radare2.",
+          "overlapGroup": "artifact"
+        }
+      }
+    },
+    {
+      "name": "mdns_discover",
+      "description": "Probe mDNS/DNS-SD services on a specified target, or multicast within the Security-container namespace. Aliases: Zeroconf service TXT.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for mdns discover.",
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "Authorized private/allowlisted hostname or IP address."
+          },
+          "interface": {
+            "type": "string",
+            "description": "Optional interface visible inside the mcp-security container, such as eth0.",
+            "maxLength": 64
+          },
+          "timeout_seconds": {
+            "type": "integer",
+            "description": "Maximum protocol probe duration in seconds; default 15, maximum 60.",
+            "minimum": 3,
+            "maximum": 60
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "Zeroconf service TXT"
+          ],
+          "scope": "Probe mDNS/DNS-SD services on a specified target, or multicast within the Security-container namespace.",
+          "preferredFor": "Probe mDNS/DNS-SD services on a specified target, or multicast within the Security-container namespace."
+        }
+      }
+    },
+    {
+      "name": "upnp_discover",
+      "description": "Probe a target for UPnP/SSDP device metadata, or multicast within the Security-container namespace. Aliases: UPnP product description.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for upnp discover.",
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "Authorized private/allowlisted hostname or IP address."
+          },
+          "interface": {
+            "type": "string",
+            "description": "Optional interface visible inside the mcp-security container, such as eth0.",
+            "maxLength": 64
+          },
+          "timeout_seconds": {
+            "type": "integer",
+            "description": "Maximum protocol probe duration in seconds; default 15, maximum 60.",
+            "minimum": 3,
+            "maximum": 60
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "UPnP product description"
+          ],
+          "scope": "Probe a target for UPnP/SSDP device metadata, or multicast within the Security-container namespace.",
+          "preferredFor": "Probe a target for UPnP/SSDP device metadata, or multicast within the Security-container namespace."
+        }
+      }
+    },
+    {
+      "name": "dhcp_discover",
+      "description": "Read DHCP options using target DHCPINFORM, or broadcast within the Security-container namespace. Aliases: DHCP server options.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for dhcp discover.",
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "Authorized private/allowlisted hostname or IP address."
+          },
+          "interface": {
+            "type": "string",
+            "description": "Optional interface visible inside the mcp-security container, such as eth0.",
+            "maxLength": 64
+          },
+          "timeout_seconds": {
+            "type": "integer",
+            "description": "Maximum protocol probe duration in seconds; default 15, maximum 60.",
+            "minimum": 3,
+            "maximum": 60
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "DHCP server options"
+          ],
+          "scope": "Read DHCP options using target DHCPINFORM, or broadcast within the Security-container namespace.",
+          "preferredFor": "Read DHCP options using target DHCPINFORM, or broadcast within the Security-container namespace."
+        }
+      }
+    },
+    {
+      "name": "dhcp6_discover",
+      "description": "Read DHCPv6 advertisements by multicast within the Security-container namespace. Aliases: DHCPv6 options.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for dhcp6 discover.",
+        "properties": {
+          "interface": {
+            "type": "string",
+            "description": "Optional interface visible inside the mcp-security container, such as eth0.",
+            "maxLength": 64
+          },
+          "timeout_seconds": {
+            "type": "integer",
+            "description": "Maximum protocol probe duration in seconds; default 15, maximum 60.",
+            "minimum": 3,
+            "maximum": 60
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "DHCPv6 options"
+          ],
+          "scope": "Read DHCPv6 advertisements by multicast within the Security-container namespace.",
+          "preferredFor": "Read DHCPv6 advertisements by multicast within the Security-container namespace."
+        }
+      }
+    },
+    {
+      "name": "dns_audit",
+      "description": "Audit an authorized DNS server\u2019s recursion, DNSSEC, NSID and optional AXFR zone-transfer behavior. Aliases: DNS server posture.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for dns audit.",
+        "properties": {
+          "server": {
+            "type": "string",
+            "description": "Authorized private/allowlisted hostname or IP address."
+          },
+          "domain": {
+            "type": "string",
+            "description": "Domain to query and, if requested, use for the AXFR check."
+          },
+          "check_axfr": {
+            "type": "boolean",
+            "description": "Attempt one AXFR request; default false."
+          },
+          "timeout_seconds": {
+            "type": "integer",
+            "description": "Maximum protocol probe duration in seconds; default 15, maximum 60.",
+            "minimum": 3,
+            "maximum": 60
+          }
+        },
+        "required": [
+          "server",
+          "domain"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "DNS server posture"
+          ],
+          "scope": "Audit an authorized DNS server\u2019s recursion, DNSSEC, NSID and optional AXFR zone-transfer behavior.",
+          "preferredFor": "Audit an authorized DNS server\u2019s recursion, DNSSEC, NSID and optional AXFR zone-transfer behavior."
+        }
+      }
+    },
+    {
+      "name": "snmp_discover",
+      "description": "Read SNMP system identification from an authorized target using bounded probes. Aliases: SNMP system metadata.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for snmp discover.",
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "Authorized private/allowlisted hostname or IP address."
+          },
+          "port": {
+            "type": "integer",
+            "description": "SNMP UDP port; default 161.",
+            "minimum": 1,
+            "maximum": 65535
+          },
+          "timeout_seconds": {
+            "type": "integer",
+            "description": "Maximum protocol probe duration in seconds; default 15, maximum 60.",
+            "minimum": 3,
+            "maximum": 60
+          }
+        },
+        "required": [
+          "target"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "SNMP system metadata"
+          ],
+          "scope": "Read SNMP system identification from an authorized target using bounded probes.",
+          "preferredFor": "Read SNMP system identification from an authorized target using bounded probes."
+        }
+      }
+    },
+    {
+      "name": "snmp_interfaces",
+      "description": "Read interface addresses and link metadata exposed by an authorized SNMP target. Aliases: SNMP interface table.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for snmp interfaces.",
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "Authorized private/allowlisted hostname or IP address."
+          },
+          "port": {
+            "type": "integer",
+            "description": "SNMP UDP port; default 161.",
+            "minimum": 1,
+            "maximum": 65535
+          },
+          "timeout_seconds": {
+            "type": "integer",
+            "description": "Maximum protocol probe duration in seconds; default 15, maximum 60.",
+            "minimum": 3,
+            "maximum": 60
+          }
+        },
+        "required": [
+          "target"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "SNMP interface table"
+          ],
+          "scope": "Read interface addresses and link metadata exposed by an authorized SNMP target.",
+          "preferredFor": "Read interface addresses and link metadata exposed by an authorized SNMP target."
+        }
+      }
+    },
+    {
+      "name": "smb_audit",
+      "description": "Audit SMB dialects, signing and anonymous server metadata on an authorized target. Aliases: SMB signing posture.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for smb audit.",
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "Authorized private/allowlisted hostname or IP address."
+          },
+          "port": {
+            "type": "integer",
+            "description": "SMB TCP port; default 445.",
+            "minimum": 1,
+            "maximum": 65535
+          },
+          "timeout_seconds": {
+            "type": "integer",
+            "description": "Maximum protocol probe duration in seconds; default 15, maximum 60.",
+            "minimum": 3,
+            "maximum": 60
+          }
+        },
+        "required": [
+          "target"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "SMB signing posture"
+          ],
+          "scope": "Audit SMB dialects, signing and anonymous server metadata on an authorized target.",
+          "preferredFor": "Audit SMB dialects, signing and anonymous server metadata on an authorized target."
+        }
+      }
+    },
+    {
+      "name": "smb_shares",
+      "description": "Enumerate SMB shares and anonymous-access metadata on an authorized target. Aliases: SMB share permissions.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for smb shares.",
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "Authorized private/allowlisted hostname or IP address."
+          },
+          "port": {
+            "type": "integer",
+            "description": "SMB TCP port; default 445.",
+            "minimum": 1,
+            "maximum": 65535
+          },
+          "timeout_seconds": {
+            "type": "integer",
+            "description": "Maximum protocol probe duration in seconds; default 15, maximum 60.",
+            "minimum": 3,
+            "maximum": 60
+          }
+        },
+        "required": [
+          "target"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "SMB share permissions"
+          ],
+          "scope": "Enumerate SMB shares and anonymous-access metadata on an authorized target.",
+          "preferredFor": "Enumerate SMB shares and anonymous-access metadata on an authorized target."
+        }
+      }
+    },
+    {
+      "name": "ntp_discover",
+      "description": "Read NTP time, stratum, reference ID and implementation details from an authorized target. Aliases: NTP server information.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for ntp discover.",
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "Authorized private/allowlisted hostname or IP address."
+          },
+          "port": {
+            "type": "integer",
+            "description": "NTP UDP port; default 123.",
+            "minimum": 1,
+            "maximum": 65535
+          },
+          "timeout_seconds": {
+            "type": "integer",
+            "description": "Maximum protocol probe duration in seconds; default 15, maximum 60.",
+            "minimum": 3,
+            "maximum": 60
+          }
+        },
+        "required": [
+          "target"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "NTP server information"
+          ],
+          "scope": "Read NTP time, stratum, reference ID and implementation details from an authorized target.",
+          "preferredFor": "Read NTP time, stratum, reference ID and implementation details from an authorized target."
+        }
+      }
+    },
+    {
+      "name": "ldap_discover",
+      "description": "Read LDAP RootDSE capabilities, naming contexts and authentication mechanisms from an authorized target. Aliases: directory server RootDSE.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for ldap discover.",
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "Authorized private/allowlisted hostname or IP address."
+          },
+          "port": {
+            "type": "integer",
+            "description": "LDAP TCP port; default 389. Common values are 389 and 636.",
+            "minimum": 1,
+            "maximum": 65535
+          },
+          "timeout_seconds": {
+            "type": "integer",
+            "description": "Maximum protocol probe duration in seconds; default 15, maximum 60.",
+            "minimum": 3,
+            "maximum": 60
+          }
+        },
+        "required": [
+          "target"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "directory server RootDSE"
+          ],
+          "scope": "Read LDAP RootDSE capabilities, naming contexts and authentication mechanisms from an authorized target.",
+          "preferredFor": "Read LDAP RootDSE capabilities, naming contexts and authentication mechanisms from an authorized target."
+        }
+      }
+    },
+    {
+      "name": "protocol_observe",
+      "description": "Passively observe LLDP, CDP or LLMNR/NBNS packets on a Security-container interface. Requires packet-capture permission. Aliases: passive protocol advertisements.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for protocol observe.",
+        "properties": {
+          "protocol": {
+            "type": "string",
+            "description": "Protocol to observe.",
+            "enum": [
+              "lldp",
+              "cdp",
+              "llmnr_nbns"
+            ]
+          },
+          "interface": {
+            "type": "string",
+            "description": "Interface visible inside mcp-security."
+          },
+          "duration_seconds": {
+            "type": "integer",
+            "description": "Observation duration; default 8, maximum 30 seconds.",
+            "minimum": 1,
+            "maximum": 30
+          },
+          "max_packets": {
+            "type": "integer",
+            "description": "Packet limit; default 50, or 100 for LLMNR/NBNS; maximum 300.",
+            "minimum": 1,
+            "maximum": 300
+          }
+        },
+        "required": [
+          "protocol",
+          "interface"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "passive protocol advertisements"
+          ],
+          "scope": "Passively observe LLDP, CDP or LLMNR/NBNS packets on a Security-container interface. Requires packet-capture permission.",
+          "preferredFor": "Passively observe LLDP, CDP or LLMNR/NBNS packets on a Security-container interface. Requires packet-capture permission."
+        }
+      }
+    },
+    {
+      "name": "wsd_discover",
+      "description": "Probe WS-Discovery endpoints on a specified target, or multicast within the Security-container namespace. Aliases: WSD printer endpoints.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for wsd discover.",
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "Authorized private/allowlisted hostname or IP address."
+          },
+          "interface": {
+            "type": "string",
+            "description": "Optional interface visible inside the mcp-security container, such as eth0.",
+            "maxLength": 64
+          },
+          "timeout_seconds": {
+            "type": "integer",
+            "description": "Maximum protocol probe duration in seconds; default 15, maximum 60.",
+            "minimum": 3,
+            "maximum": 60
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "WSD printer endpoints"
+          ],
+          "scope": "Probe WS-Discovery endpoints on a specified target, or multicast within the Security-container namespace.",
+          "preferredFor": "Probe WS-Discovery endpoints on a specified target, or multicast within the Security-container namespace."
+        }
+      }
+    },
+    {
+      "name": "arp_discover",
+      "description": "Probe authorized IPv4 targets using ARP within the Security-container broadcast domain. Aliases: ARP neighbor sweep.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for arp discover.",
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "Authorized private/allowlisted IPv4 address or CIDR."
+          },
+          "timeout_seconds": {
+            "type": "integer",
+            "description": "Maximum protocol probe duration in seconds; default 15, maximum 60.",
+            "minimum": 3,
+            "maximum": 60
+          }
+        },
+        "required": [
+          "target"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "ARP neighbor sweep"
+          ],
+          "scope": "Probe authorized IPv4 targets using ARP within the Security-container broadcast domain.",
+          "preferredFor": "Probe authorized IPv4 targets using ARP within the Security-container broadcast domain."
+        }
+      }
+    },
+    {
+      "name": "ndp_discover",
+      "description": "Read the IPv6 neighbor cache of the Security-container namespace. Aliases: NDP cached neighbors.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for ndp discover.",
+        "properties": {
+          "interface": {
+            "type": "string",
+            "description": "Optional interface visible inside the mcp-security container, such as eth0.",
+            "maxLength": 64
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "NDP cached neighbors"
+          ],
+          "scope": "Read the IPv6 neighbor cache of the Security-container namespace.",
+          "preferredFor": "Read the IPv6 neighbor cache of the Security-container namespace."
+        }
+      }
+    },
+    {
+      "name": "get_host_interface_info",
+      "description": "Start local network reconnaissance here: inspect the laptop\u2019s physical Ethernet/Wi-Fi interfaces, addresses, gateway, DNS and link speed through the required host helper. Aliases: host network state; active laptop interfaces; network reconnaissance and mapping workflow.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for get host interface info.",
+        "properties": {
+          "interface": {
+            "type": "string",
+            "description": "Host network interface name such as eth0, enp1s0, wlan0, or wlp2s0.",
+            "maxLength": 64
+          },
+          "internet_check": {
+            "type": "boolean",
+            "description": "Check default-route, DNS-resolution, and one ICMP reachability probe to a fixed public resolver; default true."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "host network state",
+            "active laptop interfaces",
+            "network reconnaissance and mapping workflow"
+          ],
+          "scope": "Start local network reconnaissance here: inspect the laptop\u2019s physical Ethernet/Wi-Fi interfaces, addresses, gateway, DNS and link speed through the required host helper.",
+          "preferredFor": "Start local network reconnaissance here: inspect the laptop\u2019s physical Ethernet/Wi-Fi interfaces, addresses, gateway, DNS and link speed through the required host helper.",
+          "overlapGroup": "network-recon"
+        }
+      }
+    },
+    {
+      "name": "perform_network_discovery",
+      "description": "Discover and enumerate hosts on authorized local subnets through the required host helper. Full mode adds names, MAC/vendor, OS evidence, ports/services, shares and media devices. Aliases: LAN reconnaissance; comprehensive network discovery; reachable host inventory.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for perform network discovery.",
+        "properties": {
+          "cidrs": {
+            "type": "array",
+            "description": "One to four authorized IPv4 CIDRs. Omit to infer directly connected networks from the active interface.",
+            "items": {
+              "type": "string",
+              "description": "Authorized private/allowlisted IPv4 CIDR such as 192.168.1.0/24.",
+              "maxLength": 64
+            },
+            "maxItems": 4
+          },
+          "interface": {
+            "type": "string",
+            "description": "Host network interface name such as eth0, enp1s0, wlan0, or wlp2s0.",
+            "maxLength": 64
+          },
+          "detail": {
+            "type": "string",
+            "description": "Inventory depth; hosts discovers reachable addresses only, full also enriches names, OS, ports and services. Default full.",
+            "enum": [
+              "hosts",
+              "full"
+            ]
+          },
+          "host_offset": {
+            "type": "integer",
+            "description": "Live-host page offset returned as next_offset; default 0.",
+            "minimum": 0,
+            "maximum": 65535
+          },
+          "max_hosts": {
+            "type": "integer",
+            "description": "Maximum live hosts to enrich; default 64, maximum 128.",
+            "minimum": 1,
+            "maximum": 128
+          },
+          "port_profile": {
+            "type": "string",
+            "description": "Port coverage: quick=top 100, standard=top 1000 plus common share/media ports, full=all TCP ports. Full is limited to at most 16 hosts.",
+            "enum": [
+              "quick",
+              "standard",
+              "full"
+            ]
+          },
+          "os_detection": {
+            "type": "boolean",
+            "description": "Attempt Nmap OS fingerprinting; default true. Requires raw-packet privileges."
+          },
+          "resolve_names": {
+            "type": "boolean",
+            "description": "Resolve names using DHCP lease files, reverse DNS, and mDNS where available; default true."
+          },
+          "include_shares": {
+            "type": "boolean",
+            "description": "Enumerate SMB/NFS shares read-only when their services are detected; default true."
+          },
+          "include_media": {
+            "type": "boolean",
+            "description": "Probe common UPnP/DLNA/Plex/Jellyfin/Emby ports and metadata; default true."
+          },
+          "timeout_seconds": {
+            "type": "integer",
+            "description": "Total call budget across all scan and enrichment phases; default 240, maximum 300 seconds.",
+            "minimum": 30,
+            "maximum": 300
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "LAN reconnaissance",
+            "comprehensive network discovery",
+            "reachable host inventory"
+          ],
+          "scope": "Discover and enumerate hosts on authorized local subnets through the required host helper. Full mode adds names, MAC/vendor, OS evidence, ports/services, shares and media devices.",
+          "preferredFor": "Discover and enumerate hosts on authorized local subnets through the required host helper. Full mode adds names, MAC/vendor, OS evidence, ports/services, shares and media devices.",
+          "overlapGroup": "network-recon"
+        }
+      }
+    },
+    {
+      "name": "analyze_network_topology",
+      "description": "Analyze physical network topology through the required host helper: subnets, routes, gateways, mDNS visibility and optional LLDP/CDP or peer-isolation evidence. Virtual interfaces and VLANs are excluded. Aliases: routing relationships; network segmentation.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for analyze network topology.",
+        "properties": {
+          "interface": {
+            "type": "string",
+            "description": "Host network interface name such as eth0, enp1s0, wlan0, or wlp2s0.",
+            "maxLength": 64
+          },
+          "peer_targets": {
+            "type": "array",
+            "description": "Known authorized peer IPs expected to be on the same local network. Supplying peers enables the client-isolation test.",
+            "items": {
+              "type": "string",
+              "description": "Authorized peer IPv4 address."
+            },
+            "maxItems": 16
+          },
+          "observe_mdns": {
+            "type": "boolean",
+            "description": "Browse mDNS/DNS-SD services for topology hints; default true."
+          },
+          "observe_l2": {
+            "type": "boolean",
+            "description": "Passively observe LLDP/CDP for topology hints; default false and requires SECURITY_ALLOW_PACKET_CAPTURE=true."
+          },
+          "timeout_seconds": {
+            "type": "integer",
+            "description": "Observation/probe duration per bounded operation; default 8, maximum 30.",
+            "minimum": 3,
+            "maximum": 30
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "routing relationships",
+            "network segmentation"
+          ],
+          "scope": "Analyze physical network topology through the required host helper: subnets, routes, gateways, mDNS visibility and optional LLDP/CDP or peer-isolation evidence. Virtual interfaces and VLANs are excluded.",
+          "preferredFor": "Analyze physical network topology through the required host helper: subnets, routes, gateways, mDNS visibility and optional LLDP/CDP or peer-isolation evidence. Virtual interfaces and VLANs are excluded.",
+          "overlapGroup": "network-recon"
+        }
+      }
+    },
+    {
+      "name": "analyze_wireless_environment",
+      "description": "Assess laptop Wi-Fi through the required host helper: SSID/BSSID, signal, link rate, channel width, nearby access points and channel overlap. Passive cached observations by default. Aliases: passive wireless assessment; wifi survey; wireless network assessment.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for analyze wireless environment.",
+        "properties": {
+          "interface": {
+            "type": "string",
+            "description": "Host network interface name such as eth0, enp1s0, wlan0, or wlp2s0.",
+            "maxLength": 64
+          },
+          "rescan": {
+            "type": "boolean",
+            "description": "Request an active Wi-Fi rescan; default false uses cached passive observations."
+          },
+          "use_airodump": {
+            "type": "boolean",
+            "description": "Also collect passive airodump-ng observations; default false. Requires monitor_interface and SECURITY_ALLOW_PACKET_CAPTURE=true."
+          },
+          "monitor_interface": {
+            "type": "string",
+            "description": "Host network interface name such as eth0, enp1s0, wlan0, or wlp2s0.",
+            "maxLength": 64
+          },
+          "duration_seconds": {
+            "type": "integer",
+            "description": "airodump passive observation duration; default 10, maximum 30.",
+            "minimum": 3,
+            "maximum": 30
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "passive wireless assessment",
+            "wifi survey",
+            "wireless network assessment"
+          ],
+          "scope": "Assess laptop Wi-Fi through the required host helper: SSID/BSSID, signal, link rate, channel width, nearby access points and channel overlap. Passive cached observations by default.",
+          "preferredFor": "Assess laptop Wi-Fi through the required host helper: SSID/BSSID, signal, link rate, channel width, nearby access points and channel overlap. Passive cached observations by default.",
+          "overlapGroup": "network-recon"
+        }
+      }
+    },
+    {
+      "name": "generate_graphical_network_map",
+      "description": "Render collected network reconnaissance data into Graphviz SVG and HTML topology maps. Pass returned observation_path values as input_paths; no JSON copying needed. Aliases: graphical network map; network mapping; topology diagram.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for generate graphical network map.",
+        "properties": {
+          "data": {
+            "type": "object",
+            "description": "Aggregated object containing outputs from get_host_interface_info, perform_network_discovery, analyze_network_topology and/or analyze_wireless_environment.",
+            "additionalProperties": true
+          },
+          "input_path": {
+            "type": "string",
+            "description": "Workspace-relative JSON file containing aggregated network data."
+          },
+          "input_paths": {
+            "type": "array",
+            "description": "Observation artifact paths returned by earlier host tools; merges their data without copying JSON. Include every discovery page.",
+            "items": {
+              "type": "string",
+              "description": "Security workspace observation JSON path."
+            },
+            "minItems": 1,
+            "maxItems": 128
+          },
+          "output_base": {
+            "type": "string",
+            "description": "Workspace-relative output basename without extension; default .security-results/network-map.",
+            "maxLength": 240
+          },
+          "format": {
+            "type": "string",
+            "description": "Map output format.",
+            "enum": [
+              "svg",
+              "html",
+              "both"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "description": "Optional map title; maximum 120 characters.",
+            "maxLength": 120
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "graphical network map",
+            "network mapping",
+            "topology diagram"
+          ],
+          "scope": "Render collected network reconnaissance data into Graphviz SVG and HTML topology maps. Pass returned observation_path values as input_paths; no JSON copying needed.",
+          "preferredFor": "Render collected network reconnaissance data into Graphviz SVG and HTML topology maps. Pass returned observation_path values as input_paths; no JSON copying needed.",
+          "overlapGroup": "network-recon"
+        }
+      }
+    },
+    {
+      "name": "port_scan",
+      "description": "Scan authorized TCP targets from the Security container. Enable service_detection for product/version fingerprints. Aliases: TCP open ports; service version detection.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for port scan.",
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "Authorized hostname, IP address, or CIDR."
+          },
+          "ports": {
+            "type": "string",
+            "description": "Port expression such as 22,80,443 or 1-1024; default top 1000."
+          },
+          "service_detection": {
+            "type": "boolean",
+            "description": "Identify service products and versions; default false."
+          },
+          "timeout_seconds": {
+            "type": "number",
+            "description": "Total scan deadline; default 60, or 90 with service detection; maximum 240 seconds.",
+            "minimum": 5,
+            "maximum": 240
+          }
+        },
+        "required": [
+          "target"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "TCP open ports",
+            "service version detection"
+          ],
+          "scope": "Scan authorized TCP targets from the Security container. Enable service_detection for product/version fingerprints.",
+          "preferredFor": "Scan authorized TCP targets from the Security container. Enable service_detection for product/version fingerprints."
+        }
+      }
+    },
+    {
+      "name": "tls_audit",
+      "description": "Audit TLS protocol support, certificates and cipher suites on an authorized service. Aliases: SSL configuration.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for tls audit.",
+        "properties": {
+          "host": {
+            "type": "string",
+            "description": "Hostname or IP address."
+          },
+          "port": {
+            "type": "number",
+            "description": "TLS port; default 443.",
+            "minimum": 1,
+            "maximum": 65535
+          }
+        },
+        "required": [
+          "host"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "SSL configuration"
+          ],
+          "scope": "Audit TLS protocol support, certificates and cipher suites on an authorized service.",
+          "preferredFor": "Audit TLS protocol support, certificates and cipher suites on an authorized service."
+        }
+      }
+    },
+    {
+      "name": "http_headers_audit",
+      "description": "Audit CSP, HSTS, frame protection and other HTTP response headers on an authorized URL. Aliases: web security headers.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for http headers audit.",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Authorized http:// or https:// URL."
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "web security headers"
+          ],
+          "scope": "Audit CSP, HSTS, frame protection and other HTTP response headers on an authorized URL.",
+          "preferredFor": "Audit CSP, HSTS, frame protection and other HTTP response headers on an authorized URL.",
+          "overlapGroup": "http"
+        }
+      }
+    },
+    {
+      "name": "web_server_audit",
+      "description": "Check an authorized web server for exposed files and risky defaults using bounded Nikto probes. Aliases: Nikto misconfiguration.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for web server audit.",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Authorized http:// or https:// URL."
+          },
+          "timeout_seconds": {
+            "type": "number",
+            "description": "Maximum runtime; default 90, maximum 180.",
+            "minimum": 15,
+            "maximum": 180
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "Nikto misconfiguration"
+          ],
+          "scope": "Check an authorized web server for exposed files and risky defaults using bounded Nikto probes.",
+          "preferredFor": "Check an authorized web server for exposed files and risky defaults using bounded Nikto probes."
+        }
+      }
+    },
+    {
+      "name": "vulnerability_scan",
+      "description": "Scan an authorized URL with bounded Nuclei CVE and misconfiguration templates. Aliases: known vulnerability detection.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for vulnerability scan.",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Authorized http:// or https:// URL."
+          },
+          "severities": {
+            "type": "array",
+            "description": "Severities to include; default low,medium,high,critical.",
+            "items": {
+              "type": "string",
+              "description": "One severity.",
+              "enum": [
+                "info",
+                "low",
+                "medium",
+                "high",
+                "critical"
+              ]
+            },
+            "maxItems": 5
+          },
+          "rate_limit": {
+            "type": "number",
+            "description": "Maximum requests per second; default 20, maximum 50.",
+            "minimum": 1,
+            "maximum": 50
+          },
+          "timeout_seconds": {
+            "type": "number",
+            "description": "Maximum total runtime; default 120, maximum 300.",
+            "minimum": 15,
+            "maximum": 300
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "known vulnerability detection"
+          ],
+          "scope": "Scan an authorized URL with bounded Nuclei CVE and misconfiguration templates.",
+          "preferredFor": "Scan an authorized URL with bounded Nuclei CVE and misconfiguration templates."
+        }
+      }
+    },
+    {
+      "name": "web_content_discover",
+      "description": "Probe paths on an authorized website using bounded ffuf requests and an explicit status-code filter. Aliases: web directory fuzzing.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for web content discover.",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Base authorized http:// or https:// URL. FUZZ is appended when absent."
+          },
+          "wordlist": {
+            "type": "string",
+            "description": "Optional workspace-relative wordlist; omit for the built-in common path list."
+          },
+          "status_codes": {
+            "type": "array",
+            "description": "HTTP status codes to return; default only 200.",
+            "items": {
+              "type": "integer",
+              "description": "HTTP status code.",
+              "minimum": 100,
+              "maximum": 599
+            },
+            "minItems": 1,
+            "maxItems": 10
+          },
+          "rate_limit": {
+            "type": "number",
+            "description": "Requests per second; default 20, maximum 50.",
+            "minimum": 1,
+            "maximum": 50
+          },
+          "concurrency": {
+            "type": "number",
+            "description": "Concurrent workers; default 10, maximum 30.",
+            "minimum": 1,
+            "maximum": 30
+          },
+          "timeout_seconds": {
+            "type": "number",
+            "description": "Maximum runtime; default 60, maximum 180.",
+            "minimum": 10,
+            "maximum": 180
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "web directory fuzzing"
+          ],
+          "scope": "Probe paths on an authorized website using bounded ffuf requests and an explicit status-code filter.",
+          "preferredFor": "Probe paths on an authorized website using bounded ffuf requests and an explicit status-code filter."
+        }
+      }
+    },
+    {
+      "name": "workspace_vuln_scan",
+      "description": "Scan workspace dependencies, IaC and secrets using Trivy; choose scanners to control coverage. Aliases: dependency vulnerabilities; configuration audit.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for workspace vuln scan.",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Workspace-relative file or directory; default current workspace."
+          },
+          "scanners": {
+            "type": "array",
+            "description": "Trivy scanners; default vuln,misconfig,secret.",
+            "items": {
+              "type": "string",
+              "description": "Scanner.",
+              "enum": [
+                "vuln",
+                "misconfig",
+                "secret"
+              ]
+            },
+            "maxItems": 3
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "dependency vulnerabilities",
+            "configuration audit"
+          ],
+          "scope": "Scan workspace dependencies, IaC and secrets using Trivy; choose scanners to control coverage.",
+          "preferredFor": "Scan workspace dependencies, IaC and secrets using Trivy; choose scanners to control coverage."
+        }
+      }
+    },
+    {
+      "name": "secret_scan",
+      "description": "Scan current workspace files with Gitleaks for exposed credentials. Returns redacted findings; excludes Git history. Aliases: credential leak detection.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for secret scan.",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Workspace-relative directory; default current workspace."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "credential leak detection"
+          ],
+          "scope": "Scan current workspace files with Gitleaks for exposed credentials. Returns redacted findings; excludes Git history.",
+          "preferredFor": "Scan current workspace files with Gitleaks for exposed credentials. Returns redacted findings; excludes Git history."
+        }
+      }
+    },
+    {
+      "name": "code_scan",
+      "description": "Analyze workspace source for insecure coding patterns using Semgrep. Aliases: static application analysis.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for code scan.",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Workspace-relative file or directory; default current workspace."
+          },
+          "max_findings": {
+            "type": "number",
+            "description": "Maximum findings returned; default 100, maximum 300.",
+            "minimum": 1,
+            "maximum": 300
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "static application analysis"
+          ],
+          "scope": "Analyze workspace source for insecure coding patterns using Semgrep.",
+          "preferredFor": "Analyze workspace source for insecure coding patterns using Semgrep."
+        }
+      }
+    },
+    {
+      "name": "generate_sbom",
+      "description": "Inventory workspace software packages with Syft and optionally save a CycloneDX SBOM. Aliases: software bill of materials.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for generate sbom.",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Workspace-relative file or directory; default current workspace."
+          },
+          "output": {
+            "type": "string",
+            "description": "Optional workspace-relative .json path for a CycloneDX SBOM artifact."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "software bill of materials"
+          ],
+          "scope": "Inventory workspace software packages with Syft and optionally save a CycloneDX SBOM.",
+          "preferredFor": "Inventory workspace software packages with Syft and optionally save a CycloneDX SBOM."
+        }
+      }
+    },
+    {
+      "name": "yara_scan",
+      "description": "Match YARA rules against workspace files using bundled or supplied rules. Aliases: artifact pattern signatures.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for yara scan.",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Workspace-relative file or directory."
+          },
+          "rules": {
+            "type": "string",
+            "description": "Optional workspace-relative .yar/.yara rule file; omit for bundled baseline rules."
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "artifact pattern signatures"
+          ],
+          "scope": "Match YARA rules against workspace files using bundled or supplied rules.",
+          "preferredFor": "Match YARA rules against workspace files using bundled or supplied rules.",
+          "overlapGroup": "artifact"
+        }
+      }
+    },
+    {
+      "name": "malware_scan",
+      "description": "Scan workspace files with ClamAV and report detected signatures. Aliases: antivirus file scan.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for malware scan.",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Workspace-relative file or directory."
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "antivirus file scan"
+          ],
+          "scope": "Scan workspace files with ClamAV and report detected signatures.",
+          "preferredFor": "Scan workspace files with ClamAV and report detected signatures.",
+          "overlapGroup": "artifact"
+        }
+      }
+    },
+    {
+      "name": "file_hash",
+      "description": "Compute a workspace file\u2019s SHA-256, SHA-512 or MD5 digest. Aliases: file integrity checksum.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for file hash.",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Workspace-relative file path."
+          },
+          "algorithm": {
+            "type": "string",
+            "description": "Hash algorithm; default sha256.",
+            "enum": [
+              "sha256",
+              "sha512",
+              "md5"
+            ]
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "file integrity checksum"
+          ],
+          "scope": "Compute a workspace file\u2019s SHA-256, SHA-512 or MD5 digest.",
+          "preferredFor": "Compute a workspace file\u2019s SHA-256, SHA-512 or MD5 digest.",
+          "overlapGroup": "artifact"
+        }
+      }
+    },
+    {
+      "name": "file_strings",
+      "description": "Extract printable strings from the entire raw file, including data outside recognized binary sections. Aliases: raw artifact strings.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for file strings.",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Workspace-relative file path."
+          },
+          "min_length": {
+            "type": "number",
+            "description": "Minimum string length; default 6, range 4-32.",
+            "minimum": 4,
+            "maximum": 32
+          },
+          "max_lines": {
+            "type": "number",
+            "description": "Maximum strings returned; default 300, maximum 1000.",
+            "minimum": 1,
+            "maximum": 1000
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "raw artifact strings"
+          ],
+          "scope": "Extract printable strings from the entire raw file, including data outside recognized binary sections.",
+          "preferredFor": "Extract printable strings from the entire raw file, including data outside recognized binary sections.",
+          "overlapGroup": "artifact"
+        }
+      }
+    },
+    {
+      "name": "packet_capture",
+      "description": "Record bounded traffic on a Security-container interface into a workspace PCAP. Requires SECURITY_ALLOW_PACKET_CAPTURE=true. Aliases: tcpdump capture.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for packet capture.",
+        "properties": {
+          "interface": {
+            "type": "string",
+            "description": "Network interface name such as eth0."
+          },
+          "output": {
+            "type": "string",
+            "description": "Workspace-relative output .pcap path."
+          },
+          "duration_seconds": {
+            "type": "number",
+            "description": "Capture duration; default 30, maximum 120.",
+            "minimum": 1,
+            "maximum": 120
+          },
+          "packet_count": {
+            "type": "number",
+            "description": "Maximum packets; default 2000, maximum 10000.",
+            "minimum": 1,
+            "maximum": 10000
+          },
+          "filter": {
+            "type": "string",
+            "description": "Optional tcpdump BPF capture filter such as tcp port 443."
+          }
+        },
+        "required": [
+          "interface",
+          "output"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "tcpdump capture"
+          ],
+          "scope": "Record bounded traffic on a Security-container interface into a workspace PCAP. Requires SECURITY_ALLOW_PACKET_CAPTURE=true.",
+          "preferredFor": "Record bounded traffic on a Security-container interface into a workspace PCAP. Requires SECURITY_ALLOW_PACKET_CAPTURE=true."
+        }
+      }
+    },
+    {
+      "name": "network_interfaces",
+      "description": "Inspect Security-container interfaces and routes for container diagnostics or choosing a packet-capture interface. Aliases: container interface list.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for network interfaces.",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "container interface list"
+          ],
+          "scope": "Inspect Security-container interfaces and routes for container diagnostics or choosing a packet-capture interface.",
+          "preferredFor": "Inspect Security-container interfaces and routes for container diagnostics or choosing a packet-capture interface."
+        }
+      }
+    },
+    {
+      "name": "suricata_alerts",
+      "description": "Run Suricata IDS on a saved capture using the installed ruleset; return alert and event counts. Aliases: offline IDS alerts.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for suricata alerts.",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Workspace-relative .pcap or .pcapng file."
+          },
+          "max_alerts": {
+            "type": "number",
+            "description": "Maximum alerts returned; default 100, maximum 300.",
+            "minimum": 1,
+            "maximum": 300
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "offline IDS alerts"
+          ],
+          "scope": "Run Suricata IDS on a saved capture using the installed ruleset; return alert and event counts.",
+          "preferredFor": "Run Suricata IDS on a saved capture using the installed ruleset; return alert and event counts.",
+          "overlapGroup": "pcap"
+        }
+      }
+    },
+    {
+      "name": "host_log_search",
+      "description": "Find text or regex matches in an allowlisted mounted-host /var/log file. Aliases: authentication log evidence.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for host log search.",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Absolute host log path under /var/log, e.g. /var/log/auth.log."
+          },
+          "query": {
+            "type": "string",
+            "description": "Literal text or extended regular expression."
+          },
+          "regex": {
+            "type": "boolean",
+            "description": "Treat query as an extended regular expression."
+          },
+          "max_matches": {
+            "type": "number",
+            "description": "Maximum matching lines; default 100, maximum 500.",
+            "minimum": 1,
+            "maximum": 500
+          }
+        },
+        "required": [
+          "path",
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "authentication log evidence"
+          ],
+          "scope": "Find text or regex matches in an allowlisted mounted-host /var/log file.",
+          "preferredFor": "Find text or regex matches in an allowlisted mounted-host /var/log file."
+        }
+      }
+    },
+    {
+      "name": "workspace_ioc_search",
+      "description": "Search workspace text files recursively for one literal indicator. Aliases: IOC scoping.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for workspace ioc search.",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Workspace-relative directory; default current workspace."
+          },
+          "indicator": {
+            "type": "string",
+            "description": "Literal indicator to locate."
+          },
+          "max_matches": {
+            "type": "number",
+            "description": "Maximum matching lines; default 100, maximum 500.",
+            "minimum": 1,
+            "maximum": 500
+          }
+        },
+        "required": [
+          "indicator"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "IOC scoping"
+          ],
+          "scope": "Search workspace text files recursively for one literal indicator.",
+          "preferredFor": "Search workspace text files recursively for one literal indicator."
+        }
+      }
+    },
+    {
+      "name": "host_audit",
+      "description": "Audit mounted-host filesystem hardening with Lynis and summarize warnings and suggestions. Aliases: host hardening review.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for host audit.",
+        "properties": {
+          "timeout_seconds": {
+            "type": "number",
+            "description": "Maximum runtime; default 180, maximum 300.",
+            "minimum": 30,
+            "maximum": 300
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "host hardening review"
+          ],
+          "scope": "Audit mounted-host filesystem hardening with Lynis and summarize warnings and suggestions.",
+          "preferredFor": "Audit mounted-host filesystem hardening with Lynis and summarize warnings and suggestions."
+        }
+      }
+    }
+  ],
+  "google": [
+    {
+      "name": "auth_status",
+      "description": "Check Google OAuth configuration and granted scopes; credentials remain server-side. Aliases: Google account authentication.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for auth status.",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "google",
+          "aliases": [
+            "Google account authentication"
+          ],
+          "scope": "Check Google OAuth configuration and granted scopes; credentials remain server-side.",
+          "preferredFor": "Check Google OAuth configuration and granted scopes; credentials remain server-side."
+        }
+      }
+    },
+    {
+      "name": "gmail_get_unread_count",
+      "description": "Return exact unread Gmail message and thread counts. Aliases: how many unread emails.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for gmail get unread count.",
+        "properties": {
+          "label_id": {
+            "type": "string",
+            "description": "Gmail label ID to count; default \"INBOX\". Common system IDs include INBOX, UNREAD, SPAM, TRASH, SENT, and STARRED."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "google",
+          "aliases": [
+            "how many unread emails"
+          ],
+          "scope": "Return exact unread Gmail message and thread counts.",
+          "preferredFor": "Return exact unread Gmail message and thread counts.",
+          "overlapGroup": "gmail"
+        }
+      }
+    },
+    {
+      "name": "gmail_search_messages",
+      "description": "Find Gmail messages with a query; return matching records, metadata and snippets. Aliases: find email.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for gmail search messages.",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Gmail search query, e.g. \"in:inbox is:unread newer_than:7d\", \"from:alice@example.com\", or \"subject:invoice\"."
+          },
+          "max_results": {
+            "type": "number",
+            "description": "Maximum messages to return; default 20, maximum 100.",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "page_token": {
+            "type": "string",
+            "description": "Optional Gmail page token for continuing a previous search."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "google",
+          "aliases": [
+            "find email"
+          ],
+          "scope": "Find Gmail messages with a query; return matching records, metadata and snippets.",
+          "preferredFor": "Find Gmail messages with a query; return matching records, metadata and snippets.",
+          "overlapGroup": "gmail"
+        }
+      }
+    },
+    {
+      "name": "gmail_get_message",
+      "description": "Read one Gmail message by ID, including headers and optional decoded body. Aliases: email content.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for gmail get message.",
+        "properties": {
+          "message_id": {
+            "type": "string",
+            "description": "Gmail message ID returned by Gmail search or thread tools."
+          },
+          "include_body": {
+            "type": "boolean",
+            "description": "Include decoded text body; default true."
+          }
+        },
+        "required": [
+          "message_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "google",
+          "aliases": [
+            "email content"
+          ],
+          "scope": "Read one Gmail message by ID, including headers and optional decoded body.",
+          "preferredFor": "Read one Gmail message by ID, including headers and optional decoded body.",
+          "overlapGroup": "gmail"
+        }
+      }
+    },
+    {
+      "name": "gmail_get_thread",
+      "description": "Read all messages in a Gmail conversation thread. Aliases: email conversation.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for gmail get thread.",
+        "properties": {
+          "thread_id": {
+            "type": "string",
+            "description": "Gmail thread ID."
+          },
+          "include_body": {
+            "type": "boolean",
+            "description": "Include decoded text bodies; default true."
+          }
+        },
+        "required": [
+          "thread_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "google",
+          "aliases": [
+            "email conversation"
+          ],
+          "scope": "Read all messages in a Gmail conversation thread.",
+          "preferredFor": "Read all messages in a Gmail conversation thread.",
+          "overlapGroup": "gmail"
+        }
+      }
+    },
+    {
+      "name": "gmail_list_labels",
+      "description": "List Gmail system and user labels with their IDs. Aliases: mailbox labels.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for gmail list labels.",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "google",
+          "aliases": [
+            "mailbox labels"
+          ],
+          "scope": "List Gmail system and user labels with their IDs.",
+          "preferredFor": "List Gmail system and user labels with their IDs.",
+          "overlapGroup": "gmail"
+        }
+      }
+    },
+    {
+      "name": "gmail_create_draft",
+      "description": "Create an unsent Gmail draft. Requires Gmail writes and a matching OAuth scope. Aliases: draft email.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for gmail create draft.",
+        "properties": {
+          "to": {
+            "type": "array",
+            "description": "Recipient email addresses.",
+            "items": {
+              "type": "string",
+              "description": "Email address."
+            }
+          },
+          "subject": {
+            "type": "string",
+            "description": "Email subject."
+          },
+          "body": {
+            "type": "string",
+            "description": "Plain-text email body."
+          },
+          "cc": {
+            "type": "array",
+            "description": "Optional CC recipients.",
+            "items": {
+              "type": "string",
+              "description": "Email address."
+            }
+          },
+          "bcc": {
+            "type": "array",
+            "description": "Optional BCC recipients.",
+            "items": {
+              "type": "string",
+              "description": "Email address."
+            }
+          },
+          "thread_id": {
+            "type": "string",
+            "description": "Optional Gmail thread ID to associate this draft with a conversation."
+          },
+          "in_reply_to": {
+            "type": "string",
+            "description": "Optional RFC Message-ID value for In-Reply-To when creating a reply."
+          },
+          "references": {
+            "type": "string",
+            "description": "Optional RFC References header value when creating a reply."
+          }
+        },
+        "required": [
+          "to",
+          "subject",
+          "body"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "google",
+          "aliases": [
+            "draft email"
+          ],
+          "scope": "Create an unsent Gmail draft. Requires Gmail writes and a matching OAuth scope.",
+          "preferredFor": "Create an unsent Gmail draft. Requires Gmail writes and a matching OAuth scope.",
+          "overlapGroup": "gmail"
+        }
+      }
+    },
+    {
+      "name": "gmail_send_draft",
+      "description": "Send an existing Gmail draft by ID. Requires Gmail writes and a send scope. Aliases: send prepared email.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for gmail send draft.",
+        "properties": {
+          "draft_id": {
+            "type": "string",
+            "description": "Gmail draft ID."
+          }
+        },
+        "required": [
+          "draft_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "google",
+          "aliases": [
+            "send prepared email"
+          ],
+          "scope": "Send an existing Gmail draft by ID. Requires Gmail writes and a send scope.",
+          "preferredFor": "Send an existing Gmail draft by ID. Requires Gmail writes and a send scope.",
+          "overlapGroup": "gmail"
+        }
+      }
+    },
+    {
+      "name": "gmail_modify_labels",
+      "description": "Add or remove labels on a Gmail message. Requires Gmail writes. Aliases: archive mark read star.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for gmail modify labels.",
+        "properties": {
+          "message_id": {
+            "type": "string",
+            "description": "Gmail message ID."
+          },
+          "add_label_ids": {
+            "type": "array",
+            "description": "Label IDs to add.",
+            "items": {
+              "type": "string",
+              "description": "Gmail label ID."
+            }
+          },
+          "remove_label_ids": {
+            "type": "array",
+            "description": "Label IDs to remove.",
+            "items": {
+              "type": "string",
+              "description": "Gmail label ID."
+            }
+          }
+        },
+        "required": [
+          "message_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "google",
+          "aliases": [
+            "archive mark read star"
+          ],
+          "scope": "Add or remove labels on a Gmail message. Requires Gmail writes.",
+          "preferredFor": "Add or remove labels on a Gmail message. Requires Gmail writes.",
+          "overlapGroup": "gmail"
+        }
+      }
+    },
+    {
+      "name": "calendar_list_calendars",
+      "description": "List accessible Google calendars and their IDs. Aliases: available calendars.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for calendar list calendars.",
+        "properties": {
+          "max_results": {
+            "type": "number",
+            "description": "Maximum calendars; default 100, maximum 250.",
+            "minimum": 1,
+            "maximum": 250
+          },
+          "page_token": {
+            "type": "string",
+            "description": "Optional continuation token."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "google",
+          "aliases": [
+            "available calendars"
+          ],
+          "scope": "List accessible Google calendars and their IDs.",
+          "preferredFor": "List accessible Google calendars and their IDs.",
+          "overlapGroup": "calendar"
+        }
+      }
+    },
+    {
+      "name": "calendar_list_events",
+      "description": "List Google Calendar events in a time range with optional text filtering. Aliases: upcoming meetings; calendar agenda.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for calendar list events.",
+        "properties": {
+          "calendar_id": {
+            "type": "string",
+            "description": "Calendar ID; default \"primary\"."
+          },
+          "time_min": {
+            "type": "string",
+            "description": "RFC3339 lower bound, e.g. 2026-09-30T00:00:00-04:00."
+          },
+          "time_max": {
+            "type": "string",
+            "description": "RFC3339 upper bound."
+          },
+          "query": {
+            "type": "string",
+            "description": "Optional free-text Calendar search query."
+          },
+          "max_results": {
+            "type": "number",
+            "description": "Maximum events; default 50, maximum 250.",
+            "minimum": 1,
+            "maximum": 250
+          },
+          "page_token": {
+            "type": "string",
+            "description": "Optional continuation token."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "google",
+          "aliases": [
+            "upcoming meetings",
+            "calendar agenda"
+          ],
+          "scope": "List Google Calendar events in a time range with optional text filtering.",
+          "preferredFor": "List Google Calendar events in a time range with optional text filtering.",
+          "overlapGroup": "calendar"
+        }
+      }
+    },
+    {
+      "name": "calendar_get_event",
+      "description": "Read one Google Calendar event\u2019s complete details. Aliases: meeting details.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for calendar get event.",
+        "properties": {
+          "calendar_id": {
+            "type": "string",
+            "description": "Calendar ID; default \"primary\"."
+          },
+          "event_id": {
+            "type": "string",
+            "description": "Google Calendar event ID."
+          }
+        },
+        "required": [
+          "event_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "google",
+          "aliases": [
+            "meeting details"
+          ],
+          "scope": "Read one Google Calendar event\u2019s complete details.",
+          "preferredFor": "Read one Google Calendar event\u2019s complete details.",
+          "overlapGroup": "calendar"
+        }
+      }
+    },
+    {
+      "name": "calendar_freebusy",
+      "description": "Read busy intervals for one or more calendars over a requested period. Aliases: calendar availability; meeting conflicts.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for calendar freebusy.",
+        "properties": {
+          "time_min": {
+            "type": "string",
+            "description": "RFC3339 start timestamp."
+          },
+          "time_max": {
+            "type": "string",
+            "description": "RFC3339 end timestamp."
+          },
+          "calendar_ids": {
+            "type": "array",
+            "description": "Calendar IDs; use \"primary\" for the main calendar.",
+            "items": {
+              "type": "string",
+              "description": "Calendar ID."
+            }
+          },
+          "time_zone": {
+            "type": "string",
+            "description": "Optional IANA time zone such as America/Toronto."
+          }
+        },
+        "required": [
+          "time_min",
+          "time_max",
+          "calendar_ids"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "google",
+          "aliases": [
+            "calendar availability",
+            "meeting conflicts"
+          ],
+          "scope": "Read busy intervals for one or more calendars over a requested period.",
+          "preferredFor": "Read busy intervals for one or more calendars over a requested period.",
+          "overlapGroup": "calendar"
+        }
+      }
+    },
+    {
+      "name": "calendar_create_event",
+      "description": "Create a Google Calendar event. Requires Calendar writes and a matching OAuth scope. Aliases: schedule meeting.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for calendar create event.",
+        "properties": {
+          "calendar_id": {
+            "type": "string",
+            "description": "Calendar ID; default \"primary\"."
+          },
+          "summary": {
+            "type": "string",
+            "description": "Event title."
+          },
+          "start": {
+            "type": "string",
+            "description": "RFC3339 timestamp for timed events, or YYYY-MM-DD for all-day events."
+          },
+          "end": {
+            "type": "string",
+            "description": "RFC3339 timestamp for timed events, or exclusive YYYY-MM-DD end date for all-day events."
+          },
+          "all_day": {
+            "type": "boolean",
+            "description": "Treat start/end as YYYY-MM-DD all-day dates."
+          },
+          "time_zone": {
+            "type": "string",
+            "description": "IANA time zone for timed events, e.g. America/Toronto."
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional event description."
+          },
+          "location": {
+            "type": "string",
+            "description": "Optional location."
+          },
+          "attendees": {
+            "type": "array",
+            "description": "Optional attendee email addresses.",
+            "items": {
+              "type": "string",
+              "description": "Email address."
+            }
+          }
+        },
+        "required": [
+          "summary",
+          "start",
+          "end"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "google",
+          "aliases": [
+            "schedule meeting"
+          ],
+          "scope": "Create a Google Calendar event. Requires Calendar writes and a matching OAuth scope.",
+          "preferredFor": "Create a Google Calendar event. Requires Calendar writes and a matching OAuth scope.",
+          "overlapGroup": "calendar"
+        }
+      }
+    },
+    {
+      "name": "calendar_update_event",
+      "description": "Update selected fields of an existing Google Calendar event. Requires Calendar writes. Aliases: reschedule event.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for calendar update event.",
+        "properties": {
+          "calendar_id": {
+            "type": "string",
+            "description": "Calendar ID; default \"primary\"."
+          },
+          "event_id": {
+            "type": "string",
+            "description": "Google Calendar event ID."
+          },
+          "summary": {
+            "type": "string",
+            "description": "New event title."
+          },
+          "start": {
+            "type": "string",
+            "description": "New RFC3339 timestamp or YYYY-MM-DD date."
+          },
+          "end": {
+            "type": "string",
+            "description": "New RFC3339 timestamp or YYYY-MM-DD date."
+          },
+          "all_day": {
+            "type": "boolean",
+            "description": "Treat supplied start/end as all-day dates."
+          },
+          "time_zone": {
+            "type": "string",
+            "description": "IANA time zone for timed event values."
+          },
+          "description": {
+            "type": "string",
+            "description": "New description."
+          },
+          "location": {
+            "type": "string",
+            "description": "New location."
+          },
+          "attendees": {
+            "type": "array",
+            "description": "Replacement attendee email addresses.",
+            "items": {
+              "type": "string",
+              "description": "Email address."
+            }
+          }
+        },
+        "required": [
+          "event_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "google",
+          "aliases": [
+            "reschedule event"
+          ],
+          "scope": "Update selected fields of an existing Google Calendar event. Requires Calendar writes.",
+          "preferredFor": "Update selected fields of an existing Google Calendar event. Requires Calendar writes.",
+          "overlapGroup": "calendar"
+        }
+      }
+    },
+    {
+      "name": "calendar_delete_event",
+      "description": "Delete a Google Calendar event. Requires Calendar writes. Aliases: cancel calendar event.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for calendar delete event.",
+        "properties": {
+          "calendar_id": {
+            "type": "string",
+            "description": "Calendar ID; default \"primary\"."
+          },
+          "event_id": {
+            "type": "string",
+            "description": "Google Calendar event ID."
+          }
+        },
+        "required": [
+          "event_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "google",
+          "aliases": [
+            "cancel calendar event"
+          ],
+          "scope": "Delete a Google Calendar event. Requires Calendar writes.",
+          "preferredFor": "Delete a Google Calendar event. Requires Calendar writes.",
+          "overlapGroup": "calendar"
+        }
+      }
+    },
+    {
+      "name": "drive_search_files",
+      "description": "Find Google Drive files or folders and return IDs and metadata. Aliases: find Drive document.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for drive search files.",
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "Plain-text term searched with Drive fullText contains."
+          },
+          "name_contains": {
+            "type": "string",
+            "description": "Optional filename substring."
+          },
+          "mime_type": {
+            "type": "string",
+            "description": "Optional exact Drive MIME type."
+          },
+          "parent_id": {
+            "type": "string",
+            "description": "Optional parent folder ID."
+          },
+          "query": {
+            "type": "string",
+            "description": "Optional raw Drive v3 q expression. Combined with the simpler filters when supplied."
+          },
+          "include_trashed": {
+            "type": "boolean",
+            "description": "Include trashed files; default false."
+          },
+          "max_results": {
+            "type": "number",
+            "description": "Maximum files; default 50, maximum 200.",
+            "minimum": 1,
+            "maximum": 200
+          },
+          "page_token": {
+            "type": "string",
+            "description": "Optional continuation token."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "google",
+          "aliases": [
+            "find Drive document"
+          ],
+          "scope": "Find Google Drive files or folders and return IDs and metadata.",
+          "preferredFor": "Find Google Drive files or folders and return IDs and metadata.",
+          "overlapGroup": "drive"
+        }
+      }
+    },
+    {
+      "name": "drive_get_file_metadata",
+      "description": "Read metadata for a known Google Drive file ID. Aliases: Drive file properties.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for drive get file metadata.",
+        "properties": {
+          "file_id": {
+            "type": "string",
+            "description": "Google Drive file ID."
+          }
+        },
+        "required": [
+          "file_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "google",
+          "aliases": [
+            "Drive file properties"
+          ],
+          "scope": "Read metadata for a known Google Drive file ID.",
+          "preferredFor": "Read metadata for a known Google Drive file ID.",
+          "overlapGroup": "drive"
+        }
+      }
+    },
+    {
+      "name": "drive_read_text",
+      "description": "Read text from a known Drive file or exportable Google document. Aliases: Google Docs content.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for drive read text.",
+        "properties": {
+          "file_id": {
+            "type": "string",
+            "description": "Google Drive file ID."
+          },
+          "max_chars": {
+            "type": "number",
+            "description": "Maximum returned characters; default 60000, maximum 200000.",
+            "minimum": 100,
+            "maximum": 200000
+          }
+        },
+        "required": [
+          "file_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "google",
+          "aliases": [
+            "Google Docs content"
+          ],
+          "scope": "Read text from a known Drive file or exportable Google document.",
+          "preferredFor": "Read text from a known Drive file or exportable Google document.",
+          "overlapGroup": "drive"
+        }
+      }
+    },
+    {
+      "name": "drive_download_file",
+      "description": "Save a Drive file\u2019s original bytes or export a Google document to the workspace. Aliases: download PDF image attachment.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for drive download file.",
+        "properties": {
+          "file_id": {
+            "type": "string",
+            "description": "Google Drive file ID."
+          },
+          "output": {
+            "type": "string",
+            "description": "Workspace-relative output path, e.g. \"downloads/report.pdf\"."
+          },
+          "export_mime_type": {
+            "type": "string",
+            "description": "Optional export MIME type for Google Docs/Sheets/Slides, e.g. application/pdf, text/plain, text/csv, or application/vnd.openxmlformats-officedocument.wordprocessingml.document."
+          }
+        },
+        "required": [
+          "file_id",
+          "output"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "google",
+          "aliases": [
+            "download PDF image attachment"
+          ],
+          "scope": "Save a Drive file\u2019s original bytes or export a Google document to the workspace.",
+          "preferredFor": "Save a Drive file\u2019s original bytes or export a Google document to the workspace.",
+          "overlapGroup": "drive"
+        }
+      }
+    },
+    {
+      "name": "drive_create_folder",
+      "description": "Create a folder in Google Drive. Requires Drive writes. Aliases: new Drive folder.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for drive create folder.",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Folder name."
+          },
+          "parent_id": {
+            "type": "string",
+            "description": "Optional parent folder ID."
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "google",
+          "aliases": [
+            "new Drive folder"
+          ],
+          "scope": "Create a folder in Google Drive. Requires Drive writes.",
+          "preferredFor": "Create a folder in Google Drive. Requires Drive writes.",
+          "overlapGroup": "drive"
+        }
+      }
+    },
+    {
+      "name": "drive_upload_file",
+      "description": "Upload a workspace file to Google Drive. Requires Drive writes. Aliases: save file to Drive.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for drive upload file.",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Workspace-relative source path."
+          },
+          "name": {
+            "type": "string",
+            "description": "Optional destination filename; defaults to source basename."
+          },
+          "mime_type": {
+            "type": "string",
+            "description": "Content MIME type, e.g. text/plain, application/pdf, image/png, application/zip."
+          },
+          "parent_id": {
+            "type": "string",
+            "description": "Optional destination folder ID."
+          }
+        },
+        "required": [
+          "path",
+          "mime_type"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "google",
+          "aliases": [
+            "save file to Drive"
+          ],
+          "scope": "Upload a workspace file to Google Drive. Requires Drive writes.",
+          "preferredFor": "Upload a workspace file to Google Drive. Requires Drive writes.",
+          "overlapGroup": "drive"
+        }
+      }
+    },
+    {
+      "name": "drive_delete_file",
+      "description": "Delete a Google Drive file by ID. Requires Drive writes. Aliases: remove Drive file.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for drive delete file.",
+        "properties": {
+          "file_id": {
+            "type": "string",
+            "description": "Google Drive file ID."
+          }
+        },
+        "required": [
+          "file_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "google",
+          "aliases": [
+            "remove Drive file"
+          ],
+          "scope": "Delete a Google Drive file by ID. Requires Drive writes.",
+          "preferredFor": "Delete a Google Drive file by ID. Requires Drive writes.",
+          "overlapGroup": "drive"
+        }
+      }
+    }
+  ]
+}

@@ -1,7 +1,6 @@
 # Security CLI suite — 2026-10-01
 
-The security MCP now exposes **65 tools**, discovered through Pi's existing
-Pi's native deferred MCP/tool_search path. The full Security catalog stays outside Pi's
+The security MCP now exposes **58 tools**, discovered through Pi's native deferred MCP/tool_search path. The full Security catalog stays outside Pi's
 standing prompt. The new CLI dependencies are installed during image build.
 
 ## What is available
@@ -9,45 +8,45 @@ standing prompt. The new CLI dependencies are installed during image build.
 | CLI | MCP capability | Output / execution behavior |
 |---|---|---|
 | Nmap | Existing discovery, port scan, service detection | `-oG -`, parsed before output limiting |
-| Firecrawl | `security_firecrawl_scrape`, `security_firecrawl_map` | Clean Markdown / bounded JSON URL map |
-| FFuF | `security_web_content_discover` | `-json`, noninteractive, HTTP 200 by default; configurable status codes |
-| Subfinder | `security_subdomain_enum` | Passive JSONL enumeration; Subfinder is the selected Subfinder/Amass alternative |
-| Searchsploit | `security_exploit_search`, `security_exploit_source` | Local Exploit-DB JSON search and paginated source inspection |
-| sqlmap | `security_sqlmap` | Always `--batch`; detection, current database or database-name enumeration |
-| Metasploit | `security_metasploit_info`, `security_metasploit_run` | Generated `.rc` files; info/options, check or explicit run |
-| Netcat / Socat | `security_listener_start` | Asynchronous TCP listeners on container ports 4444–4453 |
-| jq | `security_jq` | Streaming JSON/JSONL filtering with a result limit |
-| Tshark | `security_pcap_fields` plus existing tools | `-T fields -e` extraction with display filters |
-| Suricata | `security_suricata_test_rules` plus existing replay | `-T` validation, custom `-S` rules, PCAP replay, alert counts and packet hit rate |
-| Osquery | `security_osquery` | One read-only SELECT/WITH query, JSON results |
-| YARA | Existing `security_yara_scan` | Workspace custom rules; compilation/runtime errors reported correctly |
-| Radare2 | `security_binary_analyze` | Scripted JSON metadata, imports, exports, strings, functions, disassembly |
+| Firecrawl | `firecrawl_scrape`, `firecrawl_map` | Clean Markdown / bounded JSON URL map |
+| FFuF | `web_content_discover` | `-json`, noninteractive, HTTP 200 by default; configurable status codes |
+| Subfinder | `subdomain_enum` | Passive JSONL enumeration; Subfinder is the selected Subfinder/Amass alternative |
+| Searchsploit | `exploit_search`, `exploit_source` | Local Exploit-DB JSON search and paginated source inspection |
+| sqlmap | `sqlmap` | Always `--batch`; detection, current database or database-name enumeration |
+| Metasploit | `metasploit_info`, `metasploit_run` | Generated `.rc` files; info/options, check or explicit run |
+| Netcat / Socat | `listener_start` | Asynchronous TCP listeners on container ports 4444–4453 |
+| jq | `jq` | Streaming JSON/JSONL filtering with a result limit |
+| Tshark | `pcap_analyze` with summary/conversations/fields views | `-T fields -e` extraction with display filters |
+| Suricata | `suricata_test_rules` plus existing replay | `-T` validation, custom `-S` rules, PCAP replay, alert counts and packet hit rate |
+| Osquery | `osquery` | One read-only SELECT/WITH query, JSON results |
+| YARA | Existing `yara_scan` | Workspace custom rules; compilation/runtime errors reported correctly |
+| Radare2 | `binary_analyze` | Scripted JSON metadata, imports, exports, strings, functions, disassembly |
 
-`security_tool_status` reports installation and Firecrawl configuration status.
-`security_job_status`, `security_job_send`, and `security_job_stop` manage jobs.
+`status` reports installation and Firecrawl configuration status.
+`job_status`, `job_send`, and `job_stop` manage jobs.
 FFuF filtering is performed directly on JSON records, equivalent to a jq status
 filter, without an intermediate shell pipeline.
 
 
 ## Protocol-specific network tools
 
-Seventeen bounded protocol tools complement generic host/port/service scanning:
+Fifteen bounded protocol tools complement generic host/port/service scanning:
 
 | Protocol | MCP tools | Behavior |
 |---|---|---|
-| mDNS / DNS-SD | `security_mdns_discover` | Targeted UDP/5353 or multicast DNS-SD enumeration |
-| UPnP / SSDP | `security_upnp_discover` | Targeted UDP/1900 or multicast device/service metadata |
-| DHCP / DHCPv6 | `security_dhcp_discover`, `security_dhcp6_discover` | DHCPINFORM or bounded broadcast/multicast option discovery; no starvation |
-| DNS | `security_dns_audit` | Recursion/DNSSEC/NSID/version checks; AXFR only when explicitly requested |
-| SNMP | `security_snmp_discover`, `security_snmp_interfaces` | Read-only system/interface enumeration; no brute force or SET |
-| SMB | `security_smb_audit`, `security_smb_shares` | Dialects/signing/OS metadata plus separate read-only share enumeration |
-| NTP | `security_ntp_discover` | Time, stratum, reference and implementation metadata |
-| LDAP | `security_ldap_discover` | Unauthenticated RootDSE capabilities/naming contexts |
-| LLDP / CDP | `security_lldp_observe`, `security_cdp_observe` | Passive bounded observation; packet-capture gate required |
-| LLMNR / NBNS | `security_llmnr_nbns_observe` | Passive-only observation; never responds or poisons |
-| WS-Discovery | `security_wsd_discover` | Targeted UDP/3702 or multicast Windows/printer/WCF discovery |
-| ARP | `security_arp_discover` | Bounded IPv4 ARP host discovery on directly connected links |
-| IPv6 NDP | `security_ndp_discover` | Read-only neighbor-cache inspection |
+| mDNS / DNS-SD | `mdns_discover` | Targeted UDP/5353 or multicast DNS-SD enumeration |
+| UPnP / SSDP | `upnp_discover` | Targeted UDP/1900 or multicast device/service metadata |
+| DHCP / DHCPv6 | `dhcp_discover`, `dhcp6_discover` | DHCPINFORM or bounded broadcast/multicast option discovery; no starvation |
+| DNS | `dns_audit` | Recursion/DNSSEC/NSID/version checks; AXFR only when explicitly requested |
+| SNMP | `snmp_discover`, `snmp_interfaces` | Read-only system/interface enumeration; no brute force or SET |
+| SMB | `smb_audit`, `smb_shares` | Dialects/signing/OS metadata plus separate read-only share enumeration |
+| NTP | `ntp_discover` | Time, stratum, reference and implementation metadata |
+| LDAP | `ldap_discover` | Unauthenticated RootDSE capabilities/naming contexts |
+| LLDP / CDP | `protocol_observe` with lldp/cdp | Passive bounded observation; packet-capture gate required |
+| LLMNR / NBNS | `protocol_observe` with llmnr_nbns | Passive-only observation; never responds or poisons |
+| WS-Discovery | `wsd_discover` | Targeted UDP/3702 or multicast Windows/printer/WCF discovery |
+| ARP | `arp_discover` | Bounded IPv4 ARP host discovery on directly connected links |
+| IPv6 NDP | `ndp_discover` | Read-only neighbor-cache inspection |
 
 ## High-level network reconnaissance
 
@@ -61,7 +60,7 @@ Five orchestration tools sit above the generic/protocol primitives:
 | `analyze_wireless_environment` | Passive `iw`/`nmcli` Wi-Fi health/security/channel analysis; optional existing monitor-interface `airodump-ng` |
 | `generate_graphical_network_map` | Confined Graphviz DOT/SVG/HTML output from aggregated recon JSON |
 
-For correct laptop interface visibility while keeping the main security container isolated, run `scripts/install-security-host-recon-helper.sh`. The helper exposes only the four host-observation operations over `/run/mcp-security-host/recon.sock`; graphical map generation stays inside `mcp-security`. The Docker MCP mounts the socket read-only. If the helper is absent, the observation tools fall back to container visibility and report that scope. Full schemas, dependencies and permission details are in `docs/NETWORK-RECON-MCP.md`.
+For correct laptop interface visibility while keeping the main security container isolated, run `scripts/install-security-host-recon-helper.sh`. The helper exposes only the four host-observation operations over `/run/mcp-security-host/recon.sock`; graphical map generation stays inside `mcp-security`. The Docker MCP mounts the socket read-only. If the helper is absent, host observation fails explicitly; container results never substitute for laptop observations. Full schemas, dependencies and permission details are in `docs/NETWORK-RECON-MCP.md`.
 
 Targeted probes remain subject to `SECURITY_ALLOW_ACTIVE` and the existing target
 allowlist. Broadcast/multicast/L2 operations intentionally stay inside the
@@ -123,11 +122,11 @@ and network namespaces**. Osquery's `processes` and `listening_ports` tables do
 not describe the host. Read-only `/host` files remain available to the dedicated
 host tools. No host PID namespace or privileged-container mode is added.
 
-`security_network_interfaces` has the same container-only visibility and must not
-be used as LAN-host enumeration. For an authorized LAN inventory, first obtain
-the real LAN CIDR from the System/OpenWrt side when necessary, then call
-`security_network_discover` with that CIDR. Its result is explicitly marked
-`scope: "target-scan"`; the interface tool reports `scope: "security-container"`.
+`network_interfaces` has the same container-only visibility and must not
+be used as LAN-host enumeration. For a laptop/LAN inventory, use `get_host_interface_info`, then
+`perform_network_discovery` through the required host helper. Use `detail="hosts"`
+for a quick host sweep, or default full enrichment. `port_scan` is a separate
+targeted TCP check from the container.
 
 ## Active tools and jobs
 

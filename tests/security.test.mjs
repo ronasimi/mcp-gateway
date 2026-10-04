@@ -42,7 +42,7 @@ function networkReconFixture(run, { capture=true, physicalInterfaceExists=()=>tr
       requireActive: () => {},
       requireCapture: () => { if(!capture) throw new Error('packet capture disabled'); },
       hostRoot: path.join(workspace,'host'),
-      physicalInterfaceExists,
+      physicalInterfaceExists, disableHostDelegation:true,
     });
     return {...api,calls,workspace,cleanup:()=>fs.rm(workspace,{recursive:true,force:true})};
   });
@@ -65,9 +65,9 @@ async function fixture(fn, run = runStatus) {
 test('real jq streams JSONL, filters matching records and signals a row limit', async () => {
   await fixture(async ({ call, workspace }) => {
     await fs.writeFile(path.join(workspace,'events.jsonl'), '{"status":200,"url":"a"}\n{"status":403,"url":"b"}\n{"status":200,"url":"c"}\n');
-    const r = await call('security_jq', { path:'events.jsonl', filter:'select(.status == 200) | {url}', limit:1 });
+    const r = await call('jq', { path:'events.jsonl', filter:'select(.status == 200) | {url}', limit:1 });
     assert.deepEqual(r.records,[{url:'a'}]); assert.equal(r.truncated,true);
-    await assert.rejects(call('security_jq',{ path:'events.jsonl', filter:'bad syntax !' }), /jq failed/);
+    await assert.rejects(call('jq',{ path:'events.jsonl', filter:'bad syntax !' }), /jq failed/);
   });
 });
 test('workspace symlinks cannot escape for reads or new outputs', async () => {
@@ -79,7 +79,7 @@ test('workspace symlinks cannot escape for reads or new outputs', async () => {
   });
 });
 test('strict schemas reject unknown arguments, invalid enums, fractional ports and missing inputs', () => {
-  const schema = EXTENDED_TOOLS.find(t => t.name === 'security_listener_start').inputSchema;
+  const schema = EXTENDED_TOOLS.find(t => t.name === 'listener_start').inputSchema;
   for (const args of [{}, {port:4444,engine:'bash'}, {port:4444.5}, {port:22}, {port:4444,command:'x'}]) assert.throws(() => validateArguments(schema,args));
   validateArguments(schema,{port:4444,engine:'socat'});
 });
@@ -104,43 +104,43 @@ test('background jobs allow input, bounded paginated output, cancellation and ca
 });
 test('sqlmap uses batch mode, target policy, timeout, and separate argv values', async () => {
   await fixture(async ({call,calls}) => {
-    const result=await call('security_sqlmap',{url:'http://127.0.0.1/?id=1',data:'x=$(not-a-shell)',action:'enumerate_databases'});
+    const result=await call('sqlmap',{url:'http://127.0.0.1/?id=1',data:'x=$(not-a-shell)',action:'enumerate_databases'});
     assert.equal(result.complete,true);
     assert.ok(calls[0].args.includes('--batch')); assert.ok(calls[0].args.includes('--ignore-redirects')); assert.ok(calls[0].args.includes('--dbs'));
     assert.ok(calls[0].args.includes('--data=x=$(not-a-shell)'));
-    await assert.rejects(call('security_sqlmap',{url:'https://example.com/?id=1'}),/unauthorized/);
+    await assert.rejects(call('sqlmap',{url:'https://example.com/?id=1'}),/unauthorized/);
   },async()=>ok('assessment completed'));
 });
 test('Metasploit module info uses a generated resource file; rejects console injection and target overrides', async () => {
   let resource='';
   await fixture(async ({call}) => {
-    await call('security_metasploit_info',{module:'auxiliary/scanner/http/http_version'});
+    await call('metasploit_info',{module:'auxiliary/scanner/http/http_version'});
     assert.match(resource,/use auxiliary\/scanner\/http\/http_version\ninfo\nshow options\nexit -y/);
-    await assert.rejects(call('security_metasploit_info',{module:'exploit/x; shell evil'}),/invalid/);
-    await assert.rejects(call('security_metasploit_run',{module:'exploit/test',target:'127.0.0.1',options:{RHOSTS:'elsewhere'}}),/reserved/);
-    await assert.rejects(call('security_metasploit_run',{module:'exploit/test',target:'127.0.0.1',options:{TARGETURI:'/; shell evil'}}),/unsupported/);
+    await assert.rejects(call('metasploit_info',{module:'exploit/x; shell evil'}),/invalid/);
+    await assert.rejects(call('metasploit_run',{module:'exploit/test',target:'127.0.0.1',options:{RHOSTS:'elsewhere'}}),/reserved/);
+    await assert.rejects(call('metasploit_run',{module:'exploit/test',target:'127.0.0.1',options:{TARGETURI:'/; shell evil'}}),/unsupported/);
   },async(cmd,args)=>{resource=await fs.readFile(args[2],'utf8');return ok('module info');});
 });
 test('osquery constrains a read-only query and reports its actual namespace', async () => {
   await fixture(async({call,calls})=>{
-    const r=await call('security_osquery',{query:'SELECT * FROM listening_ports;',limit:1});
+    const r=await call('osquery',{query:'SELECT * FROM listening_ports;',limit:1});
     assert.equal(r.truncated,true); assert.match(r.visibility,/container/);
     assert.ok(calls[0].args.includes('--disable_extensions')); assert.match(calls[0].args.at(-1),/LIMIT 2/);
-    await assert.rejects(call('security_osquery',{query:'SELECT 1; DELETE FROM x;'}),/read-only/);
+    await assert.rejects(call('osquery',{query:'SELECT 1; DELETE FROM x;'}),/read-only/);
   },async()=>ok('[{"port":"22"},{"port":"80"}]'));
 });
 test('Radare2 operations cannot inject arbitrary commands', async () => {
   await fixture(async({call,workspace,calls})=>{
     await fs.writeFile(path.join(workspace,'sample.bin'),'sample');
-    const r=await call('security_binary_analyze',{path:'sample.bin',operation:'disassemble',address:'0x1000',count:8});
+    const r=await call('binary_analyze',{path:'sample.bin',operation:'disassemble',address:'0x1000',count:8});
     assert.deepEqual(r.result,[]); assert.ok(calls[0].args.includes('e cfg.sandbox=true;pdj 8 @ 0x1000')); assert.ok(!calls[0].args.includes('-w'));
-    await assert.rejects(call('security_binary_analyze',{path:'sample.bin',address:'0;!sh'}),/address/);
+    await assert.rejects(call('binary_analyze',{path:'sample.bin',address:'0;!sh'}),/address/);
   },async()=>ok('[]'));
 });
 test('Tshark extracts selected fields and marks the packet examination limit', async () => {
   await fixture(async({call,workspace,calls})=>{
     await fs.writeFile(path.join(workspace,'sample.pcap'),'fixture');
-    const r=await call('security_pcap_fields',{path:'sample.pcap',fields:['ip.src','ip.dst'],display_filter:'tcp',packet_limit:10});
+    const r=await call('pcap_analyze',{view:'fields',path:'sample.pcap',fields:['ip.src','ip.dst'],display_filter:'tcp',packet_limit:10});
     assert.deepEqual(r.rows,[{'ip.src':'127.0.0.1','ip.dst':'127.0.0.2'}]); assert.equal(r.exhaustive,false);
     assert.ok(calls[0].args.includes('-T')); assert.ok(calls[0].args.includes('-Y'));
   },async()=>ok('127.0.0.1\t127.0.0.2\n'));
@@ -149,7 +149,7 @@ test('Suricata custom-rule validation and PCAP hit rate use the supplied rules',
   await fixture(async({call,workspace})=>{
     await fs.writeFile(path.join(workspace,'custom.rules'),'alert ip any any -> any any (sid:1;)');
     await fs.writeFile(path.join(workspace,'sample.pcap'),'fixture');
-    const r=await call('security_suricata_test_rules',{rules:'custom.rules',pcap:'sample.pcap'});
+    const r=await call('suricata_test_rules',{rules:'custom.rules',pcap:'sample.pcap'});
     assert.equal(r.valid,true); assert.equal(r.alert_count,2); assert.equal(r.matched_packets,1); assert.equal(r.packet_hit_rate,0.5);
   },async(cmd,args)=>{
     assert.ok(args.includes('-S'));
@@ -163,7 +163,7 @@ test('Suricata custom-rule validation and PCAP hit rate use the supplied rules',
 });
 test('Subfinder filters out-of-domain records; invalid JSON never becomes a clean empty result', async () => {
   await fixture(async({call,calls})=>{
-    const r=await call('security_subdomain_enum',{domain:'example.com'});
+    const r=await call('subdomain_enum',{domain:'example.com'});
     assert.deepEqual(r.subdomains,['a.example.com']); assert.equal(r.complete,false); assert.ok(calls[0].args.includes('-json'));
     assert.ok(!calls[0].args.includes('-active'));
   },async()=>ok('{"host":"a.example.com"}\n{"host":"badexample.com"}\ninvalid\n'));
@@ -172,8 +172,8 @@ test('Firecrawl uses Markdown/JSON modes; credentials are never tool arguments',
   const old=process.env.FIRECRAWL_API_URL; process.env.FIRECRAWL_API_URL='http://127.0.0.1:3002';
   try {
     await fixture(async({call,calls})=>{
-      const scrape=await call('security_firecrawl_scrape',{url:'https://example.com'}); assert.equal(scrape.markdown,'# Page');
-      const map=await call('security_firecrawl_map',{url:'https://example.com',limit:2}); assert.equal(map.links.length,1);
+      const scrape=await call('firecrawl_scrape',{url:'https://example.com'}); assert.equal(scrape.markdown,'# Page');
+      const map=await call('firecrawl_map',{url:'https://example.com',limit:2}); assert.equal(map.links.length,1);
       assert.ok(calls[0].args.includes('markdown')); assert.ok(calls[1].args.includes('--json'));
       assert.ok(calls.every(c=>!c.args.includes('--api-key')));
     },async(cmd,args)=>ok(args[0]==='scrape'?'# Page':'{"links":["https://example.com/a"]}'));
@@ -182,17 +182,17 @@ test('Firecrawl uses Markdown/JSON modes; credentials are never tool arguments',
 
 
 test('protocol schemas are strict and keep dangerous behavior out of the model-facing API', () => {
-  const dns = PROTOCOL_TOOLS.find(t=>t.name==='security_dns_audit').inputSchema;
-  const lldp = PROTOCOL_TOOLS.find(t=>t.name==='security_lldp_observe').inputSchema;
+  const dns = PROTOCOL_TOOLS.find(t=>t.name==='dns_audit').inputSchema;
+  const lldp = PROTOCOL_TOOLS.find(t=>t.name==='protocol_observe').inputSchema;
   assert.throws(()=>validateArguments(dns,{server:'127.0.0.1',domain:'example.com',command:'dig any'}));
-  assert.throws(()=>validateArguments(lldp,{interface:'eth0',duration_seconds:31}));
+  assert.throws(()=>validateArguments(lldp,{protocol:'lldp',interface:'eth0',duration_seconds:31}));
   validateArguments(dns,{server:'127.0.0.1',domain:'example.com',check_axfr:false});
 });
 
 test('protocol discovery uses bounded targeted NSE scripts and parses script output', async () => {
   const xml='<?xml version="1.0"?><nmaprun><host><ports><port><script id="dns-service-discovery" output="80/tcp http&#xa;Address: 127.0.0.1&#xa;Machine Name: fixture"/></port></ports></host></nmaprun>';
   const api=protocolFixture(async()=>ok(xml));
-  const r=await api.call('security_mdns_discover',{target:'127.0.0.1',timeout_seconds:7});
+  const r=await api.call('mdns_discover',{target:'127.0.0.1',timeout_seconds:7});
   assert.equal(r.scope,'target-scan'); assert.equal(r.mode,'target');
   assert.equal(r.scripts[0].id,'dns-service-discovery'); assert.equal(r.scripts[0].fields.address,'127.0.0.1');
   assert.ok(api.calls[0].args.includes('-sU')); assert.ok(api.calls[0].args.includes('5353')); assert.ok(api.calls[0].args.includes('dns-service-discovery'));
@@ -202,7 +202,7 @@ test('protocol discovery uses bounded targeted NSE scripts and parses script out
 test('broadcast protocol discovery is explicitly container scoped', async () => {
   const xml='<?xml version="1.0"?><nmaprun><prescript><script id="broadcast-dhcp-discover" output="Server Identifier: 172.20.0.1"/></prescript></nmaprun>';
   const api=protocolFixture(async()=>ok(xml));
-  const r=await api.call('security_dhcp_discover',{interface:'eth0'});
+  const r=await api.call('dhcp_discover',{interface:'eth0'});
   assert.equal(r.scope,'security-container-network'); assert.match(r.warning,/Docker bridge/i);
   assert.equal(r.scripts[0].fields.server_identifier,'172.20.0.1');
   assert.ok(api.calls[0].args.includes('broadcast-dhcp-discover')); assert.ok(api.calls[0].args.includes('-e')); assert.ok(api.calls[0].args.includes('eth0'));
@@ -217,17 +217,17 @@ test('DNS audit keeps target authorization, makes AXFR explicit, and reports rec
     if(args.includes('+dnssec')) return ok(';; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 1\n;; flags: qr rd ra ad; QUERY: 1, ANSWER: 1\nexample.com. 300 IN RRSIG A 13 2 300 0 0 0 example.com. sig\n');
     return ok(';; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 1\n;; flags: qr rd ra; QUERY: 1, ANSWER: 1\nexample.com. 300 IN A 127.0.0.1\n');
   });
-  const r=await api.call('security_dns_audit',{server:'127.0.0.1',domain:'example.com',check_axfr:true});
+  const r=await api.call('dns_audit',{server:'127.0.0.1',domain:'example.com',check_axfr:true});
   assert.equal(r.response.recursion_available,true); assert.equal(r.dnssec.authenticated_data,true); assert.equal(r.dnssec.rrsig_present,true); assert.equal(r.axfr.succeeded,true);
   assert.equal(api.calls.length,5);
 });
 
 test('passive L2/name-resolution observation respects the packet-capture gate and never starts a responder', async () => {
   const blocked=protocolFixture(async()=>ok('[]'),{capture:false});
-  await assert.rejects(blocked.call('security_llmnr_nbns_observe',{interface:'eth0'}),/packet capture disabled/);
+  await assert.rejects(blocked.call('protocol_observe',{protocol:'llmnr_nbns',interface:'eth0'}),/packet capture disabled/);
   const packet=[{_source:{layers:{frame:{'frame.time_epoch':'1.0'},eth:{'eth.src':'00:11:22:33:44:55'},ip:{'ip.src':'127.0.0.1'},llmnr:{'llmnr.id':'1'}}}}];
   const api=protocolFixture(async()=>ok(JSON.stringify(packet)));
-  const r=await api.call('security_llmnr_nbns_observe',{interface:'eth0',duration_seconds:1,max_packets:2});
+  const r=await api.call('protocol_observe',{protocol:'llmnr_nbns',interface:'eth0',duration_seconds:1,max_packets:2});
   assert.equal(r.mode,'passive-only'); assert.equal(r.packet_count,1); assert.equal(r.packets[0].source_mac,'00:11:22:33:44:55');
   assert.equal(api.calls[0].command,'tshark'); assert.ok(api.calls[0].args.includes('llmnr || nbns')); assert.ok(!api.calls[0].args.some(x=>/responder/i.test(x)));
 });
@@ -238,8 +238,8 @@ test('ARP and NDP tools preserve network-namespace scope and parse compact neigh
     if(cmd==='ip') return ok('fe80::1 dev eth0 lladdr 00:11:22:33:44:55 REACHABLE\n');
     throw new Error('unexpected command');
   });
-  const arp=await api.call('security_arp_discover',{target:'127.0.0.0/8'}); assert.equal(arp.count,1); assert.equal(arp.hosts[0].mac,'00:11:22:33:44:55');
-  const ndp=await api.call('security_ndp_discover',{interface:'eth0'}); assert.equal(ndp.count,1); assert.equal(ndp.neighbors[0].address,'fe80::1'); assert.equal(ndp.scope,'security-container-network');
+  const arp=await api.call('arp_discover',{target:'127.0.0.0/8'}); assert.equal(arp.count,1); assert.equal(arp.hosts[0].mac,'00:11:22:33:44:55');
+  const ndp=await api.call('ndp_discover',{interface:'eth0'}); assert.equal(ndp.count,1); assert.equal(ndp.neighbors[0].address,'fe80::1'); assert.equal(ndp.scope,'security-container-network');
 });
 
 test('high-level network recon schemas are strict and bounded', () => {
@@ -364,12 +364,12 @@ test('wireless analysis is passive and never enables monitor mode or deauthentic
     if(cmd==='iw'&&args.includes('link')) return ok('Connected to aa:bb:cc:dd:ee:ff (on wlan0)\n\tSSID: Fixture\n\tfreq: 2412\n\tsignal: -43 dBm\n\ttx bitrate: 144.4 MBit/s HE-MCS 7\n');
     if(cmd==='iw'&&args.includes('info')) return ok('Interface wlan0\n\ttype managed\n\tchannel 1 (2412 MHz), width: 20 MHz\n');
     if(cmd==='iw'&&args.includes('station')) return ok('Station aa:bb:cc:dd:ee:ff (on wlan0)\n\tsignal: -43 dBm\n\ttx bitrate: 144.4 MBit/s HE-MCS 7\n');
-    if(cmd==='nmcli') return ok('*:AA\\:BB\\:CC\\:DD\\:EE\\:FF:Fixture:1:2412:144 Mbit/s:80:WPA2\n:11\\:22\\:33\\:44\\:55\\:66:Neighbor:6:2437:72 Mbit/s:55:WPA2\n');
+    if(cmd==='nmcli') return ok('*:AA\\:BB\\:CC\\:DD\\:EE\\:FF:Fixture:1:2412 MHz:144 Mbit/s:80:WPA2\n:11\\:22\\:33\\:44\\:55\\:66:Neighbor:6:2437:72 Mbit/s:55:WPA2\n');
     return {code:1,stdout:'',stderr:'fixture unavailable'};
   });
   try {
     const r=await api.call('analyze_wireless_environment',{interface:'wlan0'});
-    assert.equal(r.current_connection.phy,'802.11ax'); assert.equal(r.nearby_access_points.length,2); assert.ok(r.channel_analysis.length>=1);
+    assert.equal(r.nearby_access_points[0].frequency_mhz,2412); assert.equal(r.nearby_access_points[0].signal_percent,80); assert.equal(r.nearby_access_points[0].signal_dbm,null); assert.equal(r.channel_analysis[0].strongest_signal_percent,80); assert.equal(r.channel_analysis[0].strongest_signal_dbm,null); assert.equal(r.current_connection.phy,'802.11ax'); assert.equal(r.nearby_access_points.length,2); assert.equal(r.observation_mode,'passive-cached'); assert.equal(r.current_connection.channel_width_mhz,20); assert.ok(api.calls.some(c=>c.command==='nmcli'&&c.args.at(-1)==='no')); assert.ok(r.channel_analysis.length>=1);
     assert.ok(api.calls.every(c=>c.command!=='airmon-ng')); assert.ok(api.calls.every(c=>!c.args.some(x=>/deauth|monitor|set\s+type/i.test(String(x)))));
   } finally { await api.cleanup(); }
 });
@@ -478,17 +478,8 @@ test('host recon helper queues concurrent requests instead of rejecting them as 
   assert.doesNotMatch(helper,/host recon helper is busy/);
   assert.doesNotMatch(helper,/if\(busy\)/);
   const recon=await fs.readFile(path.join(root,'scripts/security-network-recon.mjs'),'utf8');
-  assert.match(recon,/SECURITY_HOST_RECON_REQUIRED/);
+  assert.match(recon,/ctx\.disableHostDelegation!==true/);
   assert.match(recon,/refusing to substitute the mcp-security container namespace/);
-});
-
-test('MCP catalog metadata distinguishes wireless assessment from container interfaces', async () => {
-  const catalogSource=await fs.readFile(path.join(root,'scripts/catalog-metadata.mjs'),'utf8');
-  assert.match(catalogSource,/passive wireless assessment/);
-  assert.match(catalogSource,/wireless network assessment/);
-  assert.match(catalogSource,/spectrum survey/);
-  assert.match(catalogSource,/security container interfaces/);
-  assert.match(catalogSource,/Security-container namespace diagnostics only/);
 });
 
 test('MCP protocol validates calls, parses Nmap/ffuf, preserves large JSON and rejects target bypasses', async () => {
@@ -503,19 +494,17 @@ test('MCP protocol validates calls, parses Nmap/ffuf, preserves large JSON and r
   const rpc=(method,params)=>new Promise(resolve=>{const id=++seq;pending.set(id,resolve);child.stdin.write(JSON.stringify({jsonrpc:'2.0',id,method,params})+'\n');});
   const call=(name,args)=>rpc('tools/call',{name,arguments:args});
   try {
-    const catalog=await rpc('tools/list',{}); assert.equal(catalog.tools.length,65);
-    const interfaceTool=catalog.tools.find(t=>t.name==='security_network_interfaces');
-    assert.match(interfaceTool.description,/container.*namespace/i); assert.match(interfaceTool.description,/LAN[- ]host enumeration/i);
-    const bad=await call('security_sqlmap',{}); assert.equal(bad.isError,true);
+    const catalog=await rpc('tools/list',{}); assert.equal(catalog.tools.length,58);
+    const interfaceTool=catalog.tools.find(t=>t.name==='network_interfaces');
+    assert.match(interfaceTool.description,/container.*interfaces/i); assert.doesNotMatch(interfaceTool.description,/LAN|laptop|reconnaissance/i);
+    const bad=await call('sqlmap',{}); assert.equal(bad.isError,true);
     for(const target of ['8.8.8.8','127.0.0.1/99','fd00::1','--script=default']) {
-      const r=await call('security_network_discover',{target}); assert.equal(r.isError,true,target);
+      const r=await call('port_scan',{target}); assert.equal(r.isError,true,target);
     }
-    const discovery=JSON.parse((await call('security_network_discover',{target:'127.0.0.1'})).content[0].text);
-    assert.equal(discovery.scope,'target-scan'); assert.equal(discovery.complete,true);
-    const ports=JSON.parse((await call('security_port_scan',{target:'127.0.0.1'})).content[0].text);assert.equal(ports.open_ports[0].port,80);
-    const fuzz=JSON.parse((await call('security_web_content_discover',{url:'http://127.0.0.1/'})).content[0].text);assert.equal(fuzz.count,1);assert.equal(fuzz.results[0].status,200);
+    const ports=JSON.parse((await call('port_scan',{target:'127.0.0.1'})).content[0].text);assert.equal(ports.open_ports[0].port,80);
+    const fuzz=JSON.parse((await call('web_content_discover',{url:'http://127.0.0.1/'})).content[0].text);assert.equal(fuzz.count,1);assert.equal(fuzz.results[0].status,200);
     await fs.writeFile(path.join(dir,'workspace','big.json'),JSON.stringify({value:'x'.repeat(4000)}));
-    const large=JSON.parse((await call('security_jq',{path:'big.json'})).content[0].text);assert.equal(large.truncated,true);
+    const large=JSON.parse((await call('jq',{path:'big.json'})).content[0].text);assert.equal(large.truncated,true);
     const full=JSON.parse(await fs.readFile(path.join(dir,'workspace',large.output_file),'utf8'));assert.equal(full.records[0].value.length,4000);
   } finally { child.kill(); lines.close(); await fs.rm(dir,{recursive:true,force:true}); }
 });

@@ -16,7 +16,6 @@ RUN apt-get update \
        iputils-ping \
        libimage-exiftool-perl \
        netcat-openbsd \
-       nmap \
        openssh-client \
        pandoc \
        poppler-utils \
@@ -30,7 +29,6 @@ RUN apt-get update \
     && command -v convert \
     && command -v pdftotext \
     && command -v pandoc \
-    && command -v nmap \
     && command -v ssh
 
 COPY scripts/system-tools.mjs /opt/mcp/system-tools.mjs

@@ -1,3 +1,5 @@
+> Catalog update (2026-10-03): 132 owned tools, concise names and curated descriptions. See [deduplication and search changes](docs/TOOL-DEDUPLICATION.md), [current inventory](docs/TOOL-CATALOG.md), and [run review](docs/RUN-REVIEW-2026-10-03.md).
+
 # Local MCP gateway
 
 A local MCP stack for **stock Pi 1.0 native MCP + built-in `tool_search`**. Pi owns the agent loop and deferred tool loading. The MCP services own capability descriptions, catalog metadata, authorization, input bounds, and execution policy.
@@ -74,7 +76,6 @@ Host tools read from a read-only bind mount of the host root and expose bounded 
 - `host_memory_info`
 - `host_processes`
 - `host_process_info`
-- `host_network_info`
 - `host_disk_usage`
 - `host_read_file`
 
@@ -87,15 +88,14 @@ Host tools read from a read-only bind mount of the host root and expose bounded 
 - `network_trace_route`
 - `network_http_probe`
 - `network_port_check`
-- `network_scan_ports`
-- `network_interfaces`
 
-The scanner is intentionally bounded (`nmap --host-timeout 45s`, one target supplied per call) to prevent a discovery request from turning into an unbounded scan.
+System connectivity checks originate in the System container. Laptop/LAN state and discovery belong to Security `get_host_interface_info` and `perform_network_discovery`, through the required host helper. Targeted TCP/service scans use Security `port_scan`. DNS accepts either `type` or `types`, including PTR and CAA.
 
 ### OpenWrt
 
 OpenWrt access is SSH-key/config based. The model refers to a configured SSH alias instead of receiving credentials in a tool call.
 
+- `openwrt_targets` — discover configured SSH aliases
 - `openwrt_status`
 - `openwrt_uci_show`
 - `openwrt_uci_get`
@@ -129,7 +129,7 @@ Place the referenced private key in `data/ssh/` and keep its permissions restric
 
 ### Images
 
-Image tools are restricted to `MCP_WORKSPACE_PATH` and use ImageMagick/ExifTool.
+Image tools are restricted to `MCP_WORKSPACE_PATH` and use ImageMagick/ExifTool. `image_resize` supports ordinary resize geometry or `mode="thumbnail"` with width/height and an explicit enlargement option.
 
 - `image_list`
 - `image_info`
@@ -138,7 +138,6 @@ Image tools are restricted to `MCP_WORKSPACE_PATH` and use ImageMagick/ExifTool.
 - `image_crop`
 - `image_convert`
 - `image_compare`
-- `image_thumbnail`
 
 ### Documents
 
@@ -313,7 +312,7 @@ secrets/          OAuth client JSON + token-encryption key (ignored by git)
 
 `mcp-security` exposes a bounded red-team/blue-team security toolkit at `http://mcp-security:8935/mcp`. Pi registers the server through native deferred MCP exposure, while Security MCP itself enforces private/allowlisted target policy, typed schemas, runtime bounds, and write/capture gates. Active network/web tools are limited to private or explicitly allowlisted targets by default; typed sqlmap, Metasploit and listener operations are available alongside the scanners.
 
-Core active tools include Nmap discovery/port/service scans, TLS auditing, HTTP security-header checks, Nikto, Nuclei, ffuf content discovery, DNS enumeration/auditing, and dedicated mDNS/DNS-SD, UPnP/SSDP, DHCP/DHCPv6, SNMP, SMB, NTP, LDAP, WS-Discovery, ARP and IPv6 NDP inspection. Passive LLDP, CDP and LLMNR/NBNS observation is also available when packet capture is enabled. Five high-level network-recon tools (`get_host_interface_info`, `perform_network_discovery`, `analyze_network_topology`, `analyze_wireless_environment`, `generate_graphical_network_map`) orchestrate these primitives for newly connected client networks; an optional systemd host helper gives them the laptop's real network namespace over a Unix socket without exposing another MCP TCP endpoint. See `docs/NETWORK-RECON-MCP.md`. Defensive tools include Trivy, Gitleaks, Semgrep, Syft SBOMs, YARA, ClamAV, tshark/PCAP analysis, optional tcpdump capture, Suricata offline IDS, host log search, IOC search, and Lynis hardening review.
+Core active tools include Nmap discovery/port/service scans, TLS auditing, HTTP security-header checks, Nikto, Nuclei, ffuf content discovery, DNS enumeration/auditing, and dedicated mDNS/DNS-SD, UPnP/SSDP, DHCP/DHCPv6, SNMP, SMB, NTP, LDAP, WS-Discovery, ARP and IPv6 NDP inspection. Passive LLDP, CDP and LLMNR/NBNS observation is also available when packet capture is enabled. Five high-level network-recon tools (`get_host_interface_info`, `perform_network_discovery`, `analyze_network_topology`, `analyze_wireless_environment`, `generate_graphical_network_map`) orchestrate these primitives for newly connected client networks; a required systemd host helper gives them the laptop's real network namespace over a Unix socket without exposing another MCP TCP endpoint. See `docs/NETWORK-RECON-MCP.md`. Defensive tools include Trivy, Gitleaks, Semgrep, Syft SBOMs, YARA, ClamAV, tshark/PCAP analysis, optional tcpdump capture, Suricata offline IDS, host log search, IOC search, and Lynis hardening review.
 
 Key controls:
 
@@ -326,7 +325,7 @@ SECURITY_ALLOW_PACKET_CAPTURE=false
 
 `SECURITY_TARGET_ALLOWLIST` checks active target addresses; it is an application policy, not a network sandbox. Add a public CIDR/host network only when you are explicitly authorized to assess it. Packet capture is separately disabled by default.
 
-For real laptop Ethernet/Wi-Fi visibility while keeping `mcp-security` on the Docker bridge, install the optional Unix-socket host helper:
+For real laptop Ethernet/Wi-Fi visibility while keeping `mcp-security` on the Docker bridge, install the required Unix-socket host helper:
 
 ```bash
 ./scripts/install-security-host-recon-helper.sh --install-deps
@@ -357,7 +356,7 @@ Install the stock Pi 1.0 native MCP configuration with:
 
 ## Expanded security CLI suite
 
-The security catalog now has 65 tools. See [SECURITY-SUITE.md](docs/SECURITY-SUITE.md) for the full tool mapping, Firecrawl setup, background jobs, namespace visibility, dependency versions and offline image checks.
+The security catalog now has 58 tools. See [SECURITY-SUITE.md](docs/SECURITY-SUITE.md) for the full tool mapping, Firecrawl setup, background jobs, namespace visibility, dependency versions and offline image checks.
 
 
 ### Physical interface provenance
@@ -381,3 +380,7 @@ Install both updated source trees, then run:
 This validates the gateway, rebuilds System and Security (plus Google when configured/running), merges all six native MCP domains into the existing Pi configuration, and upgrades Pi. The merge retains custom server entries, endpoint URLs, authentication headers, timeouts, and explicit disabled states. Source archives omit credentials and runtime state.
 
 Pi itself remains stock 1.0.0. Pi Web UI 0.97.0 needs a narrow compatibility adjustment to load the official MCP/tool-search factories and preserve deferred activation during settings reloads; the Pi image checks the exact upstream source hashes before applying it. Start a new conversation after deployment.
+
+## 2026-10-04 recon completion update
+
+Topology preserves partial results when capture is unavailable. Wireless units are explicit. Host observation artifacts feed map input_paths directly. Pi builds now verify the ESM SDK import before deployment. See the bundle RECON-COMPLETION-FIXES.md for validation and limits.

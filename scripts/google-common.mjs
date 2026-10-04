@@ -157,13 +157,14 @@ export async function getAccessToken() {
 }
 
 export async function googleFetch(url, options = {}) {
+  const { responseType, ...requestOptions } = options;
   const accessToken = await getAccessToken();
   const headers = new Headers(options.headers || {});
   headers.set('authorization', `Bearer ${accessToken}`);
-  const res = await fetch(url, { ...options, headers });
+  const res = await fetch(url, { ...requestOptions, headers });
   const contentType = res.headers.get('content-type') || '';
   let body;
-  if (contentType.includes('application/json')) body = await res.json();
+  if (responseType !== 'buffer' && contentType.includes('application/json')) body = await res.json();
   else body = Buffer.from(await res.arrayBuffer());
   if (!res.ok) {
     const detail = Buffer.isBuffer(body) ? body.toString('utf8').slice(0, 4000) : JSON.stringify(body).slice(0, 4000);

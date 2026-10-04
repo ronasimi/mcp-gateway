@@ -52,20 +52,18 @@ const TOOLS = [
   { name:'host_memory_info', description:'Host memory: parse /proc/meminfo for total, available, cached, buffers, swap, dirty, committed, and huge-page values. Use for memory pressure and capacity diagnosis.', inputSchema:s('Read host memory information.', {}) },
   { name:'host_processes', description:'Host processes: list processes from host /proc with PID, command, state, RSS, CPU time, and executable/cmdline where readable. Use for process discovery, CPU/RAM troubleshooting, or checking whether a service is running.', inputSchema:s('List host processes.', {limit:num('Maximum processes returned; default 80.',{minimum:1,maximum:500}), sort_by:str('Sort key.',{enum:['rss','cpu','pid','name']})}) },
   { name:'host_process_info', description:'Host process inspect: return status, cmdline, executable, environment subset, open-file count, threads, memory, and CPU accounting for one host PID.', inputSchema:s('Inspect one host process.', {pid:num('Host PID.',{minimum:1})}, ['pid']) },
-  { name:'host_network_info', description:'Host network snapshot: read host kernel interface counters, IPv4 routes, ARP/neighbor cache, and resolver configuration from mounted /proc and /etc. Use when container-side network_interfaces is not representative of the host.', inputSchema:s('Read host network state.', {}) },
   { name:'host_disk_usage', description:'Host filesystem usage: report mounted filesystems and disk capacity/free/used percentages from the host root mount. Use for low-disk-space and mount troubleshooting.', inputSchema:s('Read host filesystem usage.', {}) },
   { name:'host_read_file', description:'Host diagnostic file read: read a bounded text file under host /etc, /proc, /sys, /var/log, or /run. Use for configs and diagnostics when a dedicated host tool is not enough; binary files are rejected.', inputSchema:s('Read an allowlisted host text file.', {path:str('Absolute host path such as /etc/os-release or /proc/loadavg.'), max_bytes:num('Maximum bytes to read; default 32768.',{minimum:1,maximum:131072})}, ['path']) },
 
   // Network
-  { name:'network_dns_lookup', description:'DNS lookup: resolve A/AAAA/CNAME/MX/TXT/NS records for a hostname or domain. Use for DNS failures, name resolution, mail records, aliases, or verifying local DNS.', inputSchema:s('Resolve DNS records.', {name:str('Hostname or domain.'), type:str('DNS record type.',{enum:['A','AAAA','CNAME','MX','TXT','NS','SOA','PTR']})}, ['name']) },
+  { name:'network_dns_lookup', description:'Resolve DNS records for a hostname or domain. Query one record type or a set of types for DNS inventory and mail policy review.', inputSchema:s('Resolve one or more DNS record types.', {name:str('Hostname, domain, or reverse-DNS name.'), type:str('Single record type; default A. Use types for multiple records.',{enum:['A','AAAA','CNAME','MX','TXT','NS','SOA','PTR','CAA']}), types:arr('Record types to query together; mutually exclusive with type.',str('DNS record type.',{enum:['A','AAAA','CNAME','MX','TXT','NS','SOA','PTR','CAA']}))}, ['name']) },
   { name:'network_ping', description:'Network ping: test ICMP reachability and latency to a host/IP with packet loss and round-trip timing. Use for LAN/Internet connectivity diagnosis.', inputSchema:s('Ping a host.', {host:str('Hostname or IP address.'), count:num('Packets; default 4.',{minimum:1,maximum:20}), timeout:num('Per-packet timeout seconds; default 2.',{minimum:1,maximum:10})}, ['host']) },
   { name:'network_trace_route', description:'Traceroute: show network path and hop latency to a host/IP. Use for routing, latency, ISP path, or unreachable-network diagnosis.', inputSchema:s('Trace route to a host.', {host:str('Hostname or IP address.'), max_hops:num('Maximum hops; default 20.',{minimum:1,maximum:64})}, ['host']) },
   { name:'network_http_probe', description:'HTTP/HTTPS probe: fetch headers/status/timing and optionally a bounded response body from a URL. Use for endpoint health, redirects, TLS reachability, APIs, and local web services.', inputSchema:s('Probe an HTTP endpoint.', {url:str('http:// or https:// URL.'), method:str('HTTP method.',{enum:['GET','HEAD']}), body:bool('Include a bounded response body for GET.')}, ['url']) },
   { name:'network_port_check', description:'TCP port check: test whether a host:port accepts a TCP connection and report connection latency. Use for SSH, web, database, router, and service reachability.', inputSchema:s('Check one TCP port.', {host:str('Hostname or IP.'), port:num('TCP port.',{minimum:1,maximum:65535}), timeout:num('Timeout seconds; default 3.',{minimum:1,maximum:30})}, ['host','port']) },
-  { name:'network_scan_ports', description:'Nmap port scan: scan a host or CIDR for open TCP ports with bounded timing. Use for LAN service discovery, exposed-port inventory, and troubleshooting. Targets are user-supplied; no Internet-wide scanning.', inputSchema:s('Run a bounded nmap TCP scan.', {target:str('Host, IP, or CIDR.'), ports:str('Port expression, e.g. 22,80,443 or 1-1024; default top ports.'), service_detection:bool('Enable -sV service/version detection.')}, ['target']) },
-  { name:'network_interfaces', description:'Network interfaces: show container-side interface addresses, routes, links, and neighbor table. Use to understand the MCP gateway network namespace and ai-local connectivity.', inputSchema:s('Show network interfaces and routes.', {}) },
 
   // OpenWrt
+  { name:'openwrt_targets', description:'List configured OpenWrt SSH target aliases from the mounted SSH config. Read this before using router tools when the target is unknown.', inputSchema:s('List configured router target aliases.', {}) },
   { name:'openwrt_status', description:'OpenWrt router status: via SSH, return uptime, release/version, board info, load, memory, mounts, interfaces, routes, and key ubus system/network status. Use first for router health checks.', inputSchema:s('Get OpenWrt system status.', {target:str('SSH host alias from the mounted OpenWrt SSH config, e.g. anansi or arachne.')}, ['target']) },
   { name:'openwrt_uci_show', description:'OpenWrt UCI configuration: show all config or one package such as network, wireless, firewall, dhcp, system, minidlna. Use for router configuration inspection and troubleshooting.', inputSchema:s('Show OpenWrt UCI config.', {target:str('SSH host alias.'), package:str('Optional UCI package name such as network, wireless, firewall, dhcp, system.')}, ['target']) },
   { name:'openwrt_uci_get', description:'OpenWrt UCI value: read one exact option, e.g. network.lan.ipaddr or wireless.@wifi-iface[0].ssid. Use when a precise router setting is needed.', inputSchema:s('Read one UCI setting.', {target:str('SSH host alias.'), key:str('UCI key.')}, ['target','key']) },
@@ -81,11 +79,10 @@ const TOOLS = [
   { name:'image_list', description:'Image files: list PNG/JPEG/WebP/GIF/TIFF/BMP/SVG files in the MCP workspace, optionally under a subdirectory. Use to discover available images before inspecting or editing.', inputSchema:s('List workspace image files.', {directory:str('Workspace-relative directory; default .'), recursive:bool('Recurse into subdirectories.')}) },
   { name:'image_info', description:'Image inspect: report format, width, height, color space, alpha, bit depth, file size, and frame/page count for a workspace image. Use before resize/crop/convert.', inputSchema:s('Inspect an image.', {path:str('Workspace-relative image path.')}, ['path']) },
   { name:'image_metadata', description:'Image metadata/EXIF: extract camera, timestamp, orientation, GPS, dimensions, ICC, and other available metadata from a workspace image using exiftool.', inputSchema:s('Read image metadata.', {path:str('Workspace-relative image path.')}, ['path']) },
-  { name:'image_resize', description:'Image resize: create a resized copy of a workspace image using ImageMagick. Supports exact WxH or bounded geometry such as 1920x1080>. Output remains inside the workspace.', inputSchema:s('Resize an image.', {input:str('Workspace-relative input image.'), output:str('Workspace-relative output image.'), geometry:str('ImageMagick geometry, e.g. 1024x1024, 1920x1080>, 50%.')}, ['input','output','geometry']) },
+  { name:'image_resize', description:'Resize an image or create a proportional thumbnail. Thumbnail mode uses ImageMagick thumbnail processing and preserves aspect ratio.', inputSchema:s('Resize an image or create a thumbnail.', {input:str('Workspace-relative input image.'), output:str('Workspace-relative output image.'), geometry:str('Resize geometry, e.g. 1024x1024, 1920x1080>, 50%. Required in resize mode.'), mode:str('Processing mode; default resize.',{enum:['resize','thumbnail']}), width:num('Thumbnail maximum width.',{minimum:1}), height:num('Thumbnail maximum height.',{minimum:1}), enlarge:bool('Allow thumbnail enlargement; default false.')}, ['input','output']) },
   { name:'image_crop', description:'Image crop: create a cropped copy using width, height, x, and y coordinates. Use for extracting a region or trimming an image. Output remains inside the workspace.', inputSchema:s('Crop an image.', {input:str('Workspace-relative input image.'), output:str('Workspace-relative output image.'), width:num('Crop width pixels.',{minimum:1}), height:num('Crop height pixels.',{minimum:1}), x:num('Left offset pixels.',{minimum:0}), y:num('Top offset pixels.',{minimum:0})}, ['input','output','width','height','x','y']) },
   { name:'image_convert', description:'Image format convert: convert a workspace image between PNG, JPEG, WebP, GIF, TIFF, BMP, or PDF-compatible raster output. Output format is inferred from extension.', inputSchema:s('Convert an image file.', {input:str('Workspace-relative input image.'), output:str('Workspace-relative output image.'), quality:num('Optional quality 1-100 for lossy formats.',{minimum:1,maximum:100})}, ['input','output']) },
   { name:'image_compare', description:'Image compare: calculate ImageMagick RMSE difference between two workspace images and optionally write a visual diff image. Use to verify edits, compare renders, or detect image changes.', inputSchema:s('Compare two images.', {left:str('First workspace-relative image.'), right:str('Second workspace-relative image.'), diff_output:str('Optional workspace-relative diff image path.')}, ['left','right']) },
-  { name:'image_thumbnail', description:'Image thumbnail: create a proportional thumbnail constrained to max width/height, preserving aspect ratio and avoiding enlargement unless requested.', inputSchema:s('Create an image thumbnail.', {input:str('Workspace-relative input image.'), output:str('Workspace-relative output image.'), width:num('Maximum width.',{minimum:1}), height:num('Maximum height.',{minimum:1}), enlarge:bool('Allow enlarging smaller images; default false.')}, ['input','output','width','height']) },
 
   // Documents
   { name:'document_list', description:'Documents: list PDF, DOCX, ODT, RTF, HTML, Markdown, text, CSV, XLSX, PPTX, EPUB and related files in the MCP workspace. Use to discover files before extraction or conversion.', inputSchema:s('List workspace document files.', {directory:str('Workspace-relative directory; default .'), recursive:bool('Recurse into subdirectories.')}) },
@@ -100,13 +97,13 @@ const TOOLS = [
 const SYSTEM_MUTATING = new Set([
   'docker_exec','docker_container_action','docker_remove_container','docker_remove_image',
   'openwrt_service_action','openwrt_uci_set',
-  'image_resize','image_crop','image_convert','image_thumbnail',
+  'image_resize','image_crop','image_convert',
   'document_convert','document_render_pdf_page',
 ]);
 const SYSTEM_DESTRUCTIVE = new Set(['docker_remove_container','docker_remove_image']);
 const SYSTEM_OPEN_WORLD = new Set([
   'local_daily_briefing',
-  'network_dns_lookup','network_ping','network_trace_route','network_http_probe','network_port_check','network_scan_ports',
+  'network_dns_lookup','network_ping','network_trace_route','network_http_probe','network_port_check',
   'openwrt_status','openwrt_uci_show','openwrt_uci_get','openwrt_ubus_call','openwrt_logread','openwrt_wifi_status','openwrt_clients','openwrt_package_query','openwrt_service_action','openwrt_uci_set',
 ]);
 for (const tool of TOOLS) {
@@ -114,7 +111,7 @@ for (const tool of TOOLS) {
   tool.annotations = {
     readOnlyHint: !mutating,
     destructiveHint: SYSTEM_DESTRUCTIVE.has(tool.name),
-    idempotentHint: !mutating || ['image_resize','image_crop','image_convert','image_thumbnail','document_convert','document_render_pdf_page'].includes(tool.name),
+    idempotentHint: !mutating || ['image_resize','image_crop','image_convert','document_convert','document_render_pdf_page'].includes(tool.name),
     openWorldHint: SYSTEM_OPEN_WORLD.has(tool.name),
   };
 }
@@ -312,18 +309,28 @@ async function callTool(name,a={}){
       const sort=a.sort_by||'rss'; const rss=x=>Number((x.rss.match(/\d+/)||[0])[0]); rows.sort((x,y)=>sort==='pid'?x.pid-y.pid:sort==='name'?x.name.localeCompare(y.name):sort==='cpu'?y.cpu_ticks-x.cpu_ticks:rss(y)-rss(x)); return rows.slice(0,Math.max(1,Math.min(500,Number(a.limit||80))));
     }
     case 'host_process_info': { const base=hostPath(`/proc/${Number(a.pid)}`); const out={pid:Number(a.pid)}; for(const f of ['status','stat','cmdline','environ','limits','cgroup']){ try { let v=await readTextFile(path.join(base,f),65536); if(f==='cmdline'||f==='environ') v=v.replaceAll('\0','\n'); if(f==='environ') v=v.split('\n').filter(x=>/^(PATH|HOME|USER|SHELL|LANG|LC_|TERM|XDG_|WAYLAND_DISPLAY|DISPLAY)=/.test(x)).join('\n'); out[f]=v; }catch{} } try{out.exe=await fsp.readlink(path.join(base,'exe'));}catch{} try{out.open_files=(await fsp.readdir(path.join(base,'fd'))).length;}catch{} return out; }
-    case 'host_network_info': return {interfaces:await readTextFile(hostPath('/proc/net/dev'),65536), routes:await readTextFile(hostPath('/proc/net/route'),65536), arp:await readTextFile(hostPath('/proc/net/arp'),65536).catch(()=>''), resolv_conf:await readTextFile(hostPath('/etc/resolv.conf'),16384).catch(()=>'')};
     case 'host_disk_usage': return run('df',['-hPT',HOST_ROOT]);
     case 'host_read_file': return readTextFile(hostPath(a.path),Math.max(1,Math.min(131072,Number(a.max_bytes||32768))));
 
-    case 'network_dns_lookup': return run('dig',['+noall','+answer',assertNetworkTarget(a.name),a.type||'A']);
+    case 'network_dns_lookup': {
+      const name=assertNetworkTarget(a.name), allowed=['A','AAAA','CNAME','MX','TXT','NS','SOA','PTR','CAA'];
+      if(a.type && a.types) throw new Error('Supply type or types, not both');
+      const types=a.types ?? [a.type || 'A'];
+      if(!Array.isArray(types)||!types.length||types.length>9||types.some(t=>!allowed.includes(t))) throw new Error('types must contain 1-9 supported DNS record types');
+      const records={};
+      for(const type of new Set(types)) records[type]=await run('dig',['+time=3','+tries=1','+noall','+answer',name,type],{timeout:5000});
+      return {name,records};
+    }
     case 'network_ping': return run('ping',['-n','-c',String(Math.max(1,Math.min(20,Number(a.count||4)))),'-W',String(Math.max(1,Math.min(10,Number(a.timeout||2)))),assertNetworkTarget(a.host)],{timeout:60000});
     case 'network_trace_route': return run('traceroute',['-n','-m',String(Math.max(1,Math.min(64,Number(a.max_hops||20)))),assertNetworkTarget(a.host)],{timeout:60000});
     case 'network_http_probe': { const args=['-sS','-L','--max-time','15','-o',a.body&&a.method!=='HEAD'?'-':'/dev/null','-w','\nHTTP %{http_code}\nremote=%{remote_ip}:%{remote_port}\ndns=%{time_namelookup}\nconnect=%{time_connect}\ntls=%{time_appconnect}\nttfb=%{time_starttransfer}\ntotal=%{time_total}\nurl=%{url_effective}\n']; if((a.method||'GET')==='HEAD') args.splice(1,0,'-I'); args.push(assertHttpUrl(a.url)); args.splice(args.length-1,0,'-D','-'); return run('curl',args,{timeout:20000,maxBuffer:2*1024*1024}); }
     case 'network_port_check': return run('nc',['-vz','-w',String(Math.max(1,Math.min(30,Number(a.timeout||3)))),assertNetworkTarget(a.host),String(Number(a.port))],{timeout:35000});
-    case 'network_scan_ports': { const args=['-Pn','-T4','--max-retries','1','--host-timeout','45s']; if(a.ports) args.push('-p',a.ports); if(a.service_detection) args.push('-sV','--version-light'); args.push(assertNetworkTarget(a.target,{cidr:true})); return run('nmap',args,{timeout:60000,maxBuffer:2*1024*1024}); }
-    case 'network_interfaces': return run('sh',['-lc','ip -brief address; echo "--- routes ---"; ip route; echo "--- neighbors ---"; ip neigh']);
 
+    case 'openwrt_targets': {
+      const config=await fsp.readFile(SSH_CONFIG,'utf8');
+      const aliases=[...new Set([...config.matchAll(/^\s*Host\s+([^#\n]+)/gim)].flatMap(m=>m[1].trim().split(/\s+/)).filter(x=>/^[A-Za-z0-9_.-]+$/.test(x)))];
+      return {aliases,source:'configured SSH Host entries',includes_present:/^\s*Include\s+/im.test(config),note:'Literal aliases from the mounted SSH config; wildcard and Include entries are not expanded.'};
+    }
     case 'openwrt_status': return ssh(a.target,`echo '--- release ---'; cat /etc/openwrt_release 2>/dev/null || cat /etc/os-release; echo '--- uptime/load ---'; uptime; echo '--- memory ---'; free 2>/dev/null || cat /proc/meminfo; echo '--- mounts ---'; df -h; echo '--- board ---'; ubus call system board 2>/dev/null; echo '--- interfaces ---'; ubus call network.interface dump 2>/dev/null; echo '--- routes ---'; ip route 2>/dev/null || route -n`);
     case 'openwrt_uci_show': return ssh(a.target,`uci show${a.package?' '+qsh(assertToken(a.package,'package')):''}`);
     case 'openwrt_uci_get': return ssh(a.target,`uci -q get ${qsh(a.key)}`);
@@ -338,11 +345,22 @@ async function callTool(name,a={}){
     case 'image_list': return listFiles(safeWorkspace(a.directory||'.',{mustExist:true}),new Set(['.png','.jpg','.jpeg','.webp','.gif','.tif','.tiff','.bmp','.svg']),!!a.recursive);
     case 'image_info': return run('identify',['-verbose',safeWorkspace(a.path,{mustExist:true})]);
     case 'image_metadata': return run('exiftool',['-G1','-a','-s',safeWorkspace(a.path,{mustExist:true})]);
-    case 'image_resize': { const i=safeWorkspace(a.input,{mustExist:true}),o=safeWorkspace(a.output); await fsp.mkdir(path.dirname(o),{recursive:true}); return run('convert',[i,'-resize',a.geometry,o],{timeout:60000}); }
+    case 'image_resize': {
+      const i=safeWorkspace(a.input,{mustExist:true}),o=safeWorkspace(a.output),mode=a.mode||'resize';
+      if(!['resize','thumbnail'].includes(mode)) throw new Error('mode must be resize or thumbnail');
+      let geometry=a.geometry;
+      if(mode==='thumbnail') {
+        if(!Number.isInteger(a.width)||a.width<1||!Number.isInteger(a.height)||a.height<1) throw new Error('thumbnail mode requires positive integer width and height');
+        if(geometry) throw new Error('thumbnail mode uses width and height');
+        geometry=`${a.width}x${a.height}${a.enlarge?'':'>'}`;
+      } else if(typeof geometry!=='string'||!geometry||geometry.startsWith('-')) throw new Error('resize mode requires geometry');
+      await fsp.mkdir(path.dirname(o),{recursive:true});
+      await run('convert',[i,mode==='thumbnail'?'-thumbnail':'-resize',geometry,o],{timeout:60000});
+      return {output:path.relative(WORKSPACE,o),mode};
+    }
     case 'image_crop': { const i=safeWorkspace(a.input,{mustExist:true}),o=safeWorkspace(a.output); await fsp.mkdir(path.dirname(o),{recursive:true}); return run('convert',[i,'-crop',`${Number(a.width)}x${Number(a.height)}+${Number(a.x||0)}+${Number(a.y||0)}`,'+repage',o],{timeout:60000}); }
     case 'image_convert': { const i=safeWorkspace(a.input,{mustExist:true}),o=safeWorkspace(a.output); await fsp.mkdir(path.dirname(o),{recursive:true}); const args=[i]; if(a.quality!=null) args.push('-quality',String(Number(a.quality))); args.push(o); return run('convert',args,{timeout:60000}); }
     case 'image_compare': { const l=safeWorkspace(a.left,{mustExist:true}),r=safeWorkspace(a.right,{mustExist:true}); const args=['-metric','RMSE',l,r]; if(a.diff_output){const o=safeWorkspace(a.diff_output); await fsp.mkdir(path.dirname(o),{recursive:true}); args.push(o);} else args.push('null:'); try{const z=await execFileAsync('compare',args,{timeout:60000,maxBuffer:4*1024*1024}); return {metric:(z.stderr||z.stdout||'0').trim(),identical:true,diff_output:a.diff_output||null};}catch(e){if(e.code===1) return {metric:String(e.stderr||e.stdout||'').trim(),identical:false,diff_output:a.diff_output||null}; throw e;} }
-    case 'image_thumbnail': { const i=safeWorkspace(a.input,{mustExist:true}),o=safeWorkspace(a.output); await fsp.mkdir(path.dirname(o),{recursive:true}); const geom=`${Number(a.width)}x${Number(a.height)}${a.enlarge?'':'>'}`; return run('convert',[i,'-thumbnail',geom,o],{timeout:60000}); }
 
     case 'document_list': return listFiles(safeWorkspace(a.directory||'.',{mustExist:true}),new Set(['.pdf','.docx','.odt','.rtf','.html','.htm','.md','.txt','.csv','.xlsx','.pptx','.epub','.json','.xml','.yaml','.yml']),!!a.recursive);
     case 'document_info': { const p=safeWorkspace(a.path,{mustExist:true}); const st=await fsp.stat(p); const type=await run('file',['-b','--mime-type',p]); const out={path:a.path,size:st.size,modified:st.mtime.toISOString(),mime:type.trim()}; if(path.extname(p).toLowerCase()==='.pdf'){ try{out.pdfinfo=await run('pdfinfo',[p]);}catch{}} return out; }
@@ -366,7 +384,7 @@ async function handle(line){
   if(msg.method==='notifications/initialized' || msg.method==='notifications/cancelled') return;
   if(msg.id==null) return;
   try{
-    if(msg.method==='initialize') return response(msg.id,{protocolVersion:msg.params?.protocolVersion||'2025-06-18',capabilities:{tools:{listChanged:false}},serverInfo:{name:'local-system-tools',version:'1.0.0'},instructions:SERVER_CATALOG.system.description});
+    if(msg.method==='initialize') return response(msg.id,{protocolVersion:msg.params?.protocolVersion||'2025-06-18',capabilities:{tools:{listChanged:false}},serverInfo:{name:'local-system-tools',version:'2.0.0'},instructions:SERVER_CATALOG.system.description});
     if(msg.method==='ping') return response(msg.id,{});
     if(msg.method==='tools/list') return response(msg.id,{tools:CATALOG_TOOLS});
     if(msg.method==='tools/call'){

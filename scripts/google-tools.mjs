@@ -28,7 +28,7 @@ const arr = (description, items) => ({ type: 'array', description, items });
 
 const TOOLS = [
   {
-    name: 'google_auth_status',
+    name: 'auth_status',
     description: 'Google account authorization status: report whether OAuth credentials are configured, whether an encrypted user token exists, granted scopes, token expiry, and enabled write gates. Use for Google/Gmail/Calendar/Drive authentication troubleshooting. Never returns secrets or token values.',
     inputSchema: s('Check local Google Workspace OAuth status. No credentials are accepted as arguments.', {}),
   },
@@ -369,7 +369,7 @@ function defaultExportMime(meta, output = '') {
 
 async function callTool(name, a) {
   switch (name) {
-    case 'google_auth_status': {
+    case 'auth_status': {
       const exists = tokenExists();
       let token = null;
       let tokenError = null;
@@ -547,11 +547,9 @@ async function callTool(name, a) {
         if (!mime) throw new Error(`export_mime_type is required for ${meta.mimeType}`);
         url = `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(a.file_id)}/export?${qs({ mimeType: mime })}`;
       } else {
-        const textual = meta.mimeType?.startsWith('text/') || ['application/json','application/xml','application/yaml','application/x-yaml','application/javascript'].includes(meta.mimeType);
-        if (!textual) throw new Error(`Drive item ${meta.name} (${meta.mimeType}) is not a text file; use drive_download_file then the appropriate document/image tool`);
         url = `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(a.file_id)}?alt=media&supportsAllDrives=true`;
       }
-      const { body } = await googleFetch(url);
+      const { body } = await googleFetch(url, { responseType: 'buffer' });
       const data = Buffer.isBuffer(body) ? body : Buffer.from(JSON.stringify(body));
       await fsp.writeFile(output, data);
       return { ok: true, file_id: a.file_id, source_name: meta.name, source_mime_type: meta.mimeType, export_mime_type: mime || null, output: path.relative(path.resolve(process.env.MCP_WORKSPACE || '/workspace'), output), bytes: data.length };
@@ -609,7 +607,7 @@ async function handle(line) {
   if (msg.method === 'notifications/initialized' || msg.method === 'notifications/cancelled') return;
   if (msg.id == null) return;
   try {
-    if (msg.method === 'initialize') return response(msg.id, { protocolVersion: msg.params?.protocolVersion || '2025-06-18', capabilities: { tools: { listChanged: false } }, serverInfo: { name: 'local-google-workspace-tools', version: '1.0.0' }, instructions: SERVER_CATALOG.google.description });
+    if (msg.method === 'initialize') return response(msg.id, { protocolVersion: msg.params?.protocolVersion || '2025-06-18', capabilities: { tools: { listChanged: false } }, serverInfo: { name: 'local-google-workspace-tools', version: '2.0.0' }, instructions: SERVER_CATALOG.google.description });
     if (msg.method === 'ping') return response(msg.id, {});
     if (msg.method === 'tools/list') return response(msg.id, { tools: CATALOG_TOOLS });
     if (msg.method === 'tools/call') {

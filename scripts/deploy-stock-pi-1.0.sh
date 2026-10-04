@@ -15,6 +15,9 @@ node --test tests/*.test.mjs
 python3 tests/config-merge-test.py
 node scripts/validate-catalog.mjs
 
+echo '[deploy] update the required host reconnaissance helper'
+./scripts/install-security-host-recon-helper.sh
+
 echo '[deploy] owned MCP catalogs: system + security'
 docker compose build mcp-system mcp-security
 docker compose up -d --no-deps --force-recreate mcp-system mcp-security

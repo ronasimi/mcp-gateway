@@ -11,6 +11,26 @@ LEGACY_ROOT = {'directTools', 'scriptMode', 'disableProxyTool', 'exposeResources
 LEGACY_SERVER = {'directTools', 'searchKeywords', 'exposeResources', 'deferWithMissingMetadata',
                  'toolPrefix', 'eager', 'lazy', 'idleTimeout', 'cacheTTL', 'lifecycle', 'requestTimeoutMs', 'transport'}
 
+CONSOLIDATED = {
+    'security': {'tool_status': 'status', 'suricata_analyze_pcap': 'suricata_alerts', 'network_discover': 'perform_network_discovery', 'service_detect': 'port_scan',
+                 'pcap_fields': 'pcap_analyze', 'pcap_summary': 'pcap_analyze',
+                 'pcap_conversations': 'pcap_analyze', 'lldp_observe': 'protocol_observe',
+                 'cdp_observe': 'protocol_observe', 'llmnr_nbns_observe': 'protocol_observe'},
+    'system': {'image_thumbnail': 'image_resize'},
+}
+
+
+def migrate_exposure(name, overrides):
+    result = {}
+    for key, exposure in overrides.items():
+        if name in {'security', 'google'}:
+            key = key.removeprefix(name + '_')
+        key = CONSOLIDATED.get(name, {}).get(key, key)
+        # A consolidated capability inherits an old hidden restriction even if
+        # another predecessor was visible. Exact canonical overrides remain editable.
+        result[key] = 'hidden' if 'hidden' in {exposure, result.get(key)} else exposure
+    return result
+
 
 def merge(existing, template):
     if not isinstance(existing, dict) or not isinstance(existing.get('mcpServers', {}), dict):
@@ -31,6 +51,9 @@ def merge(existing, template):
             entry['type'] = current['transport']
         entry['exposure'] = 'deferred'
         entry['description'] = shipped['description']
+        if shipped.get('toolExposure') or current.get('toolExposure'):
+            entry['toolExposure'] = {**shipped.get('toolExposure', {}),
+                                     **migrate_exposure(name, current.get('toolExposure', {}))}
         servers[name] = entry
     result['mcpServers'] = servers
     return result

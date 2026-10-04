@@ -12,23 +12,21 @@ const iface = str('Optional interface visible inside the mcp-security container,
 const shortTimeout = integer('Maximum protocol probe duration in seconds; default 15, maximum 60.', 3, 60);
 
 export const PROTOCOL_TOOLS = [
-  tool('security_mdns_discover', 'mDNS/DNS-SD discovery: enumerate Zeroconf services and TXT metadata. Supply target for unicast UDP/5353 probing; omit target for multicast discovery limited to the security-container network namespace.', { target, interface:iface, timeout_seconds:shortTimeout }),
-  tool('security_upnp_discover', 'UPnP/SSDP discovery: identify UPnP devices, description URLs, product/model metadata, and advertised services. Supply target for unicast UDP/1900 probing; omit target for multicast discovery limited to the security-container network namespace.', { target, interface:iface, timeout_seconds:shortTimeout }),
-  tool('security_dhcp_discover', 'DHCP discovery: retrieve DHCP server/network options without lease-starvation behavior. Supply a DHCP server target for bounded DHCPINFORM probing; omit target for broadcast discovery limited to the security-container network namespace.', { target, interface:iface, timeout_seconds:shortTimeout }),
-  tool('security_dhcp6_discover', 'DHCPv6 multicast discovery: enumerate DHCPv6 advertisements and returned options from interfaces visible inside the security-container network namespace.', { interface:iface, timeout_seconds:shortTimeout }),
-  tool('security_dns_audit', 'DNS server audit: inspect response flags, recursion availability, DNSSEC response evidence, NSID/version disclosure, and optionally attempt one explicit AXFR zone-transfer check against an authorized DNS server.', { server:target, domain:str('Domain to query and, if requested, use for the AXFR check.'), check_axfr:bool('Attempt one AXFR request; default false.'), timeout_seconds:shortTimeout }, ['server','domain']),
-  tool('security_snmp_discover', 'SNMP discovery: perform bounded read-only SNMP service/system identification against UDP/161. No brute force and no SNMP SET operations are exposed.', { target, port:integer('SNMP UDP port; default 161.',1,65535), timeout_seconds:shortTimeout }, ['target']),
-  tool('security_snmp_interfaces', 'SNMP interface discovery: enumerate interface/address/link metadata exposed by an authorized SNMP service. Read-only; no SNMP SET operations or credential guessing.', { target, port:integer('SNMP UDP port; default 161.',1,65535), timeout_seconds:shortTimeout }, ['target']),
-  tool('security_smb_audit', 'SMB protocol audit: inspect supported SMB dialects, message-signing posture, and anonymous OS/server metadata using safe Nmap SMB discovery scripts.', { target, port:integer('SMB TCP port; default 445.',1,65535), timeout_seconds:shortTimeout }, ['target']),
-  tool('security_smb_shares', 'SMB share enumeration: perform bounded read-only share discovery and report anonymous/restricted access metadata. This uses Nmap smb-enum-shares and never writes to a share.', { target, port:integer('SMB TCP port; default 445.',1,65535), timeout_seconds:shortTimeout }, ['target']),
-  tool('security_ntp_discover', 'NTP discovery: retrieve time, stratum, reference ID, implementation/version, and other read-only NTP metadata from an authorized UDP/123 service.', { target, port:integer('NTP UDP port; default 123.',1,65535), timeout_seconds:shortTimeout }, ['target']),
-  tool('security_ldap_discover', 'LDAP RootDSE discovery: retrieve unauthenticated naming contexts, supported LDAP versions, controls, SASL mechanisms, capabilities, and server metadata from an authorized LDAP service.', { target, port:integer('LDAP TCP port; default 389. Common values are 389 and 636.',1,65535), timeout_seconds:shortTimeout }, ['target']),
-  tool('security_lldp_observe', 'Passive LLDP observation: capture bounded LLDP advertisements visible on one security-container interface and return compact packet metadata. Requires SECURITY_ALLOW_PACKET_CAPTURE=true.', { interface:str('Interface visible inside mcp-security, such as eth0.'), duration_seconds:integer('Observation duration; default 8 seconds, maximum 30.',1,30), max_packets:integer('Maximum LLDP packets returned; default 50, maximum 200.',1,200) }, ['interface']),
-  tool('security_cdp_observe', 'Passive Cisco Discovery Protocol observation: capture bounded CDP advertisements visible on one security-container interface. Requires SECURITY_ALLOW_PACKET_CAPTURE=true.', { interface:str('Interface visible inside mcp-security, such as eth0.'), duration_seconds:integer('Observation duration; default 8 seconds, maximum 30.',1,30), max_packets:integer('Maximum CDP packets returned; default 50, maximum 200.',1,200) }, ['interface']),
-  tool('security_llmnr_nbns_observe', 'Passive LLMNR/NetBIOS Name Service observation: capture bounded local name-resolution traffic without answering, spoofing, poisoning, or running a responder. Requires SECURITY_ALLOW_PACKET_CAPTURE=true.', { interface:str('Interface visible inside mcp-security, such as eth0.'), duration_seconds:integer('Observation duration; default 8 seconds, maximum 30.',1,30), max_packets:integer('Maximum matching packets returned; default 100, maximum 300.',1,300) }, ['interface']),
-  tool('security_wsd_discover', 'WS-Discovery discovery: identify Windows, printer, IoT, and WCF endpoints using UDP/3702. Supply target for unicast probing; omit target for multicast discovery limited to the security-container network namespace.', { target, interface:iface, timeout_seconds:shortTimeout }),
-  tool('security_arp_discover', 'ARP-based IPv4 discovery: perform bounded Nmap ARP host discovery against an authorized private/allowlisted target or CIDR. ARP is effective only when the target is directly connected to the security-container network namespace.', { target:str('Authorized private/allowlisted IPv4 address or CIDR.'), timeout_seconds:shortTimeout }, ['target']),
-  tool('security_ndp_discover', 'IPv6 NDP neighbor inspection: return the IPv6 neighbor cache visible inside the security-container network namespace, optionally restricted to one interface.', { interface:iface }),
+  tool('mdns_discover', 'mDNS/DNS-SD discovery: enumerate Zeroconf services and TXT metadata. Supply target for unicast UDP/5353 probing; omit target for multicast discovery limited to the security-container network namespace.', { target, interface:iface, timeout_seconds:shortTimeout }),
+  tool('upnp_discover', 'UPnP/SSDP discovery: identify UPnP devices, description URLs, product/model metadata, and advertised services. Supply target for unicast UDP/1900 probing; omit target for multicast discovery limited to the security-container network namespace.', { target, interface:iface, timeout_seconds:shortTimeout }),
+  tool('dhcp_discover', 'DHCP discovery: retrieve DHCP server/network options without lease-starvation behavior. Supply a DHCP server target for bounded DHCPINFORM probing; omit target for broadcast discovery limited to the security-container network namespace.', { target, interface:iface, timeout_seconds:shortTimeout }),
+  tool('dhcp6_discover', 'DHCPv6 multicast discovery: enumerate DHCPv6 advertisements and returned options from interfaces visible inside the security-container network namespace.', { interface:iface, timeout_seconds:shortTimeout }),
+  tool('dns_audit', 'DNS server audit: inspect response flags, recursion availability, DNSSEC response evidence, NSID/version disclosure, and optionally attempt one explicit AXFR zone-transfer check against an authorized DNS server.', { server:target, domain:str('Domain to query and, if requested, use for the AXFR check.'), check_axfr:bool('Attempt one AXFR request; default false.'), timeout_seconds:shortTimeout }, ['server','domain']),
+  tool('snmp_discover', 'SNMP discovery: perform bounded read-only SNMP service/system identification against UDP/161. No brute force and no SNMP SET operations are exposed.', { target, port:integer('SNMP UDP port; default 161.',1,65535), timeout_seconds:shortTimeout }, ['target']),
+  tool('snmp_interfaces', 'SNMP interface discovery: enumerate interface/address/link metadata exposed by an authorized SNMP service. Read-only; no SNMP SET operations or credential guessing.', { target, port:integer('SNMP UDP port; default 161.',1,65535), timeout_seconds:shortTimeout }, ['target']),
+  tool('smb_audit', 'SMB protocol audit: inspect supported SMB dialects, message-signing posture, and anonymous OS/server metadata using safe Nmap SMB discovery scripts.', { target, port:integer('SMB TCP port; default 445.',1,65535), timeout_seconds:shortTimeout }, ['target']),
+  tool('smb_shares', 'SMB share enumeration: perform bounded read-only share discovery and report anonymous/restricted access metadata. This uses Nmap smb-enum-shares and never writes to a share.', { target, port:integer('SMB TCP port; default 445.',1,65535), timeout_seconds:shortTimeout }, ['target']),
+  tool('ntp_discover', 'NTP discovery: retrieve time, stratum, reference ID, implementation/version, and other read-only NTP metadata from an authorized UDP/123 service.', { target, port:integer('NTP UDP port; default 123.',1,65535), timeout_seconds:shortTimeout }, ['target']),
+  tool('ldap_discover', 'LDAP RootDSE discovery: retrieve unauthenticated naming contexts, supported LDAP versions, controls, SASL mechanisms, capabilities, and server metadata from an authorized LDAP service.', { target, port:integer('LDAP TCP port; default 389. Common values are 389 and 636.',1,65535), timeout_seconds:shortTimeout }, ['target']),
+  tool('protocol_observe', 'Passively observe LLDP, CDP, or LLMNR/NetBIOS advertisements on a Security-container interface. Returns bounded packet metadata; requires SECURITY_ALLOW_PACKET_CAPTURE=true.', { protocol:str('Protocol to observe.',{enum:['lldp','cdp','llmnr_nbns']}), interface:str('Interface visible inside mcp-security.'), duration_seconds:integer('Observation duration; default 8, maximum 30 seconds.',1,30), max_packets:integer('Packet limit; default 50, or 100 for LLMNR/NBNS; maximum 300.',1,300) }, ['protocol','interface']),
+  tool('wsd_discover', 'WS-Discovery discovery: identify Windows, printer, IoT, and WCF endpoints using UDP/3702. Supply target for unicast probing; omit target for multicast discovery limited to the security-container network namespace.', { target, interface:iface, timeout_seconds:shortTimeout }),
+  tool('arp_discover', 'ARP-based IPv4 discovery: perform bounded Nmap ARP host discovery against an authorized private/allowlisted target or CIDR. ARP is effective only when the target is directly connected to the security-container network namespace.', { target:str('Authorized private/allowlisted IPv4 address or CIDR.'), timeout_seconds:shortTimeout }, ['target']),
+  tool('ndp_discover', 'IPv6 NDP neighbor inspection: return the IPv6 neighbor cache visible inside the security-container network namespace, optionally restricted to one interface.', { interface:iface }),
 ];
 
 export const PROTOCOL_TOOL_NAMES = new Set(PROTOCOL_TOOLS.map(t => t.name));
@@ -148,26 +146,26 @@ export function createProtocolSecurity(ctx) {
 
   async function call(name,a={}) {
     switch(name) {
-      case 'security_mdns_discover': {
+      case 'mdns_discover': {
         requireActive();
         if(a.target) return { protocol:'mdns/dns-sd', mode:'target', ...(await targetScript({target:a.target,port:5353,udp:true,scripts:['dns-service-discovery'],timeoutSeconds:a.timeout_seconds})) };
         return { protocol:'mdns/dns-sd', mode:'multicast', ...(await broadcastScript('broadcast-dns-service-discovery',{interface:a.interface,timeoutSeconds:a.timeout_seconds})) };
       }
-      case 'security_upnp_discover': {
+      case 'upnp_discover': {
         requireActive();
         if(a.target) return { protocol:'upnp/ssdp', mode:'target', ...(await targetScript({target:a.target,port:1900,udp:true,scripts:['upnp-info'],timeoutSeconds:a.timeout_seconds})) };
         return { protocol:'upnp/ssdp', mode:'multicast', ...(await broadcastScript('broadcast-upnp-info',{interface:a.interface,timeoutSeconds:a.timeout_seconds})) };
       }
-      case 'security_dhcp_discover': {
+      case 'dhcp_discover': {
         requireActive();
         if(a.target) return { protocol:'dhcp', mode:'target-dhcpinform', ...(await targetScript({target:a.target,port:67,udp:true,scripts:['dhcp-discover'],timeoutSeconds:a.timeout_seconds})) };
         return { protocol:'dhcp', mode:'broadcast', ...(await broadcastScript('broadcast-dhcp-discover',{interface:a.interface,timeoutSeconds:a.timeout_seconds})) };
       }
-      case 'security_dhcp6_discover': {
+      case 'dhcp6_discover': {
         requireActive();
         return { protocol:'dhcpv6', mode:'multicast', ...(await broadcastScript('broadcast-dhcp6-discover',{ipv6:true,interface:a.interface,timeoutSeconds:a.timeout_seconds})) };
       }
-      case 'security_dns_audit': {
+      case 'dns_audit': {
         requireActive();
         const server=await assertAuthorizedTarget(a.server), domain=String(a.domain||'').trim();
         if(!/^[A-Za-z0-9._-]{1,253}\.?$/.test(domain)||domain.startsWith('-')) throw new Error('invalid domain');
@@ -185,39 +183,45 @@ export function createProtocolSecurity(ctx) {
         const header=parseDigHeader(base.stdout), dnssecHeader=parseDigHeader(dnssec.stdout);
         return { scope:'target-scan', server, domain, response:header, dnssec:{authenticated_data:dnssecHeader.authenticated_data,rrsig_present:/\sRRSIG\s/i.test(dnssec.stdout),status:dnssecHeader.status}, version_bind:dataLines(version.stdout).slice(0,10), nsid:clip(nsid.stdout,3000), axfr, complete:base.code===0 };
       }
-      case 'security_snmp_discover': {
+      case 'snmp_discover': {
         requireActive();
         return { protocol:'snmp', ...(await targetScript({target:a.target,port:a.port||161,udp:true,version:true,scripts:['snmp-info','snmp-sysdescr'],timeoutSeconds:a.timeout_seconds})) };
       }
-      case 'security_snmp_interfaces': {
+      case 'snmp_interfaces': {
         requireActive();
         return { protocol:'snmp', ...(await targetScript({target:a.target,port:a.port||161,udp:true,scripts:['snmp-interfaces'],timeoutSeconds:a.timeout_seconds})) };
       }
-      case 'security_smb_audit': {
+      case 'smb_audit': {
         requireActive();
         return { protocol:'smb', ...(await targetScript({target:a.target,port:a.port||445,scripts:['smb-protocols','smb2-security-mode','smb-os-discovery'],timeoutSeconds:a.timeout_seconds})) };
       }
-      case 'security_smb_shares': {
+      case 'smb_shares': {
         requireActive();
         return { protocol:'smb', assessment:'read-only share enumeration; Nmap categorizes smb-enum-shares as intrusive', ...(await targetScript({target:a.target,port:a.port||445,scripts:['smb-enum-shares'],timeoutSeconds:a.timeout_seconds})) };
       }
-      case 'security_ntp_discover': {
+      case 'ntp_discover': {
         requireActive();
         return { protocol:'ntp', ...(await targetScript({target:a.target,port:a.port||123,udp:true,scripts:['ntp-info'],timeoutSeconds:a.timeout_seconds})) };
       }
-      case 'security_ldap_discover': {
+      case 'ldap_discover': {
         requireActive();
         return { protocol:'ldap', ...(await targetScript({target:a.target,port:a.port||389,scripts:['ldap-rootdse'],timeoutSeconds:a.timeout_seconds})) };
       }
-      case 'security_lldp_observe': return { protocol:'lldp', ...(await tsharkObserve(a.interface,{durationSeconds:a.duration_seconds,maxPackets:a.max_packets,filter:'lldp',captureFilter:'ether proto 0x88cc',protocolKeys:['lldp']})) };
-      case 'security_cdp_observe': return { protocol:'cdp', ...(await tsharkObserve(a.interface,{durationSeconds:a.duration_seconds,maxPackets:a.max_packets,filter:'cdp',captureFilter:'ether dst 01:00:0c:cc:cc:cc',protocolKeys:['cdp']})) };
-      case 'security_llmnr_nbns_observe': return { protocol:'llmnr/nbns', mode:'passive-only', ...(await tsharkObserve(a.interface,{durationSeconds:a.duration_seconds,maxPackets:a.max_packets||100,filter:'llmnr || nbns',captureFilter:'udp port 5355 or udp port 137',protocolKeys:['llmnr','nbns']})) };
-      case 'security_wsd_discover': {
+      case 'protocol_observe': {
+        const presets={
+          lldp:{filter:'lldp',captureFilter:'ether proto 0x88cc',protocolKeys:['lldp']},
+          cdp:{filter:'cdp',captureFilter:'ether dst 01:00:0c:cc:cc:cc',protocolKeys:['cdp']},
+          llmnr_nbns:{filter:'llmnr || nbns',captureFilter:'udp port 5355 or udp port 137',protocolKeys:['llmnr','nbns']}
+        };
+        if(!Object.hasOwn(presets,a.protocol)) throw new Error('Unsupported observation protocol');
+        return {protocol:a.protocol,mode:'passive-only',...(await tsharkObserve(a.interface,{durationSeconds:a.duration_seconds,maxPackets:a.max_packets||(a.protocol==='llmnr_nbns'?100:50),...presets[a.protocol]}))};
+      }
+      case 'wsd_discover': {
         requireActive();
         if(a.target) return { protocol:'ws-discovery', mode:'target', ...(await targetScript({target:a.target,port:3702,udp:true,scripts:['wsdd-discover'],timeoutSeconds:a.timeout_seconds})) };
         return { protocol:'ws-discovery', mode:'multicast', ...(await broadcastScript('broadcast-wsdd-discover',{interface:a.interface,timeoutSeconds:a.timeout_seconds})) };
       }
-      case 'security_arp_discover': {
+      case 'arp_discover': {
         requireActive();
         const target=await assertAuthorizedTarget(a.target,{allowCidr:true});
         if(target.includes(':')) throw new Error('ARP discovery requires IPv4');
@@ -227,7 +231,7 @@ export function createProtocolSecurity(ctx) {
         const hosts=parseGrepHosts(r.stdout).filter(x=>x.status==='Up');
         return { protocol:'arp', scope:'security-container-network', warning:CONTAINER_NETWORK_WARNING, target, count:hosts.length, hosts, complete:true };
       }
-      case 'security_ndp_discover': {
+      case 'ndp_discover': {
         const dev=validInterface(a.interface), args=['-6','neigh','show']; if(dev) args.push('dev',dev);
         const r=await runStatus('ip',args,{timeout:10000,maxBuffer:1024*1024});
         if(r.code!==0) throw new Error(`ip exited ${r.code}: ${clip(r.stderr||r.stdout,3000)}`);

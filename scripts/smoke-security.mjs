@@ -10,19 +10,19 @@ import { runStatus, confinedPath } from './security-runtime.mjs';
 const dir=await fs.mkdtemp(path.join(os.tmpdir(),'security-smoke-'));
 const api=createExtendedSecurity({runStatus,safeWorkspace:(p,o)=>confinedPath(dir,p,o)});
 try {
-  const status=await api.call('security_tool_status',{});
+  const status=await api.call('status',{});
   const missing=Object.entries(status.installed).filter(([,present])=>!present).map(([name])=>name);
   assert.deepEqual(missing,[],`missing binaries: ${missing.join(', ')}`);
   await fs.writeFile(path.join(dir,'events.jsonl'),'{"status":200}\n{"status":403}\n');
-  assert.equal((await api.call('security_jq',{path:'events.jsonl',filter:'select(.status == 200)'})).returned,1);
-  const endpoint=await api.call('security_osquery',{query:'SELECT version FROM osquery_info;'});
+  assert.equal((await api.call('jq',{path:'events.jsonl',filter:'select(.status == 200)'})).returned,1);
+  const endpoint=await api.call('osquery',{query:'SELECT version FROM osquery_info;'});
   assert.ok(endpoint.rows[0]?.version);
   await fs.copyFile('/bin/true',path.join(dir,'sample.bin'));
   for(const operation of ['info','imports','exports','strings','functions','disassemble']) {
-    const r=await api.call('security_binary_analyze',{path:'sample.bin',operation,count:4});
+    const r=await api.call('binary_analyze',{path:'sample.bin',operation,count:4});
     assert.ok(r.result !== null);
   }
-  const exploitSearch=await api.call('security_exploit_search',{query:'CVE-2021-44228',limit:1});
+  const exploitSearch=await api.call('exploit_search',{query:'CVE-2021-44228',limit:1});
   assert.ok(Array.isArray(exploitSearch.results));
   const check=await runStatus('sqlmap',['--help'],{timeout:30000});assert.equal(check.code,0);assert.match(check.stdout,/--batch/);
   const fuzz=await runStatus('ffuf',['-h'],{timeout:30000});assert.match(fuzz.stdout+fuzz.stderr,/-json/);

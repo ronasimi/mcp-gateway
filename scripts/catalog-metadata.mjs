@@ -1,226 +1,166 @@
-const META_KEY = 'ai.catalog';
-
+// Pi BM25 indexes the namespace description AND initialize instructions for every
+// tool. Keep these identity-only; put capability terms on the owning tool.
 export const SERVER_CATALOG = Object.freeze({
-  system: {
-    domain: 'system',
-    description: 'Host, Docker, network administration, OpenWrt, image, document, and local briefing capabilities.',
-  },
-  security: {
-    domain: 'security',
-    description: 'Authorized security assessment, network reconnaissance, protocol inspection, hardening, vulnerability analysis, malware/IOC, PCAP, IDS, and incident-response capabilities.',
-  },
-  google: {
-    domain: 'google',
-    description: 'Authenticated Gmail, Google Calendar, and Google Drive capabilities with server-side credentials.',
-  },
+  system: {domain:'system', description:'System utilities.'},
+  security: {domain:'security', description:'Security assessment.'},
+  google: {domain:'google', description:'Google Workspace.'},
 });
-
-// Metadata is intentionally concise. Pi's deferred tool_search indexes names,
-// descriptions, and schema guidance; aliases below are appended to descriptions
-// only where wording overlap previously caused wrong-tool selection.
-export const TOOL_CATALOG = Object.freeze({
-  local_daily_briefing: {
-    aliases: ['local daily briefing', 'London Ontario weather', 'CBC London news', 'morning weather and headlines'],
-    scope: 'London Ontario current weather, seven-day forecast, and CBC London headlines in one Markdown card.',
-    preferredFor: 'a local London Ontario weather/news briefing',
-  },
-  // Security network reconnaissance: clearly separate host state, live-host sweep,
-  // comprehensive enrichment, topology, wireless, and rendering.
-  get_host_interface_info: {
-    aliases: ['host network state', 'active interface', 'IP gateway DNS', 'link speed', 'wifi association'],
-    scope: 'Physical host interface state only; establishes local CIDRs and connectivity before LAN reconnaissance.',
-    overlapGroup: 'network-recon',
-    preferredFor: 'host interface, address, route, gateway, DNS, link, and Internet state',
-  },
-  security_network_interfaces: {
-    aliases: ['security container interfaces', 'container routes', 'mcp security namespace'],
-    scope: 'Security-container namespace diagnostics only; represents container interfaces and routes.',
-    overlapGroup: 'network-recon',
-    preferredFor: 'diagnosing the mcp-security container network namespace',
-  },
-  security_network_discover: {
-    aliases: ['live host sweep', 'ping sweep', 'LAN host discovery', 'reachable IPs'],
-    scope: 'Narrow live-host discovery only. Returns reachable hosts and intentionally leaves enrichment to broader or follow-up tools.',
-    overlapGroup: 'network-recon',
-    preferredFor: 'fast reachability and live-host enumeration when ports, OS, shares, and media details are not requested',
-  },
-  perform_network_discovery: {
-    aliases: ['comprehensive network discovery', 'host enumeration', 'network inventory', 'LAN reconnaissance', 'service enumeration', 'OS fingerprinting', 'shares media discovery'],
-    scope: 'Comprehensive LAN inventory: discovery plus names, MAC/vendor, OS, ports/services, shares, and common media services.',
-    overlapGroup: 'network-recon',
-    preferredFor: 'multi-host network reconnaissance or any request combining discovery with host/service enrichment',
-  },
-  security_port_scan: {
-    aliases: ['open ports', 'TCP port scan', 'attack surface ports'],
-    scope: 'One authorized target; identifies open TCP ports without broad multi-host enrichment.',
-    overlapGroup: 'host-enumeration',
-    preferredFor: 'open-port questions for a specific host',
-  },
-  security_service_detect: {
-    aliases: ['service fingerprint', 'service versions', 'version detection'],
-    scope: 'One authorized target; identifies products and versions on selected TCP ports.',
-    overlapGroup: 'host-enumeration',
-    preferredFor: 'service/version fingerprinting after ports are known',
-  },
-  analyze_network_topology: {
-    aliases: ['network topology', 'routing relationships', 'VLAN analysis', 'LLDP CDP', 'client isolation', 'mDNS reflector'],
-    scope: 'Topology and segmentation evidence from host routes, VLANs, discovery protocols, and optional peer observations.',
-    overlapGroup: 'network-recon',
-    preferredFor: 'subnets, routes, gateways, VLANs, LLDP/CDP, reflection, and client-isolation analysis',
-  },
-  analyze_wireless_environment: {
-    aliases: ['wireless assessment', 'passive wireless assessment', 'wireless network assessment', 'wifi survey', 'spectrum survey', 'SSID BSSID channel', 'wifi security', 'channel congestion', 'signal RSSI'],
-    scope: 'Passive Wi-Fi association, nearby BSSID/channel/security, signal, PHY/rate, congestion, and optional passive monitor observations.',
-    overlapGroup: 'network-recon',
-    preferredFor: 'dedicated Wi-Fi environment, channel, signal, and wireless-security assessment',
-  },
-  generate_graphical_network_map: {
-    aliases: ['graphical network map', 'network diagram', 'SVG network map', 'HTML topology map'],
-    scope: 'Rendering only; consumes structured reconnaissance data and produces SVG/HTML artifacts.',
-    overlapGroup: 'network-recon',
-    preferredFor: 'visual network maps after reconnaissance data exists',
-  },
-
-  // System networking: host/system diagnostics versus security reconnaissance.
-  host_network_info: {
-    aliases: ['host network info', 'host interfaces routes sockets'],
-    scope: 'General host diagnostics for local interfaces/routes; use Security MCP for authorized reconnaissance and security assessment.',
-    overlapGroup: 'system-network',
-    preferredFor: 'local host diagnostics outside a security assessment',
-  },
-  network_interfaces: {
-    aliases: ['system network interfaces', 'local interface addresses', 'local routes'],
-    scope: 'System MCP local namespace/interface diagnostics; use dedicated OpenWrt or Security tools for routers and reconnaissance.',
-    overlapGroup: 'system-network',
-    preferredFor: 'system-side interface inspection',
-  },
-  network_scan_ports: {
-    aliases: ['connectivity port scan', 'system port probe'],
-    scope: 'General system/network diagnostic port probing; use Security MCP port scan for authorized security assessment.',
-    overlapGroup: 'system-network',
-    preferredFor: 'operational connectivity diagnostics rather than security reconnaissance',
-  },
-  openwrt_status: {
-    aliases: ['router status', 'OpenWrt board uptime interfaces'],
-    scope: 'Router health and board/network summary.',
-    overlapGroup: 'openwrt',
-    preferredFor: 'overall OpenWrt router status',
-  },
-  openwrt_wifi_status: {
-    aliases: ['router wifi status', 'OpenWrt radios SSIDs channel signal'],
-    scope: 'Router-side wireless radio and association state.',
-    overlapGroup: 'openwrt',
-    preferredFor: 'OpenWrt radio, SSID, channel, signal, and wireless association questions',
-  },
-  openwrt_clients: {
-    aliases: ['router clients', 'DHCP leases', 'ARP neighbors', 'wifi stations'],
-    scope: 'Router-side client inventory combining leases, neighbors, and Wi-Fi stations.',
-    overlapGroup: 'openwrt',
-    preferredFor: 'devices connected to an OpenWrt router',
-  },
-
-  // Documents/images: metadata versus content operations.
-  document_info: {
-    aliases: ['document metadata', 'PDF page count', 'document properties'],
-    scope: 'Metadata and format inspection only.',
-    overlapGroup: 'documents',
-    preferredFor: 'type, size, page count, title, author, and format metadata',
-  },
-  document_extract_text: {
-    aliases: ['read document text', 'extract PDF text', 'DOCX text'],
-    scope: 'Content extraction for broad reading or summarization.',
-    overlapGroup: 'documents',
-    preferredFor: 'reading substantial document content',
-  },
-  document_search_text: {
-    aliases: ['search inside document', 'find phrase in PDF', 'document grep'],
-    scope: 'Targeted literal/regex search inside one document with bounded context.',
-    overlapGroup: 'documents',
-    preferredFor: 'finding a specific term, clause, name, heading, or error',
-  },
-  image_info: {
-    aliases: ['image dimensions', 'image format', 'image properties'],
-    scope: 'Pixel/format geometry and basic image properties.',
-    overlapGroup: 'images',
-    preferredFor: 'dimensions, format, color space, alpha, bit depth, and frame count',
-  },
-  image_metadata: {
-    aliases: ['EXIF', 'camera metadata', 'GPS metadata', 'image timestamp'],
-    scope: 'Embedded EXIF/XMP/ICC and camera/location metadata.',
-    overlapGroup: 'images',
-    preferredFor: 'camera, timestamp, GPS, orientation, and embedded metadata',
-  },
-
-  // Google: scalar/count tools versus record retrieval.
-  gmail_get_unread_count: {
-    aliases: ['unread email count', 'how many unread emails', 'unread inbox total'],
-    scope: 'Exact scalar unread message/thread counts.',
-    overlapGroup: 'gmail',
-    preferredFor: 'count-only unread questions',
-  },
-  gmail_search_messages: {
-    aliases: ['find email', 'search Gmail', 'list matching messages'],
-    scope: 'Returns matching message records, metadata, and snippets.',
-    overlapGroup: 'gmail',
-    preferredFor: 'locating or listing messages rather than scalar counts',
-  },
-  calendar_list_events: {
-    aliases: ['calendar agenda', 'upcoming meetings', 'calendar events'],
-    scope: 'Returns event records over a time range.',
-    overlapGroup: 'calendar',
-    preferredFor: 'agenda and event lookup',
-  },
-  calendar_freebusy: {
-    aliases: ['calendar availability', 'free busy', 'meeting conflicts'],
-    scope: 'Returns busy intervals without loading full event records.',
-    overlapGroup: 'calendar',
-    preferredFor: 'availability and scheduling-window checks',
-  },
-  drive_search_files: {
-    aliases: ['find Drive file', 'search Google Drive', 'locate document'],
-    scope: 'Locates Drive files/folders and returns metadata.',
-    overlapGroup: 'drive',
-    preferredFor: 'finding file IDs and matching Drive items',
-  },
-  drive_read_text: {
-    aliases: ['read Drive document', 'Drive file content', 'Google Docs text'],
-    scope: 'Reads textual content from a known Drive file ID.',
-    overlapGroup: 'drive',
-    preferredFor: 'reading the content of a known textual Drive item',
-  },
-});
-
-function cleanList(values) {
-  return [...new Set((values || []).map((v) => String(v).trim()).filter(Boolean))];
-}
-
+const entry = (description, aliases = [], overlapGroup) => ({description, aliases, ...(overlapGroup?{overlapGroup}:{})});
+const system = {
+  local_daily_briefing: entry('London Ontario daily briefing: current weather, seven-day forecast and CBC London headlines in a Markdown card.', ['morning briefing','London local weather news']),
+  docker_list_containers: entry('List Docker containers with names, state, health, ports and Compose service. Running containers by default.', ['docker ps','running containers']),
+  docker_inspect_container: entry('Inspect one Docker container: configuration, mounts, networks, environment and health.', ['container details']),
+  docker_container_logs: entry('Read recent stdout/stderr logs from a Docker container.', ['container startup errors']),
+  docker_container_stats: entry('Measure one Docker container’s CPU, memory, network and disk I/O.', ['container resource usage']),
+  docker_list_images: entry('List local Docker images, tags, IDs and sizes.', ['docker image inventory']),
+  docker_inspect_image: entry('Inspect a Docker image’s architecture, layers, entrypoint and labels.', ['image configuration']),
+  docker_list_networks: entry('List Docker virtual networks and their drivers.', ['container network inventory']),
+  docker_inspect_network: entry('Inspect one Docker network: IPAM subnets, attached containers and options.', ['docker bridge attachments']),
+  docker_list_volumes: entry('List Docker named volumes and storage drivers.', ['persistent container storage']),
+  docker_inspect_volume: entry('Inspect one Docker volume’s mountpoint, driver and labels.', ['volume location']),
+  docker_exec: entry('Execute a bounded command inside a named Docker container. Requires DOCKER_ALLOW_EXEC=true.', ['container command']),
+  docker_container_action: entry('Start, stop, restart, pause, unpause or kill a Docker container. Requires DOCKER_ALLOW_WRITE=true.', ['container lifecycle']),
+  docker_remove_container: entry('Delete a Docker container, optionally forced. Requires DOCKER_ALLOW_WRITE=true.', ['remove stopped container']),
+  docker_remove_image: entry('Delete a local Docker image by name or ID. Requires DOCKER_ALLOW_WRITE=true.', ['remove image tag']),
+  host_snapshot: entry('Summarize mounted-host health: OS, uptime, CPU load, memory and disk capacity.', ['host health overview'], 'host-health'),
+  host_cpu_info: entry('Read mounted-host CPU model, features, load and per-CPU counters.', ['processor capabilities'], 'host-health'),
+  host_memory_info: entry('Read mounted-host memory, cache, swap and commit accounting.', ['RAM pressure'], 'host-health'),
+  host_processes: entry('List mounted-host processes, sorted by memory, CPU, PID or name.', ['process inventory']),
+  host_process_info: entry('Inspect one mounted-host PID: status, command, threads, limits and file count.', ['process details']),
+  host_disk_usage: entry('Report capacity, used and free space for the mounted host filesystem.', ['disk full'], 'host-health'),
+  host_read_file: entry('Read a bounded diagnostic text file under mounted-host /etc, /proc, /sys, /var/log or /run.', ['host config file']),
+  network_dns_lookup: entry('Query one or multiple DNS record types, including PTR and CAA. Returns records grouped by type.', ['DNS records','mail policy TXT MX','reverse lookup']),
+  network_ping: entry('Measure ICMP reachability, loss and latency to a supplied host from the System container.', ['ping latency']),
+  network_trace_route: entry('Trace routed hops to a supplied host from the System container.', ['traceroute path']),
+  network_http_probe: entry('Fetch HTTP status, raw headers, redirects, timing and optional body from a URL using curl.', ['HTTP connectivity','response timing'], 'http'),
+  network_port_check: entry('Check whether a single TCP port accepts a connection from the System container.', ['TCP connection test']),
+  openwrt_targets: entry('List configured OpenWrt SSH target aliases. Start here when the router target is unknown.', ['configured routers','SSH aliases'], 'openwrt'),
+  openwrt_status: entry('Read OpenWrt router status: board, uptime, memory, routes and interface state from a known SSH target.', ['OpenWrt router health'], 'openwrt'),
+  openwrt_uci_show: entry('Read an OpenWrt UCI package or all UCI configuration from a known SSH target.', ['router config sections'], 'openwrt'),
+  openwrt_uci_get: entry('Read one OpenWrt UCI key from a known SSH target.', ['router config value'], 'openwrt'),
+  openwrt_ubus_call: entry('Call an OpenWrt ubus object/method on a known SSH target.', ['router ubus RPC'], 'openwrt'),
+  openwrt_logread: entry('Read recent OpenWrt system log lines from a known SSH target.', ['router logs'], 'openwrt'),
+  openwrt_wifi_status: entry('Read OpenWrt radio, SSID and associated-station metrics from a known SSH target.', ['router radio metrics'], 'openwrt'),
+  openwrt_clients: entry('Read DHCP leases, neighbors and associated stations from a known OpenWrt SSH target.', ['OpenWrt connected clients'], 'openwrt'),
+  openwrt_package_query: entry('List installed or available packages on a known OpenWrt SSH target.', ['router opkg packages'], 'openwrt'),
+  openwrt_service_action: entry('Control an OpenWrt service on a known SSH target. Requires OPENWRT_ALLOW_WRITE=true.', ['restart router service'], 'openwrt'),
+  openwrt_uci_set: entry('Set and optionally commit an OpenWrt UCI key on a known SSH target. Requires OPENWRT_ALLOW_WRITE=true.', ['change router setting'], 'openwrt'),
+  image_list: entry('List workspace images, optionally recursively.', ['list image files'], 'images'),
+  image_info: entry('Inspect image format, dimensions, color space, alpha and frames.', ['pixel geometry'], 'images'),
+  image_metadata: entry('Read embedded EXIF, XMP and ICC metadata, camera details and GPS tags.', ['photo metadata'], 'images'),
+  image_resize: entry('Resize an image or create a proportional thumbnail. Thumbnail mode defaults to shrinking only.', ['image thumbnail','scale image'], 'images'),
+  image_crop: entry('Crop a rectangular region from a workspace image and write a new image.', ['extract image region'], 'images'),
+  image_convert: entry('Encode a workspace image in another format with optional quality control.', ['image format conversion'], 'images'),
+  image_compare: entry('Compare two images using RMSE and optionally write a difference image.', ['pixel difference'], 'images'),
+  document_list: entry('List workspace documents, optionally including subdirectories.', ['find document files'], 'documents'),
+  document_info: entry('Inspect document format, file size and PDF metadata/page count.', ['document properties'], 'documents'),
+  document_extract_text: entry('Extract readable text from a workspace document for reading or summarization.', ['read PDF DOCX text'], 'documents'),
+  document_search_text: entry('Search document text for a phrase or regex and return matching context.', ['search inside document'], 'documents'),
+  document_convert: entry('Convert a document with Pandoc and write the requested output format.', ['document format conversion'], 'documents'),
+  document_render_pdf_page: entry('Render one PDF page to a PNG image at a chosen resolution.', ['PDF page preview'], 'documents'),
+};
+const security = {
+  status: entry('Check installed executables, host-helper availability, Firecrawl configuration and background-job capacity.', ['backend availability']),
+  firecrawl_scrape: entry('Fetch one web page as clean Markdown through the configured Firecrawl backend; credentials stay server-side.', ['website readable content'], 'web-content'),
+  firecrawl_map: entry('Enumerate website URLs through the configured Firecrawl backend.', ['website URL inventory'], 'web-content'),
+  subdomain_enum: entry('Find subdomains in public sources with passive Subfinder OSINT.', ['passive subdomains']),
+  exploit_search: entry('Search the local Exploit-DB catalogue by CVE or service version; returns references only.', ['Searchsploit lookup']),
+  exploit_source: entry('Read an Exploit-DB source excerpt by EDB ID for analysis.', ['review exploit code']),
+  sqlmap: entry('Run bounded SQL-injection detection or explicitly requested database-name enumeration on an authorized URL.', ['sqlmap injection test']),
+  metasploit_info: entry('Inspect a Metasploit module’s help and options.', ['msfconsole module details']),
+  metasploit_run: entry('Check or run a Metasploit module on one authorized target. Returns a background job ID for job_status.', ['Metasploit module execution']),
+  listener_start: entry('Start a bounded Netcat or Socat callback listener on a published container port. Returns a background job ID.', ['TCP callback listener']),
+  job_status: entry('Read a background job’s status and output page; continue using next_offset.', ['poll job output']),
+  job_send: entry('Send text to an existing interactive listener job.', ['write listener input']),
+  job_stop: entry('Stop a background job and its child processes.', ['cancel running job']),
+  jq: entry('Filter a workspace JSON or JSONL file with a bounded jq expression.', ['JSON query']),
+  pcap_analyze: entry('Analyze a saved PCAP with Tshark: protocol hierarchy, endpoint conversations or selected packet fields.', ['analyze PCAP','top talkers','packet field extraction'], 'pcap'),
+  suricata_test_rules: entry('Validate Suricata rules and optionally replay only those rules against a saved PCAP with hit statistics.', ['IDS rule testing'], 'pcap'),
+  osquery: entry('Run a read-only SQL query through osqueryi inside the Security container.', ['container osquery SQL']),
+  binary_analyze: entry('Inspect binary metadata, imports, exports, section strings, functions or disassembly using sandboxed Radare2.', ['binary structure analysis'], 'artifact'),
+  mdns_discover: entry('Probe mDNS/DNS-SD services on a specified target, or multicast within the Security-container namespace.', ['Zeroconf service TXT']),
+  upnp_discover: entry('Probe a target for UPnP/SSDP device metadata, or multicast within the Security-container namespace.', ['UPnP product description']),
+  dhcp_discover: entry('Read DHCP options using target DHCPINFORM, or broadcast within the Security-container namespace.', ['DHCP server options']),
+  dhcp6_discover: entry('Read DHCPv6 advertisements by multicast within the Security-container namespace.', ['DHCPv6 options']),
+  dns_audit: entry('Audit an authorized DNS server’s recursion, DNSSEC, NSID and optional AXFR zone-transfer behavior.', ['DNS server posture']),
+  snmp_discover: entry('Read SNMP system identification from an authorized target using bounded probes.', ['SNMP system metadata']),
+  snmp_interfaces: entry('Read interface addresses and link metadata exposed by an authorized SNMP target.', ['SNMP interface table']),
+  smb_audit: entry('Audit SMB dialects, signing and anonymous server metadata on an authorized target.', ['SMB signing posture']),
+  smb_shares: entry('Enumerate SMB shares and anonymous-access metadata on an authorized target.', ['SMB share permissions']),
+  ntp_discover: entry('Read NTP time, stratum, reference ID and implementation details from an authorized target.', ['NTP server information']),
+  ldap_discover: entry('Read LDAP RootDSE capabilities, naming contexts and authentication mechanisms from an authorized target.', ['directory server RootDSE']),
+  protocol_observe: entry('Passively observe LLDP, CDP or LLMNR/NBNS packets on a Security-container interface. Requires packet-capture permission.', ['passive protocol advertisements']),
+  wsd_discover: entry('Probe WS-Discovery endpoints on a specified target, or multicast within the Security-container namespace.', ['WSD printer endpoints']),
+  arp_discover: entry('Probe authorized IPv4 targets using ARP within the Security-container broadcast domain.', ['ARP neighbor sweep']),
+  ndp_discover: entry('Read the IPv6 neighbor cache of the Security-container namespace.', ['NDP cached neighbors']),
+  get_host_interface_info: entry('Start local network reconnaissance here: inspect the laptop’s physical Ethernet/Wi-Fi interfaces, addresses, gateway, DNS and link speed through the required host helper.', ['host network state','active laptop interfaces','network reconnaissance and mapping workflow'], 'network-recon'),
+  perform_network_discovery: entry('Discover and enumerate hosts on authorized local subnets through the required host helper. Full mode adds names, MAC/vendor, OS evidence, ports/services, shares and media devices.', ['LAN reconnaissance','comprehensive network discovery','reachable host inventory'], 'network-recon'),
+  analyze_network_topology: entry('Analyze physical network topology through the required host helper: subnets, routes, gateways, mDNS visibility and optional LLDP/CDP or peer-isolation evidence. Virtual interfaces and VLANs are excluded.', ['routing relationships','network segmentation'], 'network-recon'),
+  analyze_wireless_environment: entry('Assess laptop Wi-Fi through the required host helper: SSID/BSSID, signal, link rate, channel width, nearby access points and channel overlap. Passive cached observations by default.', ['passive wireless assessment','wifi survey','wireless network assessment'], 'network-recon'),
+  generate_graphical_network_map: entry('Render collected network reconnaissance data into Graphviz SVG and HTML topology maps. Pass returned observation_path values as input_paths; no JSON copying needed.', ['graphical network map','network mapping','topology diagram'], 'network-recon'),
+  port_scan: entry('Scan authorized TCP targets from the Security container. Enable service_detection for product/version fingerprints.', ['TCP open ports','service version detection']),
+  tls_audit: entry('Audit TLS protocol support, certificates and cipher suites on an authorized service.', ['SSL configuration']),
+  http_headers_audit: entry('Audit CSP, HSTS, frame protection and other HTTP response headers on an authorized URL.', ['web security headers'], 'http'),
+  web_server_audit: entry('Check an authorized web server for exposed files and risky defaults using bounded Nikto probes.', ['Nikto misconfiguration']),
+  vulnerability_scan: entry('Scan an authorized URL with bounded Nuclei CVE and misconfiguration templates.', ['known vulnerability detection']),
+  web_content_discover: entry('Probe paths on an authorized website using bounded ffuf requests and an explicit status-code filter.', ['web directory fuzzing']),
+  workspace_vuln_scan: entry('Scan workspace dependencies, IaC and secrets using Trivy; choose scanners to control coverage.', ['dependency vulnerabilities','configuration audit']),
+  secret_scan: entry('Scan current workspace files with Gitleaks for exposed credentials. Returns redacted findings; excludes Git history.', ['credential leak detection']),
+  code_scan: entry('Analyze workspace source for insecure coding patterns using Semgrep.', ['static application analysis']),
+  generate_sbom: entry('Inventory workspace software packages with Syft and optionally save a CycloneDX SBOM.', ['software bill of materials']),
+  yara_scan: entry('Match YARA rules against workspace files using bundled or supplied rules.', ['artifact pattern signatures'], 'artifact'),
+  malware_scan: entry('Scan workspace files with ClamAV and report detected signatures.', ['antivirus file scan'], 'artifact'),
+  file_hash: entry('Compute a workspace file’s SHA-256, SHA-512 or MD5 digest.', ['file integrity checksum'], 'artifact'),
+  file_strings: entry('Extract printable strings from the entire raw file, including data outside recognized binary sections.', ['raw artifact strings'], 'artifact'),
+  packet_capture: entry('Record bounded traffic on a Security-container interface into a workspace PCAP. Requires SECURITY_ALLOW_PACKET_CAPTURE=true.', ['tcpdump capture']),
+  network_interfaces: entry('Inspect Security-container interfaces and routes for container diagnostics or choosing a packet-capture interface.', ['container interface list']),
+  suricata_alerts: entry('Run Suricata IDS on a saved capture using the installed ruleset; return alert and event counts.', ['offline IDS alerts'], 'pcap'),
+  host_log_search: entry('Find text or regex matches in an allowlisted mounted-host /var/log file.', ['authentication log evidence']),
+  workspace_ioc_search: entry('Search workspace text files recursively for one literal indicator.', ['IOC scoping']),
+  host_audit: entry('Audit mounted-host filesystem hardening with Lynis and summarize warnings and suggestions.', ['host hardening review']),
+};
+const google = {
+  auth_status: entry('Check Google OAuth configuration and granted scopes; credentials remain server-side.', ['Google account authentication']),
+  gmail_get_unread_count: entry('Return exact unread Gmail message and thread counts.', ['how many unread emails'], 'gmail'),
+  gmail_search_messages: entry('Find Gmail messages with a query; return matching records, metadata and snippets.', ['find email'], 'gmail'),
+  gmail_get_message: entry('Read one Gmail message by ID, including headers and optional decoded body.', ['email content'], 'gmail'),
+  gmail_get_thread: entry('Read all messages in a Gmail conversation thread.', ['email conversation'], 'gmail'),
+  gmail_list_labels: entry('List Gmail system and user labels with their IDs.', ['mailbox labels'], 'gmail'),
+  gmail_create_draft: entry('Create an unsent Gmail draft. Requires Gmail writes and a matching OAuth scope.', ['draft email'], 'gmail'),
+  gmail_send_draft: entry('Send an existing Gmail draft by ID. Requires Gmail writes and a send scope.', ['send prepared email'], 'gmail'),
+  gmail_modify_labels: entry('Add or remove labels on a Gmail message. Requires Gmail writes.', ['archive mark read star'], 'gmail'),
+  calendar_list_calendars: entry('List accessible Google calendars and their IDs.', ['available calendars'], 'calendar'),
+  calendar_list_events: entry('List Google Calendar events in a time range with optional text filtering.', ['upcoming meetings','calendar agenda'], 'calendar'),
+  calendar_get_event: entry('Read one Google Calendar event’s complete details.', ['meeting details'], 'calendar'),
+  calendar_freebusy: entry('Read busy intervals for one or more calendars over a requested period.', ['calendar availability','meeting conflicts'], 'calendar'),
+  calendar_create_event: entry('Create a Google Calendar event. Requires Calendar writes and a matching OAuth scope.', ['schedule meeting'], 'calendar'),
+  calendar_update_event: entry('Update selected fields of an existing Google Calendar event. Requires Calendar writes.', ['reschedule event'], 'calendar'),
+  calendar_delete_event: entry('Delete a Google Calendar event. Requires Calendar writes.', ['cancel calendar event'], 'calendar'),
+  drive_search_files: entry('Find Google Drive files or folders and return IDs and metadata.', ['find Drive document'], 'drive'),
+  drive_get_file_metadata: entry('Read metadata for a known Google Drive file ID.', ['Drive file properties'], 'drive'),
+  drive_read_text: entry('Read text from a known Drive file or exportable Google document.', ['Google Docs content'], 'drive'),
+  drive_download_file: entry('Save a Drive file’s original bytes or export a Google document to the workspace.', ['download PDF image attachment'], 'drive'),
+  drive_create_folder: entry('Create a folder in Google Drive. Requires Drive writes.', ['new Drive folder'], 'drive'),
+  drive_upload_file: entry('Upload a workspace file to Google Drive. Requires Drive writes.', ['save file to Drive'], 'drive'),
+  drive_delete_file: entry('Delete a Google Drive file by ID. Requires Drive writes.', ['remove Drive file'], 'drive'),
+};
+export const TOOL_CATALOG = Object.freeze({...system,...security,...google});
+const DOMAINS = {system,security,google};
 export function decorateCatalogTools(tools, domain) {
-  return tools.map((tool) => {
-    const meta = TOOL_CATALOG[tool.name] || {};
-    const aliases = cleanList(meta.aliases);
-    const additions = [];
-    if (meta.scope) additions.push(`Scope: ${meta.scope}`);
-    if (meta.preferredFor) additions.push(`Best match: ${meta.preferredFor}.`);
-    if (aliases.length) additions.push(`Search terms: ${aliases.join(', ')}.`);
-    const description = additions.length ? `${tool.description} ${additions.join(' ')}` : tool.description;
-    return {
-      ...tool,
-      description,
-      _meta: {
-        ...(tool._meta || {}),
-        [META_KEY]: {
-          domain,
-          aliases,
-          scope: meta.scope || tool.inputSchema?.description || tool.description,
-          ...(meta.overlapGroup ? { overlapGroup: meta.overlapGroup } : {}),
-          preferredFor: meta.preferredFor || tool.inputSchema?.description || tool.description,
-        },
-      },
+  return tools.map(tool => {
+    const meta=DOMAINS[domain]?.[tool.name];
+    if(!meta) throw new Error(`Missing curated catalog entry: ${domain}.${tool.name}`);
+    const aliases=[...new Set(meta.aliases)];
+    const properties={...tool.inputSchema.properties};
+    if(domain==='system'&&tool.name.startsWith('openwrt_')&&properties.target) properties.target={...properties.target,description:'Configured SSH alias returned by openwrt_targets.'};
+    return {...tool,
+      description:meta.description+(aliases.length?` Aliases: ${aliases.join('; ')}.`:''),
+      // A short schema heading prevents the old full description being indexed a second time.
+      inputSchema:{...tool.inputSchema,properties,description:`Arguments for ${tool.name.replaceAll('_',' ')}.`},
+      _meta:{...tool._meta,'ai.catalog':{domain,aliases,scope:meta.description,preferredFor:meta.description,...(meta.overlapGroup?{overlapGroup:meta.overlapGroup}:{})}},
     };
   });
 }
-
 export function catalogMetadataFor(name, domain) {
-  const meta = TOOL_CATALOG[name] || {};
-  return { domain, ...meta, aliases: cleanList(meta.aliases) };
+  return {domain,...DOMAINS[domain]?.[name]};
 }
