@@ -1,7 +1,7 @@
 # Security CLI suite — 2026-10-01
 
 The security MCP now exposes **65 tools**, discovered through Pi's existing
-`mcp_search` / `mcp_call` gate. No additional native schemas are added to Pi's
+Pi's native deferred MCP/tool_search path. The full Security catalog stays outside Pi's
 standing prompt. The new CLI dependencies are installed during image build.
 
 ## What is available

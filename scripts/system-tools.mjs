@@ -7,6 +7,7 @@ import http from 'node:http';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { buildLondonDailyBriefing } from './local-briefing.mjs';
+import { decorateCatalogTools, SERVER_CATALOG } from './catalog-metadata.mjs';
 
 const execFileAsync = promisify(execFile);
 const WORKSPACE = path.resolve(process.env.MCP_WORKSPACE || '/workspace');
@@ -118,6 +119,7 @@ for (const tool of TOOLS) {
   };
 }
 
+const CATALOG_TOOLS = decorateCatalogTools(TOOLS, 'system');
 const toolMap = new Map(TOOLS.map(t => [t.name,t]));
 
 function clip(value, max=MAX_OUTPUT) {
@@ -364,9 +366,9 @@ async function handle(line){
   if(msg.method==='notifications/initialized' || msg.method==='notifications/cancelled') return;
   if(msg.id==null) return;
   try{
-    if(msg.method==='initialize') return response(msg.id,{protocolVersion:msg.params?.protocolVersion||'2025-06-18',capabilities:{tools:{listChanged:false}},serverInfo:{name:'local-system-tools',version:'1.0.0'}});
+    if(msg.method==='initialize') return response(msg.id,{protocolVersion:msg.params?.protocolVersion||'2025-06-18',capabilities:{tools:{listChanged:false}},serverInfo:{name:'local-system-tools',version:'1.0.0'},instructions:SERVER_CATALOG.system.description});
     if(msg.method==='ping') return response(msg.id,{});
-    if(msg.method==='tools/list') return response(msg.id,{tools:TOOLS});
+    if(msg.method==='tools/list') return response(msg.id,{tools:CATALOG_TOOLS});
     if(msg.method==='tools/call'){
       const name=msg.params?.name,args=msg.params?.arguments||{};
       if(!toolMap.has(name)) throw new Error(`unknown tool: ${name}`);

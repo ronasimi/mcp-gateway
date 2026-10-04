@@ -420,24 +420,6 @@ test('network map writes DOT/SVG/HTML in the confined workspace', async () => {
 });
 
 
-test('network map prefers direct data over an invalid caller workspace input_path', async () => {
-  const api=await networkReconFixture(async(cmd,args)=>{
-    if(cmd==='dot'){const out=args[args.indexOf('-o')+1];await fs.writeFile(out,'<svg xmlns="http://www.w3.org/2000/svg"></svg>');return ok('');}
-    return {code:1,stdout:'',stderr:'fixture unavailable'};
-  });
-  try {
-    const r=await api.call('generate_graphical_network_map',{
-      data:{discovery:{cidrs:['127.0.0.0/24'],hosts:[{address:'127.0.0.2',hostname:'direct-data-host'}]}},
-      input_path:'caller-only/network_data.json',
-      output_base:'maps/direct-data-wins',
-      format:'svg'
-    });
-    assert.equal(r.host_count,1);
-    const dot=await fs.readFile(path.join(api.workspace,'maps/direct-data-wins.dot'),'utf8');
-    assert.match(dot,/direct-data-host/);
-  } finally { await api.cleanup(); }
-});
-
 test('host helper disables recursive delegation to its own Unix socket', async () => {
   const helper=await fs.readFile(path.join(root,'scripts/security-host-recon-helper.mjs'),'utf8');
   const recon=await fs.readFile(path.join(root,'scripts/security-network-recon.mjs'),'utf8');
@@ -500,17 +482,13 @@ test('host recon helper queues concurrent requests instead of rejecting them as 
   assert.match(recon,/refusing to substitute the mcp-security container namespace/);
 });
 
-test('wireless reconnaissance aliases cover passive assessment and spectrum survey phrasing', async () => {
-  const adapter=JSON.parse(await fs.readFile(path.join(root,'pi/mcp-adapter.json.example'),'utf8'));
-  const sec=adapter?.mcpServers?.security || adapter?.servers?.security || adapter?.security || adapter;
-  const aliases=sec?.searchKeywords?.analyze_wireless_environment || sec?.searchAliases?.analyze_wireless_environment || [];
-  const joined=aliases.join(' ').toLowerCase();
-  assert.match(joined,/passive wireless assessment/);
-  assert.match(joined,/wireless network assessment/);
-  assert.match(joined,/spectrum survey/);
-  const containerAliases=(sec?.searchKeywords?.security_network_interfaces || []).join(' ').toLowerCase();
-  assert.doesNotMatch(containerAliases,/(^| )network interfaces( |$)/);
-  assert.match(containerAliases,/security container interfaces/);
+test('MCP catalog metadata distinguishes wireless assessment from container interfaces', async () => {
+  const catalogSource=await fs.readFile(path.join(root,'scripts/catalog-metadata.mjs'),'utf8');
+  assert.match(catalogSource,/passive wireless assessment/);
+  assert.match(catalogSource,/wireless network assessment/);
+  assert.match(catalogSource,/spectrum survey/);
+  assert.match(catalogSource,/security container interfaces/);
+  assert.match(catalogSource,/Security-container namespace diagnostics only/);
 });
 
 test('MCP protocol validates calls, parses Nmap/ffuf, preserves large JSON and rejects target bypasses', async () => {

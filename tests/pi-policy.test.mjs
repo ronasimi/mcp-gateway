@@ -1,26 +1,24 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
 
-const root = fileURLToPath(new URL('../', import.meta.url));
+const negative = /\b(do not|don't|never|avoid|must not|cannot|can't|without)\b/i;
 
-test('Pi bounded config enforces multi-step discovery completion and evidence grounding', async () => {
+test('Pi prompt is positive, compact, and keeps domain routing', async () => {
   const prompt = await fs.readFile(new URL('../pi/APPEND_SYSTEM.md', import.meta.url), 'utf8');
-  const searchDescription = await fs.readFile(new URL('../pi/MCP_SEARCH_DESCRIPTION.txt', import.meta.url), 'utf8');
-  const installer = await fs.readFile(new URL('../scripts/install-pi-bounded-config.sh', import.meta.url), 'utf8');
-  assert.match(prompt, /## Multi-step MCP completion/);
-  assert.match(prompt, /never a complete server catalog/i);
-  assert.match(prompt, /Search each still-outstanding capability separately before finalizing/i);
-  assert.match(prompt, /## Evidence grounding/);
-  assert.match(prompt, /Unknown stays unknown/i);
-  assert.match(prompt, /HE\/NSS\/GI are PHY fields/i);
-  assert.match(prompt, /runtime blocks that no-progress loop/i);
-  assert.match(prompt, /emit the tool call immediately/i);
-  assert.match(prompt, /dedicated wireless search\/call/i);
-  assert.match(prompt, /different workspaces/i);
-  assert.match(prompt, /direct `data`/i);
-  assert.match(searchDescription, /not a server catalog/i);
-  assert.match(searchDescription, /different outstanding capability/i);
-  assert.match(installer, /not a server catalog/i);
+  assert.doesNotMatch(prompt, negative);
+  assert.match(prompt, /Use the runtime's native tools and built-in tool discovery/);
+  assert.match(prompt, /Use Pi's built-in `tool_search`/);
+  for (const domain of ['security','system','playwright','searxng','google','memory']) {
+    assert.match(prompt, new RegExp('Use `'+domain+'` MCP capabilities'));
+  }
+});
+
+test('Pi MCP template uses native deferred exposure', async () => {
+  const cfg = JSON.parse(await fs.readFile(new URL('../pi/mcp.json.example', import.meta.url), 'utf8'));
+  assert.deepEqual(Object.keys(cfg), ['mcpServers']);
+  for (const [name, server] of Object.entries(cfg.mcpServers)) {
+    assert.equal(server.exposure, 'deferred', `${name} should use deferred native MCP exposure`);
+    assert.equal(typeof server.url, 'string');
+  }
 });

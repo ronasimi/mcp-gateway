@@ -10,6 +10,7 @@ import { runStatus as execute, confinedPath, validateArguments } from './securit
 import { EXTENDED_TOOLS, createExtendedSecurity } from './security-extended.mjs';
 import { PROTOCOL_TOOLS, PROTOCOL_TOOL_NAMES, createProtocolSecurity } from './security-protocols.mjs';
 import { NETWORK_RECON_TOOLS, NETWORK_RECON_TOOL_NAMES, NETWORK_RECON_ACTIVE_TOOL_NAMES, NETWORK_RECON_WORKSPACE_WRITES, createNetworkRecon } from './security-network-recon.mjs';
+import { decorateCatalogTools, SERVER_CATALOG } from './catalog-metadata.mjs';
 
 const WORKSPACE = path.resolve(process.env.MCP_WORKSPACE || '/workspace');
 const HOST_ROOT = path.resolve(process.env.MCP_HOST_ROOT || '/host');
@@ -74,6 +75,7 @@ for (const tool of TOOLS) {
     openWorldHint:OPEN_WORLD.has(tool.name),
   };
 }
+const CATALOG_TOOLS = decorateCatalogTools(TOOLS, 'security');
 const toolMap=new Map(TOOLS.map(t=>[t.name,t]));
 const extended = createExtendedSecurity({ runStatus, safeWorkspace, assertAuthorizedTarget, assertAuthorizedUrl });
 const protocol = createProtocolSecurity({ runStatus, assertAuthorizedTarget, requireActive, requireCapture });
@@ -321,4 +323,4 @@ async function encodeResult(value) {
 function response(id,result){process.stdout.write(JSON.stringify({jsonrpc:'2.0',id,result})+'\n');}
 function errorResponse(id,code,message,data){process.stdout.write(JSON.stringify({jsonrpc:'2.0',id,error:{code,message,...(data?{data}:{})}})+'\n');}
 let input=''; process.stdin.setEncoding('utf8'); process.stdin.on('data',chunk=>{input+=chunk; let idx; while((idx=input.indexOf('\n'))>=0){const line=input.slice(0,idx).trim(); input=input.slice(idx+1); if(line) handle(line);}});
-async function handle(line){let msg; try{msg=JSON.parse(line);}catch{return;} if(msg.method==='notifications/initialized'||msg.method==='notifications/cancelled')return; if(msg.id==null)return; try{if(msg.method==='initialize')return response(msg.id,{protocolVersion:msg.params?.protocolVersion||'2025-06-18',capabilities:{tools:{listChanged:false}},serverInfo:{name:'local-security-tools',version:'1.2.0'}}); if(msg.method==='ping')return response(msg.id,{}); if(msg.method==='tools/list')return response(msg.id,{tools:TOOLS}); if(msg.method==='tools/call'){const name=msg.params?.name,args=msg.params?.arguments||{}; if(!toolMap.has(name))throw new Error(`unknown tool: ${name}`); try{validateArguments(toolMap.get(name).inputSchema,args); const out=await callTool(name,args); return response(msg.id,{content:[{type:'text',text:await encodeResult(out)}],isError:false});}catch(e){return response(msg.id,{content:[{type:'text',text:clip(e?.message||String(e))}],isError:true});}} return errorResponse(msg.id,-32601,`Method not found: ${msg.method}`);}catch(e){return errorResponse(msg.id,-32603,e?.message||String(e));}}
+async function handle(line){let msg; try{msg=JSON.parse(line);}catch{return;} if(msg.method==='notifications/initialized'||msg.method==='notifications/cancelled')return; if(msg.id==null)return; try{if(msg.method==='initialize')return response(msg.id,{protocolVersion:msg.params?.protocolVersion||'2025-06-18',capabilities:{tools:{listChanged:false}},serverInfo:{name:'local-security-tools',version:'1.2.0'},instructions:SERVER_CATALOG.security.description}); if(msg.method==='ping')return response(msg.id,{}); if(msg.method==='tools/list')return response(msg.id,{tools:CATALOG_TOOLS}); if(msg.method==='tools/call'){const name=msg.params?.name,args=msg.params?.arguments||{}; if(!toolMap.has(name))throw new Error(`unknown tool: ${name}`); try{validateArguments(toolMap.get(name).inputSchema,args); const out=await callTool(name,args); return response(msg.id,{content:[{type:'text',text:await encodeResult(out)}],isError:false});}catch(e){return response(msg.id,{content:[{type:'text',text:clip(e?.message||String(e))}],isError:true});}} return errorResponse(msg.id,-32601,`Method not found: ${msg.method}`);}catch(e){return errorResponse(msg.id,-32603,e?.message||String(e));}}

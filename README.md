@@ -1,10 +1,12 @@
 # Local MCP gateway
 
-A local MCP stack for Pi with **bounded/semantic tool discovery**. The normal model prompt stays small: MCP tools are not exposed directly and are granted only after `mcp_search` finds a relevant capability.
+A local MCP stack for **stock Pi 1.0 native MCP + built-in `tool_search`**. Pi owns the agent loop and deferred tool loading. The MCP services own capability descriptions, catalog metadata, authorization, input bounds, and execution policy.
 
-## Multi-step MCP completion
+## Architecture
 
-Pi installs a completion/evidence contract with the bounded MCP gate: each explicitly requested capability must either have a successful relevant MCP call or its own exhausted discovery before finalization. `mcp_search` results are ranked matches for one query, never a complete server catalog, so unrelated outstanding capabilities require separate searches. Unknown/not-tested fields stay unknown; network synthesis must not infer remote attachment medium, topology links, Wi-Fi security from HE/NSS/GI, or stability from a single sample. The Pi runtime additionally blocks no-progress repeats of successful read-only MCP calls and performs one hidden continuation when a small model stops with reasoning only before emitting its intended tool call/final answer.
+Pi reads its normal `mcp.json` through upstream `builtin:mcp`. Each server is configured with `exposure: "deferred"`, so Pi's upstream `tool_search` discovers matching MCP tools and activates exact schemas on demand. This repository contains no Pi agent-loop extension and no custom Pi-side MCP gate.
+
+The owned System, Security, and Google MCP servers publish additional `ai.catalog` metadata plus concise searchable scope/alias text. The metadata distinguishes overlapping tools such as live-host sweep versus comprehensive discovery, container-network diagnostics versus host network state, scalar Gmail counts versus message search, and metadata inspection versus content extraction. Server-side authorization and bounded schemas remain the enforcement boundary.
 
 ## Services
 
@@ -15,26 +17,23 @@ Pi installs a completion/evidence contract with the bounded MCP gate: each expli
 | Memory MCP | `127.0.0.1:8932/mcp` | Persistent graph memory |
 | System Tools MCP | `127.0.0.1:8933/mcp` | Local briefing, Docker, host, network, OpenWrt, image, and document tools |
 | Google Workspace MCP | `127.0.0.1:8934/mcp` | Gmail, Calendar, and Drive account tools (optional) |
+| Security MCP | `127.0.0.1:8935/mcp` | Authorized security assessment and network reconnaissance |
 
-Containers on the external `ai-local` network use `mcp-searxng:8888`, `mcp-gateway:8931/8932`, and `mcp-system:8933`. When enabled, Google Workspace is `mcp-google:8934`.
+Containers on the external `ai-local` network use `mcp-searxng:8888`, `mcp-gateway:8931/8932`, and `mcp-system:8933`. When enabled, Google Workspace is `mcp-google:8934`; Security MCP is `mcp-security:8935`.
 
-## Bounded discovery
+## Native deferred discovery and catalog metadata
 
-`pi/mcp-adapter.json.example` deliberately sets `directTools: false` for every MCP server. The system-tools server advertises a broad catalog, but Pi only receives a bounded search result and per-turn grant for tools relevant to the current request.
+Pi's native `tool_search` searches deferred MCP tool definitions. The MCP catalog therefore optimizes tool names, descriptions, schema descriptions, aliases, and scope distinctions rather than teaching a custom search protocol in the Pi prompt.
 
-The catalog is optimized for semantic/lexical discovery in two layers:
+Owned MCP tools publish `_meta["ai.catalog"]` with:
 
-1. **Tool names and MCP descriptions** use explicit domain + action names such as `docker_container_logs`, `network_dns_lookup`, `openwrt_uci_get`, `image_resize`, and `document_extract_text`.
-2. **`searchKeywords` aliases** add likely user/model phrasing such as `docker logs`, `container error`, `router clients`, `wifi status`, `find in pdf`, `resize image`, `host memory`, and `port scan`.
+- `domain` — system, security, or google
+- `aliases` — high-value alternate capability phrasing (empty for tools that need no extra aliases)
+- `scope` — the tool's functional boundary
+- `overlapGroup` — present on related tools that need clear differentiation
+- `preferredFor` — concise selection guidance
 
-
-Large heterogeneous catalogs (`system`, `google`, and `security`) intentionally
-do **not** use a wildcard `searchKeywords["*"]` bucket. Broad server-wide aliases
-make every tool appear relevant to generic words such as `router` or `file`.
-Pi's bounded gate instead retrieves metadata candidates, applies per-tool alias
-reranking/family filtering, and expands schemas only for the top bounded results.
-
-This keeps all 54 system-tool schemas and all 23 Google Workspace schemas out of the steady-state prompt while making them easy for a small local model to retrieve. Tool definitions also include MCP read-only/destructive/idempotent/open-world annotations where applicable.
+For the most commonly confused tools, the same scope/alias information is appended to the normal MCP description so it participates in Pi's built-in lexical/BM25-style tool discovery even when a provider ignores custom `_meta`. Validate the catalog with `node scripts/validate-catalog.mjs`.
 
 ## System tools
 
@@ -235,7 +234,13 @@ The initializer:
 - builds/starts Google Workspace automatically when `secrets/google-oauth-client.json` exists;
 - runs the status checks.
 
-Then merge/copy `pi/mcp-adapter.json.example` into Pi's MCP adapter configuration, use `pi/APPEND_SYSTEM.md` as the bounded-discovery prompt fragment, and restart Pi. For the standard `~/Projects/pi-docker` layout, `./scripts/install-pi-bounded-config.sh` backs up and updates both files and also patches the older native `mcp_search` description when that source is present on the host.
+For the standard `~/Projects/pi-docker` layout, install the stock Pi prompt/native MCP configuration and upgrade Pi with:
+
+```bash
+./scripts/deploy-stock-pi-1.0.sh ~/Projects/pi-docker
+```
+
+The deploy helper validates the MCP catalogs, rebuilds the owned MCP services that publish catalog metadata, copies `pi/APPEND_SYSTEM.md` and `pi/mcp.json.example` into the Pi Docker repo, then invokes Pi's stock 1.0 upgrade script. Existing Pi/Web UI bind mounts stay in place.
 
 ## Workspace
 
@@ -306,9 +311,9 @@ secrets/          OAuth client JSON + token-encryption key (ignored by git)
 
 ## Security MCP
 
-`mcp-security` exposes a bounded red-team/blue-team security toolkit at `http://mcp-security:8935/mcp`. Schemas remain behind `mcp_search` (`directTools=false`). Active network/web tools are limited to private or explicitly allowlisted targets by default; typed sqlmap, Metasploit and listener operations are available alongside the scanners.
+`mcp-security` exposes a bounded red-team/blue-team security toolkit at `http://mcp-security:8935/mcp`. Pi registers the server through native deferred MCP exposure, while Security MCP itself enforces private/allowlisted target policy, typed schemas, runtime bounds, and write/capture gates. Active network/web tools are limited to private or explicitly allowlisted targets by default; typed sqlmap, Metasploit and listener operations are available alongside the scanners.
 
-Core active tools include Nmap discovery/port/service scans, TLS auditing, HTTP security-header checks, Nikto, Nuclei, ffuf content discovery, DNS enumeration/auditing, and dedicated mDNS/DNS-SD, UPnP/SSDP, DHCP/DHCPv6, SNMP, SMB, NTP, LDAP, WS-Discovery, ARP and IPv6 NDP inspection. Passive LLDP, CDP and LLMNR/NBNS observation is also available when packet capture is enabled. Five high-level network-recon tools (`get_host_interface_info`, `perform_network_discovery`, `analyze_network_topology`, `analyze_wireless_environment`, `generate_graphical_network_map`) orchestrate these primitives for newly connected client networks; an optional systemd host helper gives them the laptop's real network namespace over a Unix socket without exposing another MCP TCP endpoint. See `docs/NETWORK-RECON-MCP.md`. Pi callers should pass map inputs as direct `data`; `input_path` is confined to the `mcp-security` workspace, and direct data takes precedence when both are supplied. Defensive tools include Trivy, Gitleaks, Semgrep, Syft SBOMs, YARA, ClamAV, tshark/PCAP analysis, optional tcpdump capture, Suricata offline IDS, host log search, IOC search, and Lynis hardening review.
+Core active tools include Nmap discovery/port/service scans, TLS auditing, HTTP security-header checks, Nikto, Nuclei, ffuf content discovery, DNS enumeration/auditing, and dedicated mDNS/DNS-SD, UPnP/SSDP, DHCP/DHCPv6, SNMP, SMB, NTP, LDAP, WS-Discovery, ARP and IPv6 NDP inspection. Passive LLDP, CDP and LLMNR/NBNS observation is also available when packet capture is enabled. Five high-level network-recon tools (`get_host_interface_info`, `perform_network_discovery`, `analyze_network_topology`, `analyze_wireless_environment`, `generate_graphical_network_map`) orchestrate these primitives for newly connected client networks; an optional systemd host helper gives them the laptop's real network namespace over a Unix socket without exposing another MCP TCP endpoint. See `docs/NETWORK-RECON-MCP.md`. Defensive tools include Trivy, Gitleaks, Semgrep, Syft SBOMs, YARA, ClamAV, tshark/PCAP analysis, optional tcpdump capture, Suricata offline IDS, host log search, IOC search, and Lynis hardening review.
 
 Key controls:
 
@@ -338,24 +343,13 @@ node scripts/validate-catalog.mjs
 ./scripts/status.sh
 ```
 
-Install the updated Pi bounded-discovery configuration with:
+Install the stock Pi 1.0 native MCP configuration with:
 
 ```bash
-./scripts/install-pi-bounded-config.sh ~/Projects/pi-docker
+./scripts/install-pi-stock-config.sh ~/Projects/pi-docker
 ```
 
-### Pi / WhiteRabbitNeo prompt compatibility
-
-The Pi addendum distinguishes domain knowledge from runtime execution tools so security-oriented models do not answer a request for a security-tool wishlist with Pi's internal `read`/`bash`/`mcp_*` interfaces. It also forbids inventing model provider, cutoff, or family metadata.
-
-`./scripts/install-pi-bounded-config.sh ~/Projects/pi-docker` now also attempts to patch two known native Pi prompt strings in the host checkout, while backing up every changed source file with a timestamped `.bak.*` suffix:
-
-- the generic `expert coding assistant` preamble becomes model-neutral;
-- the native `mcp_search` description advertises `security`, `system`, `google`, `playwright`, `searxng`, and `memory`.
-
-Reference replacements are stored in `pi/BASE_PREAMBLE.txt` and `pi/MCP_SEARCH_DESCRIPTION.txt`. If your Pi version generates those strings elsewhere, use the reference files to update that source manually.
-
-For the manually selected WhiteRabbitNeo security model, `pi/Modelfile.whiterabbitneo` provides the recommended 16K-context system prompt. It identifies the local role without claiming a remote provider and tells the model to distinguish security knowledge from executable runtime tools.
+`pi/APPEND_SYSTEM.md` is deliberately compact and action-oriented. It uses positive instructions for native tool discovery, evidence handling, authorization, credentials, state changes, and responses. The domain-routing section remains for now so a small local model can associate requests with `security`, `system`, `playwright`, `searxng`, `google`, and `memory` while Pi's built-in `tool_search` resolves the exact deferred tool.
 ### Security image package sources
 
 `mcp-security` is based on Debian Bookworm. Its Dockerfile enables `non-free` for Nikto and `bookworm-backports` for Suricata explicitly; no host APT configuration is required.
@@ -370,6 +364,20 @@ The security catalog now has 65 tools. See [SECURITY-SUITE.md](docs/SECURITY-SUI
 
 Physical-interface filtering now requires Linux sysfs device backing (`/sys/class/net/<iface>/device`) for non-Wi-Fi Ethernet interfaces; `iw` remains authoritative for Wi-Fi. This deliberately fails closed on ambiguous software links so automatic reconnaissance does not scan virtual/container networks.
 
-### v10 Pi/map integration
+## Stock Pi 1.0 integration
 
-Pi callers should not write `network_data.json` in the Pi workspace and pass that path to the Security MCP. `input_path` is relative to the `mcp-security` workspace only. The updated Pi bounded gate passes exact prior recon outputs directly through `data`, and the map renderer now prefers non-empty direct `data` over `input_path` when both are supplied. For the v12 Pi workflow hardening, use `scripts/deploy-workflow-v12.sh ~/Projects/pi-docker` after updating both repos. It validates the gateway/catalog, syncs the canonical Pi prompt/MCP metadata, runs the focused Pi regressions, rebuilds Pi, and verifies the runtime. No `mcp-security` rebuild is required because v12 changes only Pi orchestration plus gateway-owned Pi metadata.
+Pi-side orchestration is intentionally upstream-native. `scripts/install-pi-stock-config.sh` installs the positive `APPEND_SYSTEM.md` and a native `mcp.json` whose servers use `exposure: "deferred"`. Pi 1.0's built-in `tool_search` discovers deferred MCP tools; the MCP servers own catalog quality, authorization bounds, descriptions, schemas, and metadata.
+
+Owned System, Security, and Google tools include `_meta["ai.catalog"]` metadata with domain, aliases, scope, overlap group, and preferred use. Ambiguous tool families also append concise scope/search terms to their MCP descriptions so Pi's lexical/BM25 tool search can distinguish narrow diagnostics from comprehensive operations.
+
+## Deploy this migration
+
+Install both updated source trees, then run:
+
+```bash
+./scripts/deploy-stock-pi-1.0.sh ~/Projects/pi-docker
+```
+
+This validates the gateway, rebuilds System and Security (plus Google when configured/running), merges all six native MCP domains into the existing Pi configuration, and upgrades Pi. The merge retains custom server entries, endpoint URLs, authentication headers, timeouts, and explicit disabled states. Source archives omit credentials and runtime state.
+
+Pi itself remains stock 1.0.0. Pi Web UI 0.97.0 needs a narrow compatibility adjustment to load the official MCP/tool-search factories and preserve deferred activation during settings reloads; the Pi image checks the exact upstream source hashes before applying it. Start a new conversation after deployment.

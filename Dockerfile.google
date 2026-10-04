@@ -13,6 +13,7 @@ RUN apt-get update \
     && command -v supergateway
 
 COPY scripts/google-common.mjs /opt/mcp/google-common.mjs
+COPY scripts/catalog-metadata.mjs /opt/mcp/catalog-metadata.mjs
 COPY scripts/google-tools.mjs /opt/mcp/google-tools.mjs
 COPY scripts/google-auth.mjs /opt/mcp/google-auth.mjs
 

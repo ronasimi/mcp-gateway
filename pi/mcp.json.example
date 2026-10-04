@@ -1,0 +1,40 @@
+{
+  "mcpServers": {
+    "searxng": {
+      "url": "http://mcp-searxng:8888/mcp/",
+      "exposure": "deferred",
+      "description": "Current public information, web search, news and source discovery.",
+      "timeout": 30
+    },
+    "playwright": {
+      "url": "http://mcp-gateway:8931/mcp",
+      "exposure": "deferred",
+      "description": "Interactive websites, browser navigation, page actions and screenshots.",
+      "timeout": 60
+    },
+    "memory": {
+      "url": "http://mcp-gateway:8932/mcp",
+      "exposure": "deferred",
+      "description": "Durable graph memory: store, search and retrieve user-requested knowledge.",
+      "timeout": 30
+    },
+    "system": {
+      "url": "http://mcp-system:8933/mcp",
+      "exposure": "deferred",
+      "description": "Host diagnostics, Docker, network administration, OpenWrt, images, documents and London local weather/news briefing.",
+      "timeout": 120
+    },
+    "google": {
+      "url": "http://mcp-google:8934/mcp",
+      "exposure": "deferred",
+      "description": "Authenticated Gmail, Google Calendar and Google Drive with server-side credentials.",
+      "timeout": 120
+    },
+    "security": {
+      "url": "http://mcp-security:8935/mcp",
+      "exposure": "deferred",
+      "description": "Authorized security assessment, host/LAN reconnaissance, topology, wireless, vulnerability analysis, packet/log inspection and incident response.",
+      "timeout": 330
+    }
+  }
+}

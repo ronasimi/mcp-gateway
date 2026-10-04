@@ -80,7 +80,7 @@ docker compose pull mcp-searxng
 echo "Building Playwright + Memory gateway image..."
 docker compose build --pull mcp-gateway
 
-echo "Building bounded system-tools MCP image..."
+echo "Building system-tools MCP image..."
 docker compose build --pull mcp-system
 
 echo "Building security CLI suite..."

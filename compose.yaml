@@ -74,8 +74,8 @@ services:
     networks:
       - ai-local
 
-  # Privileged/local diagnostics MCP. All schemas stay behind Pi bounded
-  # discovery (directTools=false). Host/Docker access is isolated here.
+  # Privileged/local diagnostics MCP. Schemas are discovered through Pi native deferred MCP/tool_search.
+  # Host/Docker access and execution policy are isolated here.
   mcp-system:
     build:
       context: .

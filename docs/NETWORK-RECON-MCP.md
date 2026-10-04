@@ -1,15 +1,15 @@
 # High-level network reconnaissance MCP tools
 
-The Security MCP exposes five high-level tools for assessing a newly connected Ethernet or Wi-Fi network. They remain behind Pi's bounded `mcp_search` gate; adding them does not add their schemas to every model prompt.
+The Security MCP exposes five high-level tools for assessing a newly connected Ethernet or Wi-Fi network. Pi registers them with native deferred MCP exposure, so built-in `tool_search` activates matching schemas on demand rather than placing the full catalog in the steady-state prompt.
 
 ## Architecture
 
 ```text
 Pi / model
    |
-   | mcp_search(server="security") -> mcp_call
+   | Pi builtin tool_search -> exact deferred MCP tool
    v
-mcp-security (Docker, existing bounded MCP server)
+mcp-security (Docker, server-side bounded execution policy)
    |\
    | +-- Graphviz dot -> shared /workspace maps
    |
@@ -196,19 +196,19 @@ These are the JSON definitions returned by `tools/list` for the five tools (befo
   },
   {
     "name": "generate_graphical_network_map",
-    "description": "Generate Graphviz DOT/SVG and optional self-contained HTML from aggregated network-recon JSON. The map distinguishes known wired/wireless links, shows gateway/Internet relationships, link speed when known, and annotates hosts with hostname, OS, open ports, shares, and media services. Prefer direct data. input_path refers only to the mcp-security workspace, never the caller/Pi workspace.",
+    "description": "Generate Graphviz DOT/SVG and optional self-contained HTML from aggregated network-recon JSON. The map distinguishes known wired/wireless links, shows gateway/Internet relationships, link speed when known, and annotates hosts with hostname, OS, open ports, shares, and media services. Provide either data directly or a workspace JSON input_path.",
     "inputSchema": {
       "type": "object",
-      "description": "Generate Graphviz DOT/SVG and optional self-contained HTML from aggregated network-recon JSON. The map distinguishes known wired/wireless links, shows gateway/Internet relationships, link speed when known, and annotates hosts with hostname, OS, open ports, shares, and media services. Prefer direct data. input_path refers only to the mcp-security workspace, never the caller/Pi workspace.",
+      "description": "Generate Graphviz DOT/SVG and optional self-contained HTML from aggregated network-recon JSON. The map distinguishes known wired/wireless links, shows gateway/Internet relationships, link speed when known, and annotates hosts with hostname, OS, open ports, shares, and media services. Provide either data directly or a workspace JSON input_path.",
       "properties": {
         "data": {
           "type": "object",
-          "description": "Preferred input: aggregated object containing exact outputs from get_host_interface_info, perform_network_discovery, analyze_network_topology and/or analyze_wireless_environment.",
+          "description": "Aggregated object containing outputs from get_host_interface_info, perform_network_discovery, analyze_network_topology and/or analyze_wireless_environment.",
           "additionalProperties": true
         },
         "input_path": {
           "type": "string",
-          "description": "Optional mcp-security-workspace-relative JSON file containing aggregated network data. This is not a Pi/native caller workspace path; callers such as Pi should prefer data."
+          "description": "Workspace-relative JSON file containing aggregated network data."
         },
         "output_base": {
           "type": "string",
@@ -264,9 +264,6 @@ Uses `iw` and `nmcli` for the normal path: current association, BSSID/SSID, sign
 `airodump-ng` is optional. The tool **never** creates monitor mode, changes an interface type, injects frames, sends deauthentication frames, or captures credentials. When `use_airodump=true`, the caller must supply an already-existing `monitor_interface`, and packet capture must be enabled.
 
 ### `generate_graphical_network_map`
-
-When Pi is the caller, do not create a native Pi workspace `network_data.json` and pass it as `input_path`; the two containers do not share that path. The Pi bounded gate automatically aggregates successful host/discovery/topology/wireless results and injects them into `data`. The server also prefers a non-empty `data` object over `input_path` when both are present.
-
 
 Accepts aggregated JSON directly or from a workspace JSON file. It writes Graphviz `.dot`, SVG, and optionally a self-contained HTML rendering in the normal MCP workspace. The rendered topology uses Internet/gateway/AP infrastructure nodes, dashed subnet/VLAN group boxes, and per-client annotations for IP/hostname, MAC, OS evidence, open ports, shares and media services. Known Wi-Fi links are dashed; known wired links are solid; link rate is shown when available. The result is a logical topology unless LLDP/CDP, router/AP station data, or other evidence establishes physical links.
 

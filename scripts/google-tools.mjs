@@ -13,6 +13,7 @@ import {
   base64UrlDecode,
   quoteDriveLiteral,
 } from './google-common.mjs';
+import { decorateCatalogTools, SERVER_CATALOG } from './catalog-metadata.mjs';
 
 const MAX_OUTPUT = Number(process.env.GOOGLE_TOOLS_MAX_OUTPUT || 65536);
 const GMAIL_WRITE = /^(1|true|yes)$/i.test(process.env.GOOGLE_GMAIL_WRITE || 'false');
@@ -257,6 +258,7 @@ for (const tool of TOOLS) {
   };
 }
 
+const CATALOG_TOOLS = decorateCatalogTools(TOOLS, 'google');
 const toolMap = new Map(TOOLS.map(t => [t.name, t]));
 
 function requireGate(enabled, name, envName) {
@@ -607,9 +609,9 @@ async function handle(line) {
   if (msg.method === 'notifications/initialized' || msg.method === 'notifications/cancelled') return;
   if (msg.id == null) return;
   try {
-    if (msg.method === 'initialize') return response(msg.id, { protocolVersion: msg.params?.protocolVersion || '2025-06-18', capabilities: { tools: { listChanged: false } }, serverInfo: { name: 'local-google-workspace-tools', version: '1.0.0' } });
+    if (msg.method === 'initialize') return response(msg.id, { protocolVersion: msg.params?.protocolVersion || '2025-06-18', capabilities: { tools: { listChanged: false } }, serverInfo: { name: 'local-google-workspace-tools', version: '1.0.0' }, instructions: SERVER_CATALOG.google.description });
     if (msg.method === 'ping') return response(msg.id, {});
-    if (msg.method === 'tools/list') return response(msg.id, { tools: TOOLS });
+    if (msg.method === 'tools/list') return response(msg.id, { tools: CATALOG_TOOLS });
     if (msg.method === 'tools/call') {
       const name = msg.params?.name;
       const args = msg.params?.arguments || {};
