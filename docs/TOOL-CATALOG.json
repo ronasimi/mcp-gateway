@@ -3586,7 +3586,7 @@
         "properties": {
           "interface": {
             "type": "string",
-            "description": "Host network interface name such as eth0, enp1s0, wlan0, or wlp2s0.",
+            "description": "Optional host network interface. Omit to auto-select; reuse selected_interface.",
             "maxLength": 64
           },
           "internet_check": {
@@ -3636,7 +3636,7 @@
           },
           "interface": {
             "type": "string",
-            "description": "Host network interface name such as eth0, enp1s0, wlan0, or wlp2s0.",
+            "description": "Optional host network interface. Omit to auto-select; reuse selected_interface.",
             "maxLength": 64
           },
           "detail": {
@@ -3723,7 +3723,7 @@
         "properties": {
           "interface": {
             "type": "string",
-            "description": "Host network interface name such as eth0, enp1s0, wlan0, or wlp2s0.",
+            "description": "Optional host network interface. Omit to auto-select; reuse selected_interface.",
             "maxLength": 64
           },
           "peer_targets": {
@@ -3781,7 +3781,7 @@
         "properties": {
           "interface": {
             "type": "string",
-            "description": "Host network interface name such as eth0, enp1s0, wlan0, or wlp2s0.",
+            "description": "Optional host network interface. Omit to auto-select; reuse selected_interface.",
             "maxLength": 64
           },
           "rescan": {
@@ -3794,7 +3794,7 @@
           },
           "monitor_interface": {
             "type": "string",
-            "description": "Host network interface name such as eth0, enp1s0, wlan0, or wlp2s0.",
+            "description": "Optional host network interface. Omit to auto-select; reuse selected_interface.",
             "maxLength": 64
           },
           "duration_seconds": {
@@ -3845,7 +3845,7 @@
           },
           "input_paths": {
             "type": "array",
-            "description": "Observation artifact paths returned by earlier host tools; merges their data without copying JSON. Include every discovery page.",
+            "description": "Nonempty observation artifact paths returned by successful saves; omit data and input_path when using this field; merges their data without copying JSON. Include every discovery page.",
             "items": {
               "type": "string",
               "description": "Security workspace observation JSON path."

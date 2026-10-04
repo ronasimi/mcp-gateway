@@ -20,6 +20,7 @@ echo '[deploy] update the required host reconnaissance helper'
 
 echo '[deploy] owned MCP catalogs: system + security'
 docker compose build mcp-system mcp-security
+./scripts/prepare-security-results.sh
 docker compose up -d --no-deps --force-recreate mcp-system mcp-security
 
 # Google is optional. Rebuild/recreate it only when configured or already running.

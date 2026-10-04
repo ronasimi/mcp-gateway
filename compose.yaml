@@ -185,8 +185,8 @@ services:
         source: ${MCP_WORKSPACE_PATH:-./data/workspace}
         target: /workspace
       - ./data/security:/data/security
-      # Optional host-network recon helper socket. If the helper is not running,
-      # the four host-observation recon tools fall back to the container namespace; map rendering stays local to mcp-security.
+      # Required host-network recon helper socket. Missing helpers fail explicitly;
+      # map rendering stays local to mcp-security.
       - type: bind
         source: ${SECURITY_HOST_RECON_DIR:-/run/mcp-security-host}
         target: /run/mcp-security-host

@@ -14,7 +14,7 @@ const arr = (description, items, extra={}) => ({ type:'array', description, item
 const anyObject = description => ({ type:'object', description, additionalProperties:true });
 const tool = (name, description, properties={}, required=[]) => ({ name, description, inputSchema:obj(description, properties, required) });
 
-const iface = str('Host network interface name such as eth0, enp1s0, wlan0, or wlp2s0.', { maxLength:64 });
+const iface = str('Optional host network interface. Omit to auto-select; reuse selected_interface.', { maxLength:64 });
 const cidr = str('Authorized private/allowlisted IPv4 CIDR such as 192.168.1.0/24.', { maxLength:64 });
 
 export const NETWORK_RECON_TOOLS = [
@@ -59,7 +59,7 @@ export const NETWORK_RECON_TOOLS = [
     {
       data:anyObject('Aggregated object containing outputs from get_host_interface_info, perform_network_discovery, analyze_network_topology and/or analyze_wireless_environment.'),
       input_path:str('Workspace-relative JSON file containing aggregated network data.'),
-      input_paths:arr('Observation artifact paths returned by earlier host tools; merges their data without copying JSON. Include every discovery page.',str('Security workspace observation JSON path.'),{minItems:1,maxItems:128}),
+      input_paths:arr('Nonempty observation artifact paths returned by successful saves; omit data and input_path when using this field; merges their data without copying JSON. Include every discovery page.',str('Security workspace observation JSON path.'),{minItems:1,maxItems:128}),
       output_base:str('Workspace-relative output basename without extension; default .security-results/network-map.',{maxLength:240}),
       format:str('Map output format.',{enum:['svg','html','both']}),
       title:str('Optional map title; maximum 120 characters.',{maxLength:120})
@@ -265,7 +265,7 @@ export function createNetworkRecon(ctx){
   }
   function chooseInterface(state,requested){
     const req=validInterface(requested);
-    if(req){if(!state.physicalNames.has(req))throw new Error(`interface is virtual/non-physical or unavailable: ${req}`);return req;}
+    if(req){if(!state.physicalNames.has(req))throw new Error(`interface is virtual/non-physical or unavailable: ${req}. Available physical interfaces: ${[...state.physicalNames].join(', ')||'none'}. Retry get_host_interface_info with {} to select automatically.`);return req;}
     const d=state.routes.find(r=>r.dst==='default'&&r.dev&&state.physicalNames.has(r.dev))?.dev;if(d)return d;
     return state.addresses.find(x=>state.physicalNames.has(x.ifname)&&x.operstate==='UP')?.ifname||state.addresses.find(x=>state.physicalNames.has(x.ifname))?.ifname||null;
   }
@@ -505,6 +505,14 @@ export function createNetworkRecon(ctx){
     }
   }
   async function call(name,a={}){
+    if(NETWORK_RECON_HOST_TOOL_NAMES.has(name)&&ctx.disableHostDelegation!==true){
+      try{
+        const dir=safeWorkspace('.security-results/observations');
+        await fsp.mkdir(dir,{recursive:true});
+        const probe=await fsp.mkdtemp(path.join(dir,'.write-check-'));
+        try{await fsp.writeFile(path.join(probe,'probe'),'ok',{mode:0o600});}finally{await fsp.rm(probe,{recursive:true,force:true});}
+      }catch(error){throw new Error(`Observation storage unavailable before host operation: ${error.message}. Run scripts/prepare-security-results.sh in the gateway repository, then retry. No host scan was started.`);}
+    }
     const result=await execute(name,a);
     if(NETWORK_RECON_HOST_TOOL_NAMES.has(name)&&ctx.disableHostDelegation!==true){
       try{
@@ -514,7 +522,7 @@ export function createNetworkRecon(ctx){
         const file=path.join(folder,name+'.json');
         await fsp.writeFile(file,JSON.stringify({[name]:result}),{mode:0o600});
         return {...result,observation_path:path.relative(workspaceRoot,file),map_hint:'Pass observation_path values from this workflow to generate_graphical_network_map.input_paths. No JSON reconstruction required.'};
-      }catch(error){return {...result,observation_save_error:error.message};}
+      }catch(error){return {...result,observation_path:null,observation_save_error:error.message,map_ready:false,map_hint:'Storage failed after observation. Repair the Security results directory. Never pass empty input_paths or empty data to the map tool; collected results remain available here.'};}
     }
     return result;
   }

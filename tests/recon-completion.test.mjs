@@ -27,3 +27,10 @@ test('delegated observations persist as distinct artifacts and map without JSON 
   await assert.rejects(api.call('generate_graphical_network_map',{input_paths:['../escape.json']}),/outside|escape|workspace/i);
  }finally{if(prior===undefined)delete process.env.SECURITY_HOST_RECON_SOCKET;else process.env.SECURITY_HOST_RECON_SOCKET=prior;transport.mock.restore();await fs.rm(dir,{recursive:true,force:true});}
 });
+
+test('storage preflight stops before delegated discovery when results cannot be created',async()=>{
+ const dir=await fs.mkdtemp(path.join(os.tmpdir(),'recon-storage-'));
+ await fs.writeFile(path.join(dir,'.security-results'),'not a directory');
+ const api=createNetworkRecon({safeWorkspace:(p,o)=>confinedPath(dir,p,o),runStatus:async()=>{throw Error('must not scan');},assertAuthorizedTarget:async x=>x,requireActive:()=>{},requireCapture:()=>{}});
+ try{await assert.rejects(api.call('perform_network_discovery'),/Observation storage unavailable before host operation.*prepare-security-results.sh.*No host scan was started/);}finally{await fs.rm(dir,{recursive:true,force:true});}
+});

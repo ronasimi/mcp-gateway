@@ -66,3 +66,11 @@ Begin discovery with the concrete next operation, using limit: 1. For host recon
 Wireless signal_percent is a percentage and signal_dbm is dBm. Nearby BSSID counts describe visible access points, not clients or measured utilization.
 
 When an operation remains, emit its tool call in the current response. End the task with a visible evidence-based report, including concrete failures and generated outputs; a statement of intended next action does not complete it.
+
+# Host recon recovery and attribution
+
+Call get_host_interface_info with {} first: interface is optional and selected automatically. If a supplied interface is rejected, retry once with {} or use an interface actually returned by the host helper. Pi Bash and /sys/class/net describe Pi’s container; use the host helper for laptop interfaces.
+
+Check observation_save_error and observation_path before rendering. Supply exactly one populated map input: input_paths, input_path, or data. A storage error needs repair; empty arrays and empty objects are not observations.
+
+The laptop’s Wi-Fi attachment does not establish how other hosts connect. Keep each device connection unknown unless device-specific evidence identifies it. Take laptop addresses, default gateway and DNS from host-state fields; treat DNS service banners as service identification only. Report only ports returned for that device. Nmap OS matches are estimates. Hostname resolution alone does not prove advertised mDNS services.

@@ -301,7 +301,7 @@ test('high-level recon filters virtual interfaces and routes from physical-netwo
     assert.deepEqual(r.default_routes.map(x=>x.interface),['wlan0']);
     assert.deepEqual(r.ignored_virtual_interfaces.map(x=>x.name).sort(),['br-deadbeef','docker0','veth1234']);
     assert.ok(api.calls.every(c=>!(c.command==='ethtool'&&['docker0','br-deadbeef','veth1234'].includes(c.args[0]))));
-    await assert.rejects(api.call('get_host_interface_info',{interface:'docker0',internet_check:false}),/virtual\/non-physical/);
+    await assert.rejects(api.call('get_host_interface_info',{interface:'docker0',internet_check:false}),/Available physical interfaces: wlan0.*Retry get_host_interface_info/);
   } finally { await api.cleanup(); }
 });
 
