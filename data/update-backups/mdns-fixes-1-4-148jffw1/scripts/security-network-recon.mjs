@@ -199,15 +199,6 @@ function extractShareMedia(host){
 export function mdnsReportView(result={}){
     const metaKeys=['transport','diagnostics','packets_received','malformed_packets','queries_sent','query_limit','query_limit_reached','queries_suppressed_by_limit','record_limit_reached','limited','ipv6_transport'];
     const meta={};for(const key of metaKeys)if(result[key]!==undefined)meta[key]=result[key];
-    const reportHosts=(result.report_hosts||[]).map(host=>{
-      const {packet_source_addresses:_packetSources,...compact}=host||{};
-      return compact;
-    });
-    const reportCandidates=(result.report_candidate_networks||[]).map(candidate=>{
-      const {scan_automatically:_scanAutomatically,...compact}=candidate||{};
-      return compact;
-    });
-    const outside=(result.evidence||[]).map(item=>({address:item.address,hostname:item.hostname}));
     return {
       scope:result.scope,
       selected_interface:result.selected_interface,
@@ -217,25 +208,15 @@ export function mdnsReportView(result={}){
       coverage:result.coverage,
       coverage_limitations:[...(result.coverage_limitations||[])],
       evidence_available:result.evidence_available,
-      report_host_count:result.report_host_count??reportHosts.length,
-      report_hosts:reportHosts,
-      report_candidate_networks:reportCandidates,
-      outside_subnet_advertisements:outside,
-      outside_subnet_reason:outside.length?'Advertised address is outside known selected-interface subnets; multihoming or stale advertisements are alternative explanations.':null,
+      report_host_count:result.report_host_count??(result.report_hosts||[]).length,
+      report_hosts:[...(result.report_hosts||[])],
+      report_candidate_networks:[...(result.report_candidate_networks||[])],
+      outside_subnet_advertisements:[...(result.evidence||[])],
       possible_reflection:result.possible_reflection,
       reflector_confirmed:result.reflector_confirmed===true,
       reflection_status:result.reflection_status,
       subnet_masks_advertised:result.subnet_masks_advertised===true,
       scan_performed:result.scan_performed===true,
-      reporting_contract:{
-        copy_report_rows_exactly:true,
-        preserve_hostname_strings:true,
-        preserve_ip_strings:true,
-        preserve_address_count_strings:true,
-        do_not_abbreviate_ipv6:true,
-        do_not_recompute_counts:true,
-        raw_records_are_audit_only:true,
-      },
       raw_audit_evidence_saved:result.raw_audit_evidence_saved===true,
       raw_records_returned:false,
       ...meta,
