@@ -22,8 +22,3 @@ Apply the supplied update to the gateway and Pi repositories. Reinstall the host
 ## Validation
 
 Gateway tests: 73 passed, one environment-dependent UID-switch test skipped. Native Pi SDK: all 138 owned tools connected, 24 intent queries and exact-name lookup passed. Unit fixtures cover A/AAAA/PTR/SRV parsing, malformed DNS/compression loops, TTL-zero withdrawals, socket errors, IPv4 /23 and IPv6 range arithmetic, local/route/heuristic distinctions, and absence of automatic scanning. Live laptop multicast delivery remains to be tested after installation.
-
-
-## Reporting language
-
-The compact projection is also authoritative for terminology. `report_candidate_networks[].classification` is derived from `basis`: `local_interface` → `local-interface prefix`; `known_route` → `route-covered candidate range (mask unconfirmed)`; `heuristic` → `heuristic candidate range (mask unknown)`. Only `local_interface` candidates may be called local subnets/local prefixes in prose. The term `outside-subnet advertisement` applies only to exact `{address, hostname}` pairs in `outside_subnet_advertisements`; do not infer it from private address space, candidate membership, or UDP packet-source addresses.
