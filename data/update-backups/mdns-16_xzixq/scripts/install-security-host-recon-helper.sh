@@ -84,7 +84,6 @@ UNIT
 sudo install -d -m 0755 /opt/mcp-security-host
 sudo install -m 0755 "$ROOT/scripts/security-host-recon-helper.mjs" /opt/mcp-security-host/security-host-recon-helper.mjs
 sudo install -m 0644 "$ROOT/scripts/security-network-recon.mjs" /opt/mcp-security-host/security-network-recon.mjs
-sudo install -m 0644 "$ROOT/scripts/mdns-subnets.mjs" /opt/mcp-security-host/mdns-subnets.mjs
 sudo install -m 0644 "$ROOT/scripts/security-runtime.mjs" /opt/mcp-security-host/security-runtime.mjs
 sudo install -m 0644 "$tmp" "$UNIT"
 sudo systemctl daemon-reload

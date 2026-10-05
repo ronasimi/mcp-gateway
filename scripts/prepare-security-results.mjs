@@ -10,7 +10,7 @@ export async function prepareResults(root, {uid, gid, provision=false}={}) {
     try {await fs.mkdir(dir,{mode:0o750});} catch(error) {if(error.code!=='EEXIST')throw error;}
     const stat=await fs.lstat(dir);
     if(stat.isSymbolicLink()||!stat.isDirectory())throw Error(`Refusing non-directory or symlink: ${relative}`);
-    if(provision){await fs.chown(dir,uid,gid);await fs.chmod(dir,0o750);}
+    if(provision){await fs.chown(dir,uid,gid);await fs.chmod(dir,0o2750);}
   }
   const probe=await fs.mkdtemp(path.join(base,'.security-results/observations/.write-check-'));
   try{await fs.writeFile(path.join(probe,'probe'),'ok',{mode:0o600});}finally{await fs.rm(probe,{recursive:true,force:true});}

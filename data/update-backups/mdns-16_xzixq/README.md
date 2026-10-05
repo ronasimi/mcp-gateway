@@ -312,7 +312,7 @@ secrets/          OAuth client JSON + token-encryption key (ignored by git)
 
 `mcp-security` exposes a bounded red-team/blue-team security toolkit at `http://mcp-security:8935/mcp`. Pi registers the server through native deferred MCP exposure, while Security MCP itself enforces private/allowlisted target policy, typed schemas, runtime bounds, and write/capture gates. Active network/web tools are limited to private or explicitly allowlisted targets by default; typed sqlmap, Metasploit and listener operations are available alongside the scanners.
 
-Core active tools include Nmap discovery/port/service scans, TLS auditing, HTTP security-header checks, Nikto, Nuclei, ffuf content discovery, DNS enumeration/auditing, and dedicated mDNS/DNS-SD, UPnP/SSDP, DHCP/DHCPv6, SNMP, SMB, NTP, LDAP, WS-Discovery, ARP and IPv6 NDP inspection. Passive LLDP, CDP and LLMNR/NBNS observation is also available when packet capture is enabled. Six high-level network-recon tools (`discover_mdns_subnets`, `get_host_interface_info`, `perform_network_discovery`, `analyze_network_topology`, `analyze_wireless_environment`, `generate_graphical_network_map`) orchestrate these primitives for newly connected client networks; a required systemd host helper gives them the laptop's real network namespace over a Unix socket without exposing another MCP TCP endpoint. See `docs/NETWORK-RECON-MCP.md`. Defensive tools include Trivy, Gitleaks, Semgrep, Syft SBOMs, YARA, ClamAV, tshark/PCAP analysis, optional tcpdump capture, Suricata offline IDS, host log search, IOC search, and Lynis hardening review.
+Core active tools include Nmap discovery/port/service scans, TLS auditing, HTTP security-header checks, Nikto, Nuclei, ffuf content discovery, DNS enumeration/auditing, and dedicated mDNS/DNS-SD, UPnP/SSDP, DHCP/DHCPv6, SNMP, SMB, NTP, LDAP, WS-Discovery, ARP and IPv6 NDP inspection. Passive LLDP, CDP and LLMNR/NBNS observation is also available when packet capture is enabled. Five high-level network-recon tools (`get_host_interface_info`, `perform_network_discovery`, `analyze_network_topology`, `analyze_wireless_environment`, `generate_graphical_network_map`) orchestrate these primitives for newly connected client networks; a required systemd host helper gives them the laptop's real network namespace over a Unix socket without exposing another MCP TCP endpoint. See `docs/NETWORK-RECON-MCP.md`. Defensive tools include Trivy, Gitleaks, Semgrep, Syft SBOMs, YARA, ClamAV, tshark/PCAP analysis, optional tcpdump capture, Suricata offline IDS, host log search, IOC search, and Lynis hardening review.
 
 Key controls:
 
@@ -388,11 +388,3 @@ Topology preserves partial results when capture is unavailable. Wireless units a
 ## Dedicated agent workspace
 
 Pi uses `pi-docker/workspace` as `/workspace`. The complete installer aligns the MCP workspace and retains files in the old location. See `docs/WORKSPACE-UPDATE.md`.
-
-## Office and PDF tools
-
-System MCP now provides `pdf_read`, `pdf_write`, `office_read`, `office_edit`, and `office_export`. See `docs/SYSTEM-DOCUMENT-TOOLS.md` for formats, examples, deployment and validation limits.
-
-## Subnet leads from mDNS
-
-Use `discover_mdns_subnets` to collect host-side advertised addresses and candidate network ranges. No candidate is scanned automatically, and heuristic prefixes remain explicit hypotheses. See `docs/MDNS-SUBNETS.md`.

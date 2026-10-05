@@ -19,7 +19,7 @@ function rpc(server,requests,env={},imports=[]){
 const call=(name,args={})=>({method:'tools/call',params:{name,arguments:args}});
 
 test('every owned catalog has concise unique names and retires duplicate wrappers',()=>{
- const counts={system:56,security:59,google:23};
+ const counts={system:51,security:58,google:23};
  const retired=['host_network_info','network_scan_ports','image_thumbnail','network_discover','service_detect','dns_records','pcap_fields','pcap_summary','pcap_conversations','lldp_observe','cdp_observe','llmnr_nbns_observe'];
  for(const [server,count] of Object.entries(counts)){
   const tools=rpc(server,[{method:'tools/list'}])[0].result.tools;

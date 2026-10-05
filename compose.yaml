@@ -151,6 +151,8 @@ services:
         METASPLOIT_VERSION: ${METASPLOIT_VERSION:-6.5.3~20260818061200~1rapid7-1}
     image: local/agent-mcp-security:latest
     container_name: mcp-security
+    # Shared artifacts are readable by the Pi container (GID 1000).
+    group_add: ["1000"]
     restart: unless-stopped
 
     environment:

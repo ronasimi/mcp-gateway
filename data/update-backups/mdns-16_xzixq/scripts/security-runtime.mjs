@@ -60,11 +60,6 @@ export function confinedPath(root, relative = '.', { mustExist = false } = {}) {
 }
 
 export function validateArguments(schema, value, name = 'arguments') {
-  if (Array.isArray(schema.type)) {
-    for (const type of schema.type) { try { validateArguments({...schema,type},value,name); return; } catch {} }
-    throw new Error(`${name} must match one of ${schema.type.join(', ')}`);
-  }
-  if (schema.type === 'null') { if(value !== null) throw new Error(`${name} must be null`); return; }
   if (schema.type === 'object') {
     if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error(`${name} must be an object`);
     for (const key of schema.required ?? []) if (!(key in value)) throw new Error(`${name}.${key} is required`);

@@ -102,7 +102,7 @@ COPY scripts/install-security-extras.sh /opt/mcp/install-security-extras.sh
 COPY scripts/catalog-metadata.mjs /opt/mcp/catalog-metadata.mjs
 COPY config/metasploit-release.asc /opt/mcp/metasploit-release.asc
 RUN sh /opt/mcp/install-security-extras.sh
-COPY scripts/security-tools.mjs scripts/security-runtime.mjs scripts/security-extended.mjs scripts/security-protocols.mjs scripts/security-network-recon.mjs scripts/mdns-subnets.mjs /opt/mcp/
+COPY scripts/security-tools.mjs scripts/security-runtime.mjs scripts/security-extended.mjs scripts/security-protocols.mjs scripts/security-network-recon.mjs /opt/mcp/
 COPY scripts/prepare-security-results.mjs /opt/mcp/prepare-security-results.mjs
 COPY scripts/smoke-security.mjs /opt/mcp/smoke-security.mjs
 COPY security-rules/default.yar /opt/security/rules/default.yar

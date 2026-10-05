@@ -74,3 +74,9 @@ Call get_host_interface_info with {} first: interface is optional and selected a
 Check observation_save_error and observation_path before rendering. Supply exactly one populated map input: input_paths, input_path, or data. A storage error needs repair; empty arrays and empty objects are not observations.
 
 The laptop’s Wi-Fi attachment does not establish how other hosts connect. Keep each device connection unknown unless device-specific evidence identifies it. Take laptop addresses, default gateway and DNS from host-state fields; treat DNS service banners as service identification only. Report only ports returned for that device. Nmap OS matches are estimates. Hostname resolution alone does not prove advertised mDNS services.
+
+# Recon evidence handoff
+
+Wireless analysis is passive-only: omit rescan or use false. duration_seconds only applies to requested airodump capture; cached state is not a timed survey. Preserve observation_path and completion fields even in truncated envelopes. Include every collected host, discovery, topology (including partial) and wireless observation path in map input_paths. Inspect missing_observations and warnings before reporting completion; add omitted paths from this workflow and render again when needed. Use the saved observation rather than its preview.
+
+Report mDNS unavailable/not_tested as such. An empty service list leaves reflector absence unproven. Virtual interfaces are excluded, so empty VLAN results leave segmentation unknown. Remote wired/wireless attachment requires device-specific evidence; device names, OS guesses and the laptop connection leave it unknown. Nmap OS fingerprints remain estimates. DNS banners identify DNS services only; DHCP and virtual-host roles need separate evidence. Describe only returned map features and paths; HTML supports zoom and scrolling, not topology editing. Use the configured workspace and loaded instructions for initialization.

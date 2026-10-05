@@ -13,10 +13,15 @@ cd "$ROOT"
 echo '[validate] MCP tests and catalog metadata'
 node --test tests/*.test.mjs
 python3 tests/config-merge-test.py
+python3 tests/workspace-config-test.py
 node scripts/validate-catalog.mjs
 
 echo '[deploy] update the required host reconnaissance helper'
 ./scripts/install-security-host-recon-helper.sh
+
+echo '[deploy] repository-local shared workspace'
+MCP_WORKSPACE_PATH="$(python3 scripts/configure-pi-workspace.py "$ROOT" "$PI_DOCKER_DIR")"
+export MCP_WORKSPACE_PATH
 
 echo '[deploy] owned MCP catalogs: system + security'
 docker compose build mcp-system mcp-security

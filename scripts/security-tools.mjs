@@ -9,7 +9,7 @@ import { isIP, BlockList } from 'node:net';
 import { runStatus as execute, confinedPath, validateArguments } from './security-runtime.mjs';
 import { EXTENDED_TOOLS, createExtendedSecurity } from './security-extended.mjs';
 import { PROTOCOL_TOOLS, PROTOCOL_TOOL_NAMES, createProtocolSecurity } from './security-protocols.mjs';
-import { NETWORK_RECON_TOOLS, NETWORK_RECON_TOOL_NAMES, NETWORK_RECON_ACTIVE_TOOL_NAMES, NETWORK_RECON_WORKSPACE_WRITES, createNetworkRecon } from './security-network-recon.mjs';
+import { resultEnvelope, NETWORK_RECON_TOOLS, NETWORK_RECON_TOOL_NAMES, NETWORK_RECON_ACTIVE_TOOL_NAMES, NETWORK_RECON_WORKSPACE_WRITES, createNetworkRecon } from './security-network-recon.mjs';
 import { decorateCatalogTools, SERVER_CATALOG } from './catalog-metadata.mjs';
 
 const WORKSPACE = path.resolve(process.env.MCP_WORKSPACE || '/workspace');
@@ -293,8 +293,8 @@ async function encodeResult(value) {
   const rel=`.security-results/${crypto.randomUUID()}.json`;
   const file=safeWorkspace(rel);
   await fsp.mkdir(path.dirname(file),{recursive:true});
-  await fsp.writeFile(file,encoded+'\n',{mode:0o600});
-  return JSON.stringify({truncated:true,output_file:rel,total_bytes:Buffer.byteLength(encoded),preview:encoded.slice(0,Math.max(128,Math.floor(MAX_OUTPUT/8)))});
+  await fsp.writeFile(file,encoded+'\n',{mode:0o640});
+  return JSON.stringify(resultEnvelope(value,rel,Buffer.byteLength(encoded),encoded.slice(0,Math.max(128,Math.floor(MAX_OUTPUT/8)))));
 }
 
 function response(id,result){process.stdout.write(JSON.stringify({jsonrpc:'2.0',id,result})+'\n');}
