@@ -10,8 +10,8 @@ test('active wireless rescan rejected before commands or delegation',async()=>{
  await assert.rejects(api.call('analyze_wireless_environment',{rescan:true}),/Passive-only/);
 });
 test('truncation preserves observation paths and incomplete pagination',()=>{
- const r=resultEnvelope({observation_path:'wifi.json',report_path:'wifi-report.json',read_hint:'read report_path',status:'observed',coverage:'partial',complete:false,next_offset:64,observation_mode:'passive-cached'},'raw.json',20000,'preview');
- assert.equal(r.observation_path,'wifi.json');assert.equal(r.report_path,'wifi-report.json');assert.equal(r.read_hint,'read report_path');assert.equal(r.status,'observed');assert.equal(r.coverage,'partial');assert.equal(r.complete,false);assert.equal(r.next_offset,64);assert.equal(r.observation_mode,'passive-cached');
+ const r=resultEnvelope({observation_path:'wifi.json',complete:false,next_offset:64,observation_mode:'passive-cached'},'raw.json',20000,'preview');
+ assert.equal(r.observation_path,'wifi.json');assert.equal(r.complete,false);assert.equal(r.next_offset,64);assert.equal(r.observation_mode,'passive-cached');
 });
 test('raw wireless accepted; empty, arbitrary and preview JSON rejected',()=>{
  assert(normalizeReconInput({current_connection:{connected:true},nearby_access_points:[]}).analyze_wireless_environment);

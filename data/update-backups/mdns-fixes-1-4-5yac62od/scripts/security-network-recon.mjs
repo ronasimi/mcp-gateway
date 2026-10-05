@@ -20,8 +20,8 @@ const cidr = str('Authorized private/allowlisted IPv4 CIDR such as 192.168.1.0/2
 
 export const NETWORK_RECON_TOOLS = [
   tool('discover_mdns_subnets',
-    'Browse DNS-SD on the laptop physical interface using direct mDNS UDP queries. Returns a compact model-facing report_hosts/report_candidate_networks projection while saving full raw DNS audit evidence at observation_path and a compact recovery artifact at report_path. DNS-advertised A/AAAA addresses remain separate from UDP packet_source_addresses and service instances are joined through exact SRV targets. Identifies advertised addresses outside local subnets and groups candidate networks with address ranges. Local prefixes are confirmed; routes describe routing coverage; /24 and /64 fallbacks are explicit hypotheses. If status is unavailable, empty evidence arrays mean collection did not occur and are not proof that hosts, candidate ranges, or reflection are absent. Never scans inferred ranges or confirms a reflector.',
-    {interface:iface, duration_seconds:integer('Observation window; default 8, maximum 30 seconds.',3,30), max_records:integer('Maximum advertised records; default 256.',16,512), max_queries:integer('Maximum unique DNS-SD follow-up queries; default 96, maximum 256. Reaching the cap marks coverage partial.',16,256), ipv4_candidate_prefix:integer('Fallback IPv4 grouping prefix; default 24. Not an observed mask.',20,32), ipv6_candidate_prefix:integer('Fallback IPv6 grouping prefix; default 64. Not an observed mask.',48,128)}),
+    'Browse DNS-SD on the laptop physical interface using direct mDNS UDP queries. Returns raw DNS records plus normalized advertised_hosts/services that keep DNS-advertised A/AAAA addresses separate from UDP packet_source_addresses and join service instances through SRV targets. Identifies advertised addresses outside local subnets and groups candidate networks with address ranges. Local prefixes are confirmed; routes describe routing coverage; /24 and /64 fallbacks are explicit hypotheses. If status is unavailable, empty evidence arrays mean collection did not occur and are not proof that hosts, candidate ranges, or reflection are absent. Never scans inferred ranges or confirms a reflector.',
+    {interface:iface, duration_seconds:integer('Observation window; default 8, maximum 30 seconds.',3,30), max_records:integer('Maximum advertised records; default 256.',16,512), ipv4_candidate_prefix:integer('Fallback IPv4 grouping prefix; default 24. Not an observed mask.',20,32), ipv6_candidate_prefix:integer('Fallback IPv6 grouping prefix; default 64. Not an observed mask.',48,128)}),
   tool('get_host_interface_info',
     'Host network-state inventory for a laptop connected to a new Ethernet or Wi-Fi network. Only physical Ethernet/Wi-Fi interfaces are eligible; Docker bridges, veth pairs, VPN/tunnel devices, VLANs and other virtual interfaces are excluded. Reports active/default interfaces, wired vs wireless type, IPv4/IPv6 addresses, routes/default gateway, link speed, Wi-Fi association metadata when available, and a bounded external-connectivity check. Host visibility requires the security host-recon helper; an unavailable helper produces an error.',
     { interface:iface, internet_check:bool('Check default-route, DNS-resolution, and one ICMP reachability probe to a fixed public resolver; default true.') }),
@@ -194,33 +194,6 @@ function extractShareMedia(host){
   const shares=[];for(const s of scripts){if(s.id==='smb-enum-shares'){for(const m of s.output.matchAll(/(?:^|\n)\s*([^\n:]{1,120}):\s*$/g))shares.push({type:'smb',name:m[1].trim()});}if(/nfs-showmount|rpcinfo/.test(s.id)){for(const line of s.output.split(/\r?\n/).map(x=>x.trim()).filter(Boolean)){if(line.startsWith('/'))shares.push({type:'nfs',name:line.split(/\s+/)[0]});}}}
   const media=[];for(const p of host.ports||[]){const text=`${p.service||''} ${p.product||''}`;if(MEDIA_PORTS.includes(p.port)||/plex|minidlna|dlna|upnp|jellyfin|emby/i.test(text))media.push({port:p.port,protocol:p.protocol,service:p.service,product:p.product});}
   return{shares:[...new Map(shares.map(x=>[`${x.type}:${x.name}`,x])).values()],media_services:media};
-}
-
-export function mdnsReportView(result={}){
-    const metaKeys=['transport','diagnostics','packets_received','malformed_packets','queries_sent','query_limit','query_limit_reached','queries_suppressed_by_limit','record_limit_reached','limited','ipv6_transport'];
-    const meta={};for(const key of metaKeys)if(result[key]!==undefined)meta[key]=result[key];
-    return {
-      scope:result.scope,
-      selected_interface:result.selected_interface,
-      status:result.status,
-      available:result.available,
-      complete:result.complete,
-      coverage:result.coverage,
-      coverage_limitations:[...(result.coverage_limitations||[])],
-      evidence_available:result.evidence_available,
-      report_host_count:result.report_host_count??(result.report_hosts||[]).length,
-      report_hosts:[...(result.report_hosts||[])],
-      report_candidate_networks:[...(result.report_candidate_networks||[])],
-      outside_subnet_advertisements:[...(result.evidence||[])],
-      possible_reflection:result.possible_reflection,
-      reflector_confirmed:result.reflector_confirmed===true,
-      reflection_status:result.reflection_status,
-      subnet_masks_advertised:result.subnet_masks_advertised===true,
-      scan_performed:result.scan_performed===true,
-      raw_audit_evidence_saved:result.raw_audit_evidence_saved===true,
-      raw_records_returned:false,
-      ...meta,
-    };
 }
 
 export function createNetworkRecon(ctx){
@@ -408,7 +381,7 @@ export function createNetworkRecon(ctx){
     requireActive();
     const state=await networkState(),dev=chooseInterface(state,a.interface);
     const selected=state.addresses.find(x=>x.ifname===dev),address=selected?.addr_info?.find(x=>x.family==='inet')?.local;
-    let observation;try{observation=await (ctx.collectMdns||collectMdns)({address,durationSeconds:a.duration_seconds||8,maxRecords:a.max_records||256,maxQueries:a.max_queries||96});}catch(error){observation={records:[],raw_records:[],available:false,complete:false,coverage:'unavailable',status:'unavailable',diagnostics:error.message};}
+    let observation;try{observation=await (ctx.collectMdns||collectMdns)({address,durationSeconds:a.duration_seconds||8,maxRecords:a.max_records||256});}catch(error){observation={records:[],raw_records:[],available:false,complete:false,coverage:'unavailable',status:'unavailable',diagnostics:error.message};}
     const rawRecords=observation.raw_records||observation.records||[],normalized=normalizeMdnsRecords(rawRecords);
     const routes6=await optional('ip',['-j','-6','route','show'],{timeout:10000,maxBuffer:2*1024*1024});
     const inferred=inferMdnsSubnets(rawRecords,{interface:dev,interfaces:state.addresses.filter(i=>state.physicalNames.has(i.ifname)),routes:[...state.routes,...toJson(routes6.stdout,[])].filter(r=>r.dev===dev),ipv4Prefix:a.ipv4_candidate_prefix??24,ipv6Prefix:a.ipv6_candidate_prefix??64});
@@ -451,7 +424,6 @@ export function createNetworkRecon(ctx){
       raw_records:rawRecords,
     };
   }
-
   async function browseMdns(dev,seconds){
     const result=await mdnsSubnets({interface:dev,duration_seconds:seconds});
     const services=(result.services||[]).flatMap(service=>service.advertised_addresses.map(a=>({interface:dev,protocol:a.family===4?'IPv4':'IPv6',name:service.instance,type:service.service_types[0]||null,domain:'local',hostname:service.target_hostname,address:a.address,port:service.port,txt:service.txt,packet_source_addresses:service.packet_source_addresses})));
@@ -604,21 +576,8 @@ export function createNetworkRecon(ctx){
         await fsp.chmod(folder,0o2750);
         const file=path.join(folder,name+'.json');
         await fsp.writeFile(file,JSON.stringify({[name]:result}),{mode:0o640});
-        const observationPath=path.relative(workspaceRoot,file);
-        if(name==='discover_mdns_subnets'){
-          const reportFile=path.join(folder,name+'-report.json');
-          const reportPath=path.relative(workspaceRoot,reportFile);
-          const report={...mdnsReportView({...result,raw_audit_evidence_saved:true}),observation_path:observationPath,report_path:reportPath};
-          report.read_hint='If this direct response is truncated, read report_path. Do not read output_file or observation_path unless raw DNS audit evidence is explicitly needed.';
-          report.map_hint='Use observation_path for maps/audit. The direct result and report_path are compact reporting projections; do not read the raw observation unless audit records are explicitly needed.';
-          await fsp.writeFile(reportFile,JSON.stringify({discover_mdns_subnets_report:report}),{mode:0o640});
-          return report;
-        }
-        return {...result,observation_path:observationPath,map_hint:'Pass observation_path values from this workflow to generate_graphical_network_map.input_paths. No JSON reconstruction required.'};
-      }catch(error){
-        if(name==='discover_mdns_subnets')return {...mdnsReportView({...result,raw_audit_evidence_saved:false}),observation_path:null,report_path:null,observation_save_error:error.message,map_ready:false,read_hint:'Compact mDNS findings remain available in this response; raw DNS audit storage failed.',map_hint:'Storage failed after observation. Repair the Security results directory before using this observation for maps/audit.'};
-        return {...result,observation_path:null,observation_save_error:error.message,map_ready:false,map_hint:'Storage failed after observation. Repair the Security results directory. Never pass empty input_paths or empty data to the map tool; collected results remain available here.'};
-      }
+        return {...result,observation_path:path.relative(workspaceRoot,file),map_hint:name==='discover_mdns_subnets'?'Read the saved artifact for advertised addresses and candidate ranges. Candidate ranges do not authorize scans.':'Pass observation_path values from this workflow to generate_graphical_network_map.input_paths. No JSON reconstruction required.'};
+      }catch(error){return {...result,observation_path:null,observation_save_error:error.message,map_ready:false,map_hint:'Storage failed after observation. Repair the Security results directory. Never pass empty input_paths or empty data to the map tool; collected results remain available here.'};}
     }
     return result;
   }
@@ -648,7 +607,7 @@ export function normalizeReconInput(data){
 
 export function resultEnvelope(value,outputFile,totalBytes,preview){
   const result={truncated:true,output_file:outputFile,total_bytes:totalBytes};
-  for(const key of ['observation_path','report_path','read_hint','observation_save_error','map_ready','map_hint','status','available','coverage','coverage_limitations','evidence_available','complete','next_offset','observation_mode','observation_duration_seconds','duration_note','outputs','included_observations','missing_observations','warnings','evidence_notes'])if(value[key]!==undefined)result[key]=value[key];
+  for(const key of ['observation_path','observation_save_error','map_ready','map_hint','complete','next_offset','observation_mode','observation_duration_seconds','duration_note','outputs','included_observations','missing_observations','warnings','evidence_notes'])if(value[key]!==undefined)result[key]=value[key];
   return {...result,preview};
 }
 
