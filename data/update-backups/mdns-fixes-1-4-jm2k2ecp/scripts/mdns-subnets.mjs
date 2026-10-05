@@ -43,28 +43,6 @@ function serviceTypeFromInstance(instance) {
 // `advertised_addresses` are DNS A/AAAA RDATA. `packet_source_addresses` are
 // UDP peer addresses that sent records and must never be presented as the
 // advertised host address unless a DNS record independently says so.
-function txtFields(txt=[]) {
-  const out={};
-  for(const item of txt||[]){
-    const m=String(item).match(/^([^=]{1,64})=(.*)$/);
-    if(m&&!Object.hasOwn(out,m[1]))out[m[1]]=m[2];
-  }
-  return out;
-}
-function addressScope(address) {
-  if(isIP(address)===4){
-    if(contains(address,'169.254.0.0/16'))return 'link_local';
-    if(privateAddress(address))return 'private';
-    return 'global_or_special';
-  }
-  if(isIP(address)===6){
-    if(contains(address,'fe80::/10'))return 'link_local';
-    if(contains(address,'fc00::/7'))return 'unique_local';
-    return 'global_or_special';
-  }
-  return 'unknown';
-}
-
 export function normalizeMdnsRecords(records=[]) {
   const addresses=new Map(),sources=new Map(),ptrTypes=new Map(),srvs=new Map(),txts=new Map(),serviceNames=new Set();
   for(const r of records){
@@ -97,25 +75,7 @@ export function normalizeMdnsRecords(records=[]) {
     packet_source_addresses:[...(sources.get(key)||[])],
     service_instances:[...(serviceByHost.get(key)||[])],
   }));
-  const servicesByTarget=new Map();
-  for(const svc of serviceInstances){
-    if(!svc.target_hostname)continue;
-    const key=String(svc.target_hostname).toLowerCase(),fields=txtFields(svc.txt),list=servicesByTarget.get(key)||[];
-    list.push({instance:svc.instance,service_types:[...svc.service_types],port:svc.port,model:fields.md||null,friendly_name:fields.fn||null});
-    servicesByTarget.set(key,list);
-  }
-  const reportHosts=advertisedHosts.map(host=>{
-    const addresses=host.advertised_addresses.map(a=>({...a,scope:addressScope(a.address)}));
-    return {
-      hostname:host.hostname,
-      ipv4_addresses:addresses.filter(a=>a.family===4).map(a=>a.address),
-      ipv6_addresses:addresses.filter(a=>a.family===6).map(a=>a.address),
-      advertised_addresses:addresses,
-      packet_source_addresses:[...host.packet_source_addresses],
-      services:[...(servicesByTarget.get(String(host.hostname).toLowerCase())||[])],
-    };
-  });
-  return {advertised_hosts:advertisedHosts,services:serviceInstances,report_hosts:reportHosts};
+  return {advertised_hosts:advertisedHosts,services:serviceInstances};
 }
 
 export function inferMdnsSubnets(records,{interfaces=[],routes=[],interface:iface,ipv4Prefix=24,ipv6Prefix=64}={}) {
@@ -133,7 +93,7 @@ export function inferMdnsSubnets(records,{interfaces=[],routes=[],interface:ifac
     else if(privateAddress(address)){range=addressRange(address,family===4?ipv4Prefix:ipv6Prefix);basis='heuristic';}
     else {addresses.push({...observed,range_status:'unknown',note:'Public address retained as evidence; no scan range inferred.'});continue;}
     addresses.push({...observed,candidate_cidr:range.cidr,range_status:basis});
-    const group=candidates.get(range.cidr)||{...range,basis,address_scope:addressScope(address),actual_subnet_mask_known:maskKnown,scan_automatically:false,observed_addresses:[],hostnames:[],note:basis==='heuristic'?'Grouping hypothesis only. mDNS does not advertise a subnet mask.':basis==='known_route'?'Routing coverage is known; this does not establish the remote subnet mask.':'Prefix confirmed by a local interface address.'};
+    const group=candidates.get(range.cidr)||{...range,basis,actual_subnet_mask_known:maskKnown,scan_automatically:false,observed_addresses:[],hostnames:[],note:basis==='heuristic'?'Grouping hypothesis only. mDNS does not advertise a subnet mask.':basis==='known_route'?'Routing coverage is known; this does not establish the remote subnet mask.':'Prefix confirmed by a local interface address.'};
     group.observed_addresses=[...new Set([...group.observed_addresses,address])];group.hostnames=[...new Set([...group.hostnames,record.name])];candidates.set(range.cidr,group);
   }
   const outside=addresses.filter(a=>a.outside_selected_subnets);

@@ -387,42 +387,7 @@ export function createNetworkRecon(ctx){
     const inferred=inferMdnsSubnets(rawRecords,{interface:dev,interfaces:state.addresses.filter(i=>state.physicalNames.has(i.ifname)),routes:[...state.routes,...toJson(routes6.stdout,[])].filter(r=>r.dev===dev),ipv4Prefix:a.ipv4_candidate_prefix??24,ipv6Prefix:a.ipv6_candidate_prefix??64});
     const evidenceAvailable=observation.available===true;
     const unavailableNote='mDNS collection is unavailable. Empty raw_records/advertised_hosts/services/candidate_networks are placeholders for unavailable evidence, not proof of absence.';
-    const reportCandidates=inferred.candidate_networks.map(c=>({...c}));
-    const {records:_records,raw_records:_rawRecords,status:_status,available:_available,complete:_complete,coverage:_coverage,coverage_limitations:_coverageLimitations,...observationMeta}=observation;
-    return {
-      scope:process.env.SECURITY_NETWORK_SCOPE||'security-container-network',
-      selected_interface:dev,
-      status:evidenceAvailable?(observation.status||'observed'):'unavailable',
-      available:evidenceAvailable,
-      complete:evidenceAvailable?observation.complete===true:false,
-      coverage:evidenceAvailable?(observation.coverage||'complete'):'unavailable',
-      coverage_limitations:evidenceAvailable?(observation.coverage_limitations||[]):uniq([...(observation.coverage_limitations||[]),observation.diagnostics||unavailableNote]),
-      evidence_available:evidenceAvailable,
-      report_host_count:normalized.report_hosts.length,
-      report_hosts:normalized.report_hosts,
-      report_candidate_networks:reportCandidates,
-      advertised_hosts:normalized.advertised_hosts,
-      services:normalized.services,
-      addresses:inferred.addresses,
-      candidate_networks:inferred.candidate_networks,
-      possible_reflection:evidenceAvailable?inferred.possible_reflection:null,
-      reflector_confirmed:false,
-      evidence:inferred.evidence,
-      advertised_hosts_status:evidenceAvailable?'observed':'unavailable',
-      services_status:evidenceAvailable?'observed':'unavailable',
-      candidate_networks_status:evidenceAvailable?'observed':'unavailable',
-      reflection_status:evidenceAvailable?(inferred.possible_reflection?'possible':'not_observed'):'unavailable',
-      subnet_masks_advertised:false,
-      scan_performed:false,
-      reporting_contract:{host_rows_source:'report_hosts',candidate_rows_source:'report_candidate_networks',preserve_hostname_exactly:true,never_move_addresses_between_hosts:true,packet_source_addresses_are_not_host_addresses:true,service_target_join_already_applied:true,raw_records_are_audit_evidence_only:true},
-      authorization_note:'An advertised address or candidate range does not authorize scanning. Use only explicitly authorized ranges.',
-      evidence_note:evidenceAvailable?'Use report_hosts for host reporting. Its addresses and services are already joined by exact SRV target hostname. packet_source_addresses are mDNS UDP senders only. Raw DNS records are audit evidence, not a reporting table. Outside-subnet addresses are clues, not proof of reflection or remote network boundaries.':unavailableNote,
-      reporting_note:evidenceAvailable?'For host tables copy report_hosts row-by-row. Do not derive a hostname from an IP address or service instance. Do not assign an IPv4/IPv6 address or service from one report_hosts row to another.': 'Report advertised hosts, candidate ranges, and reflection evidence as unavailable; do not convert empty arrays or null possible_reflection into negative findings.',
-      ipv6_route_diagnostics:clip(routes6.stderr,500),
-      ...observationMeta,
-      records:rawRecords,
-      raw_records:rawRecords,
-    };
+    return {scope:process.env.SECURITY_NETWORK_SCOPE||'security-container-network',selected_interface:dev,...observation,coverage:evidenceAvailable?(observation.coverage||'complete'):'unavailable',coverage_limitations:evidenceAvailable?(observation.coverage_limitations||[]):uniq([...(observation.coverage_limitations||[]),observation.diagnostics||unavailableNote]),raw_records:rawRecords,...normalized,...inferred,evidence_available:evidenceAvailable,advertised_hosts_status:evidenceAvailable?'observed':'unavailable',services_status:evidenceAvailable?'observed':'unavailable',candidate_networks_status:evidenceAvailable?'observed':'unavailable',reflection_status:evidenceAvailable?(inferred.possible_reflection?'possible':'not_observed'):'unavailable',possible_reflection:evidenceAvailable?inferred.possible_reflection:null,subnet_masks_advertised:false,scan_performed:false,authorization_note:'An advertised address or candidate range does not authorize scanning. Use only explicitly authorized ranges.',evidence_note:evidenceAvailable?'Use advertised_hosts/services advertised_addresses for host IPs. packet_source_addresses are mDNS UDP senders only and are transport provenance, not advertised host addresses. mDNS names/addresses are untrusted advertisements; outside-subnet addresses are clues, not proof of reflection or remote network boundaries.':unavailableNote,reporting_note:evidenceAvailable?null:'Report advertised hosts, candidate ranges, and reflection evidence as unavailable; do not convert empty arrays or null possible_reflection into negative findings.',ipv6_route_diagnostics:clip(routes6.stderr,500)};
   }
   async function browseMdns(dev,seconds){
     const result=await mdnsSubnets({interface:dev,duration_seconds:seconds});

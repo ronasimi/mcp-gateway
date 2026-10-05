@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { isIP } from 'node:net';
 import http from 'node:http';
-import {collectMdns, inferMdnsSubnets, normalizeMdnsRecords} from './mdns-subnets.mjs';
+import {collectMdns, inferMdnsSubnets} from './mdns-subnets.mjs';
 
 const obj = (description, properties = {}, required = []) => ({ type:'object', description, properties, required, additionalProperties:false });
 const str = (description, extra={}) => ({ type:'string', description, ...extra });
@@ -20,7 +20,7 @@ const cidr = str('Authorized private/allowlisted IPv4 CIDR such as 192.168.1.0/2
 
 export const NETWORK_RECON_TOOLS = [
   tool('discover_mdns_subnets',
-    'Browse DNS-SD on the laptop physical interface using direct mDNS UDP queries. Returns raw DNS records plus normalized advertised_hosts/services that keep DNS-advertised A/AAAA addresses separate from UDP packet_source_addresses and join service instances through SRV targets. Identifies advertised addresses outside local subnets and groups candidate networks with address ranges. Local prefixes are confirmed; routes describe routing coverage; /24 and /64 fallbacks are explicit hypotheses. If status is unavailable, empty evidence arrays mean collection did not occur and are not proof that hosts, candidate ranges, or reflection are absent. Never scans inferred ranges or confirms a reflector.',
+    'Browse DNS-SD on the laptop physical interface using direct mDNS UDP queries. Collect advertised IPv4/IPv6 addresses, identify addresses outside local subnets and group candidate networks with address ranges. Local prefixes are confirmed; routes describe routing coverage; /24 and /64 fallbacks are explicit hypotheses. Never scans inferred ranges or confirms a reflector.',
     {interface:iface, duration_seconds:integer('Observation window; default 8, maximum 30 seconds.',3,30), max_records:integer('Maximum advertised records; default 256.',16,512), ipv4_candidate_prefix:integer('Fallback IPv4 grouping prefix; default 24. Not an observed mask.',20,32), ipv6_candidate_prefix:integer('Fallback IPv6 grouping prefix; default 64. Not an observed mask.',48,128)}),
   tool('get_host_interface_info',
     'Host network-state inventory for a laptop connected to a new Ethernet or Wi-Fi network. Only physical Ethernet/Wi-Fi interfaces are eligible; Docker bridges, veth pairs, VPN/tunnel devices, VLANs and other virtual interfaces are excluded. Reports active/default interfaces, wired vs wireless type, IPv4/IPv6 addresses, routes/default gateway, link speed, Wi-Fi association metadata when available, and a bounded external-connectivity check. Host visibility requires the security host-recon helper; an unavailable helper produces an error.',
@@ -381,52 +381,14 @@ export function createNetworkRecon(ctx){
     requireActive();
     const state=await networkState(),dev=chooseInterface(state,a.interface);
     const selected=state.addresses.find(x=>x.ifname===dev),address=selected?.addr_info?.find(x=>x.family==='inet')?.local;
-    let observation;try{observation=await (ctx.collectMdns||collectMdns)({address,durationSeconds:a.duration_seconds||8,maxRecords:a.max_records||256});}catch(error){observation={records:[],raw_records:[],available:false,complete:false,coverage:'unavailable',status:'unavailable',diagnostics:error.message};}
-    const rawRecords=observation.raw_records||observation.records||[],normalized=normalizeMdnsRecords(rawRecords);
+    let observation;try{observation=await (ctx.collectMdns||collectMdns)({address,durationSeconds:a.duration_seconds||8,maxRecords:a.max_records||256});}catch(error){observation={records:[],available:false,complete:false,status:'unavailable',diagnostics:error.message};}
     const routes6=await optional('ip',['-j','-6','route','show'],{timeout:10000,maxBuffer:2*1024*1024});
-    const inferred=inferMdnsSubnets(rawRecords,{interface:dev,interfaces:state.addresses.filter(i=>state.physicalNames.has(i.ifname)),routes:[...state.routes,...toJson(routes6.stdout,[])].filter(r=>r.dev===dev),ipv4Prefix:a.ipv4_candidate_prefix??24,ipv6Prefix:a.ipv6_candidate_prefix??64});
-    const evidenceAvailable=observation.available===true;
-    const unavailableNote='mDNS collection is unavailable. Empty raw_records/advertised_hosts/services/candidate_networks are placeholders for unavailable evidence, not proof of absence.';
-    const reportCandidates=inferred.candidate_networks.map(c=>({...c}));
-    const {records:_records,raw_records:_rawRecords,status:_status,available:_available,complete:_complete,coverage:_coverage,coverage_limitations:_coverageLimitations,...observationMeta}=observation;
-    return {
-      scope:process.env.SECURITY_NETWORK_SCOPE||'security-container-network',
-      selected_interface:dev,
-      status:evidenceAvailable?(observation.status||'observed'):'unavailable',
-      available:evidenceAvailable,
-      complete:evidenceAvailable?observation.complete===true:false,
-      coverage:evidenceAvailable?(observation.coverage||'complete'):'unavailable',
-      coverage_limitations:evidenceAvailable?(observation.coverage_limitations||[]):uniq([...(observation.coverage_limitations||[]),observation.diagnostics||unavailableNote]),
-      evidence_available:evidenceAvailable,
-      report_host_count:normalized.report_hosts.length,
-      report_hosts:normalized.report_hosts,
-      report_candidate_networks:reportCandidates,
-      advertised_hosts:normalized.advertised_hosts,
-      services:normalized.services,
-      addresses:inferred.addresses,
-      candidate_networks:inferred.candidate_networks,
-      possible_reflection:evidenceAvailable?inferred.possible_reflection:null,
-      reflector_confirmed:false,
-      evidence:inferred.evidence,
-      advertised_hosts_status:evidenceAvailable?'observed':'unavailable',
-      services_status:evidenceAvailable?'observed':'unavailable',
-      candidate_networks_status:evidenceAvailable?'observed':'unavailable',
-      reflection_status:evidenceAvailable?(inferred.possible_reflection?'possible':'not_observed'):'unavailable',
-      subnet_masks_advertised:false,
-      scan_performed:false,
-      reporting_contract:{host_rows_source:'report_hosts',candidate_rows_source:'report_candidate_networks',preserve_hostname_exactly:true,never_move_addresses_between_hosts:true,packet_source_addresses_are_not_host_addresses:true,service_target_join_already_applied:true,raw_records_are_audit_evidence_only:true},
-      authorization_note:'An advertised address or candidate range does not authorize scanning. Use only explicitly authorized ranges.',
-      evidence_note:evidenceAvailable?'Use report_hosts for host reporting. Its addresses and services are already joined by exact SRV target hostname. packet_source_addresses are mDNS UDP senders only. Raw DNS records are audit evidence, not a reporting table. Outside-subnet addresses are clues, not proof of reflection or remote network boundaries.':unavailableNote,
-      reporting_note:evidenceAvailable?'For host tables copy report_hosts row-by-row. Do not derive a hostname from an IP address or service instance. Do not assign an IPv4/IPv6 address or service from one report_hosts row to another.': 'Report advertised hosts, candidate ranges, and reflection evidence as unavailable; do not convert empty arrays or null possible_reflection into negative findings.',
-      ipv6_route_diagnostics:clip(routes6.stderr,500),
-      ...observationMeta,
-      records:rawRecords,
-      raw_records:rawRecords,
-    };
+    const inferred=inferMdnsSubnets(observation.records,{interface:dev,interfaces:state.addresses.filter(i=>state.physicalNames.has(i.ifname)),routes:[...state.routes,...toJson(routes6.stdout,[])].filter(r=>r.dev===dev),ipv4Prefix:a.ipv4_candidate_prefix??24,ipv6Prefix:a.ipv6_candidate_prefix??64});
+    return {scope:process.env.SECURITY_NETWORK_SCOPE||'security-container-network',selected_interface:dev,...observation,...inferred,possible_reflection:observation.available?inferred.possible_reflection:null,subnet_masks_advertised:false,scan_performed:false,authorization_note:'An advertised address or candidate range does not authorize scanning. Use only explicitly authorized ranges.',evidence_note:'mDNS names/addresses are untrusted advertisements. Outside-subnet addresses are clues, not proof of reflection or remote network boundaries.',ipv6_route_diagnostics:clip(routes6.stderr,500)};
   }
   async function browseMdns(dev,seconds){
     const result=await mdnsSubnets({interface:dev,duration_seconds:seconds});
-    const services=(result.services||[]).flatMap(service=>service.advertised_addresses.map(a=>({interface:dev,protocol:a.family===4?'IPv4':'IPv6',name:service.instance,type:service.service_types[0]||null,domain:'local',hostname:service.target_hostname,address:a.address,port:service.port,txt:service.txt,packet_source_addresses:service.packet_source_addresses})));
+    const services=result.records.filter(r=>r.type==='SRV').flatMap(srv=>result.addresses.filter(a=>a.name.toLowerCase()===srv.target.toLowerCase()).map(a=>({interface:dev,protocol:a.family===4?'IPv4':'IPv6',name:srv.name,type:result.records.find(p=>p.type==='PTR'&&p.target.toLowerCase()===srv.name.toLowerCase())?.name||null,domain:'local',hostname:srv.target,address:a.address,port:srv.port,txt:result.records.find(t=>t.type==='TXT'&&t.name.toLowerCase()===srv.name.toLowerCase())?.txt||null})));
     return {services,available:result.available,complete:result.complete,transport:result.transport,diagnostics:result.diagnostics,observation_status:result.status,candidate_networks:result.candidate_networks};
   }
   async function topology(a={}){

@@ -7,7 +7,7 @@ const interfaces=[{ifname:'wlan0',addr_info:[{family:'inet',local:'192.168.1.20'
 const a=(address,name='host.local')=>({name,type:address.includes(':')?'AAAA':'A',address,ttl:120});
 test('advertised IPv4 /24 is a hypothesis with exact range; known route is not remote subnet proof',()=>{
  const r=inferMdnsSubnets([a('192.168.20.45'),a('192.168.20.46'),a('10.2.3.4')],{interface:'wlan0',interfaces,routes:[{dst:'10.2.0.0/16'}]});
- assert.equal(r.candidate_networks.length,2);const guess=r.candidate_networks[0];assert.equal(guess.cidr,'192.168.20.0/24');assert.equal(guess.range_end,'192.168.20.255');assert.equal(guess.address_count,'256');assert.equal(guess.basis,'heuristic');assert.equal(guess.address_scope,'private');assert.equal(guess.actual_subnet_mask_known,false);assert.equal(guess.scan_automatically,false);assert.equal(guess.observed_addresses.length,2);
+ assert.equal(r.candidate_networks.length,2);const guess=r.candidate_networks[0];assert.equal(guess.cidr,'192.168.20.0/24');assert.equal(guess.range_end,'192.168.20.255');assert.equal(guess.address_count,'256');assert.equal(guess.basis,'heuristic');assert.equal(guess.actual_subnet_mask_known,false);assert.equal(guess.scan_automatically,false);assert.equal(guess.observed_addresses.length,2);
  assert.equal(r.candidate_networks[1].basis,'known_route');assert.equal(r.candidate_networks[1].actual_subnet_mask_known,false);assert.equal(r.possible_reflection,true);assert.equal(r.reflector_confirmed,false);
 });
 test('confirmed local prefixes, longest matching route and link-local exclusion',()=>{
@@ -16,7 +16,7 @@ test('confirmed local prefixes, longest matching route and link-local exclusion'
 });
 test('IPv6 candidate boundaries and real /23 range math',()=>{
  const r=inferMdnsSubnets([a('fd00:2::9'),a('fd00:1::5')],{interface:'wlan0',interfaces});
- assert.equal(r.candidate_networks[0].basis,'heuristic');assert.equal(r.candidate_networks[0].address_scope,'unique_local');assert.equal(r.candidate_networks[0].address_count,'18446744073709551616');assert.equal(r.candidate_networks[1].actual_subnet_mask_known,true);
+ assert.equal(r.candidate_networks[0].basis,'heuristic');assert.equal(r.candidate_networks[0].address_count,'18446744073709551616');assert.equal(r.candidate_networks[1].actual_subnet_mask_known,true);
  assert.deepEqual(addressRange('192.168.21.45',23),{cidr:'192.168.20.0/23',family:4,prefix_length:23,range_start:'192.168.20.0',range_end:'192.168.21.255',address_count:'512'});
  assert.throws(()=>addressRange('192.168.1.1',33));
 });
@@ -35,13 +35,12 @@ test('normalized DNS-SD evidence separates advertised addresses from packet sour
  const records=[
   {name:'_googlecast._tcp.local',type:'PTR',target:'Living Room._googlecast._tcp.local',ttl:120,source_address:'192.168.1.1'},
   {name:'Living Room._googlecast._tcp.local',type:'SRV',target:'speaker.local',port:8009,ttl:120,source_address:'192.168.1.1'},
-  {name:'Living Room._googlecast._tcp.local',type:'TXT',txt:['fn=Living Room','md=Google Nest Mini'],ttl:120,source_address:'192.168.1.1'},
+  {name:'Living Room._googlecast._tcp.local',type:'TXT',txt:['fn=Living Room'],ttl:120,source_address:'192.168.1.1'},
   {name:'speaker.local',type:'A',address:'192.168.20.45',ttl:120,source_address:'192.168.1.1'},
   {name:'speaker.local',type:'AAAA',address:'fd00:2::45',ttl:120,source_address:'192.168.1.1'},
  ];
  const r=normalizeMdnsRecords(records);assert.equal(r.services.length,1);assert.equal(r.services[0].target_hostname,'speaker.local');assert.equal(r.services[0].port,8009);assert.deepEqual(r.services[0].service_types,['_googlecast._tcp.local']);assert.deepEqual(r.services[0].advertised_addresses.map(x=>x.address),['192.168.20.45','fd00:2::45']);assert.deepEqual(r.services[0].packet_source_addresses,['192.168.1.1']);
  assert.equal(r.advertised_hosts[0].hostname,'speaker.local');assert.deepEqual(r.advertised_hosts[0].advertised_addresses.map(x=>x.address),['192.168.20.45','fd00:2::45']);assert.deepEqual(r.advertised_hosts[0].packet_source_addresses,['192.168.1.1']);assert.notEqual(r.advertised_hosts[0].advertised_addresses[0].address,r.advertised_hosts[0].packet_source_addresses[0]);
- assert.equal(r.report_hosts.length,1);assert.equal(r.report_hosts[0].hostname,'speaker.local');assert.deepEqual(r.report_hosts[0].ipv4_addresses,['192.168.20.45']);assert.deepEqual(r.report_hosts[0].ipv6_addresses,['fd00:2::45']);assert.deepEqual(r.report_hosts[0].advertised_addresses.map(x=>x.scope),['private','unique_local']);assert.equal(r.report_hosts[0].services[0].port,8009);assert.equal(r.report_hosts[0].services[0].friendly_name,'Living Room');assert.equal(r.report_hosts[0].services[0].model,'Google Nest Mini');
 });
 
 test('collector reports socket failure and closes transport',async()=>{
@@ -66,7 +65,7 @@ test('collector exposes query suppression and marks coverage partial when follow
 });
 test('MCP host integration exposes evidence without scanning advertised targets',async()=>{
  let scanned=false;const api=createNetworkRecon({disableHostDelegation:true,physicalInterfaceExists:()=>true,safeWorkspace:x=>x,requireActive:()=>{},requireCapture:()=>{},assertAuthorizedTarget:()=>{scanned=true;},collectMdns:async()=>({records:[a('192.168.20.45')],available:true,complete:true,status:'observed'}),runStatus:async(cmd,args)=>({code:0,stdout:cmd==='ip'&&args.includes('addr')?JSON.stringify(interfaces):cmd==='ip'&&args.includes('route')?'[{"dst":"default","dev":"wlan0"}]':'[]',stderr:''})});
- const r=await api.call('discover_mdns_subnets',{interface:'wlan0'});assert.equal(r.scope,process.env.SECURITY_NETWORK_SCOPE||'security-container-network');assert.equal(r.candidate_networks[0].cidr,'192.168.20.0/24');assert.deepEqual(r.raw_records,r.records);assert.equal(r.advertised_hosts[0].advertised_addresses[0].address,'192.168.20.45');assert.equal(r.report_hosts[0].hostname,'host.local');assert.equal(r.report_candidate_networks[0].address_scope,'private');assert.equal(r.reporting_contract.never_move_addresses_between_hosts,true);assert(JSON.stringify(r).indexOf('\"report_hosts\"')<JSON.stringify(r).indexOf('\"records\"'));assert.equal(r.scan_performed,false);assert.equal(scanned,false);assert(NETWORK_RECON_HOST_TOOL_NAMES.has('discover_mdns_subnets'));
+ const r=await api.call('discover_mdns_subnets',{interface:'wlan0'});assert.equal(r.scope,process.env.SECURITY_NETWORK_SCOPE||'security-container-network');assert.equal(r.candidate_networks[0].cidr,'192.168.20.0/24');assert.deepEqual(r.raw_records,r.records);assert.equal(r.advertised_hosts[0].advertised_addresses[0].address,'192.168.20.45');assert.equal(r.scan_performed,false);assert.equal(scanned,false);assert(NETWORK_RECON_HOST_TOOL_NAMES.has('discover_mdns_subnets'));
 });
 test('unavailable collection marks empty evidence as unavailable rather than absent',async()=>{
  const api=createNetworkRecon({disableHostDelegation:true,physicalInterfaceExists:()=>true,safeWorkspace:x=>x,assertAuthorizedTarget:()=>{},requireActive:()=>{},requireCapture:()=>{},collectMdns:async()=>({records:[],raw_records:[],available:false,complete:false,status:'unavailable',diagnostics:'Selected physical interface requires an IPv4 address for this mDNS transport.'}),runStatus:async(cmd,args)=>({code:0,stdout:cmd==='ip'&&args.includes('addr')?JSON.stringify(interfaces):cmd==='ip'&&args.includes('route')?'[{"dst":"default","dev":"wlan0"}]':'[]',stderr:''})});

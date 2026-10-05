@@ -379,7 +379,7 @@ Install both updated source trees, then run:
 
 This validates the gateway, rebuilds System and Security (plus Google when configured/running), merges all six native MCP domains into the existing Pi configuration, and upgrades Pi. The merge retains custom server entries, endpoint URLs, authentication headers, timeouts, and explicit disabled states. Source archives omit credentials and runtime state.
 
-Pi remains pinned to 1.0.0, with one narrow fail-closed runtime patch: omitted `tool_search.limit` defaults to 1 instead of 8 so small local models do not accidentally load a broad schema batch. Explicit limits still work. Pi Web UI 0.97.0 also receives the existing compatibility adjustment to load the official MCP/tool-search factories and preserve deferred activation during settings reloads. Start a new conversation after deployment.
+Pi itself remains stock 1.0.0. Pi Web UI 0.97.0 needs a narrow compatibility adjustment to load the official MCP/tool-search factories and preserve deferred activation during settings reloads; the Pi image checks the exact upstream source hashes before applying it. Start a new conversation after deployment.
 
 ## 2026-10-04 recon completion update
 
