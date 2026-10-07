@@ -28,7 +28,7 @@ function requireCapture(){if(!ALLOW_CAPTURE)throw new Error('packet capture disa
 
 await fsp.mkdir(WORKSPACE,{recursive:true,mode:0o700});
 const api=createNetworkRecon({
-  runStatus, safeWorkspace, assertAuthorizedTarget, requireActive, requireCapture,
+  runStatus, safeWorkspace, assertAuthorizedTarget, requireActive, requireCapture, validateArguments,
   hostRoot:'/', disableHostDelegation:true,
 });
 const MAX_QUEUE=Math.max(1,Math.min(16,Number(process.env.SECURITY_HOST_RECON_MAX_QUEUE||8)));

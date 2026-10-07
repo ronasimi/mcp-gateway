@@ -1,6 +1,374 @@
 {
   "system": [
     {
+      "name": "pdf_read",
+      "description": "Read PDF text by page with bounded pagination; scanned pages need OCR. Aliases: read PDF pages.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Workspace-relative input file."
+          },
+          "start": {
+            "type": "integer",
+            "description": "First page, 1-based; default 1.",
+            "minimum": 1,
+            "maximum": 100000
+          },
+          "count": {
+            "type": "integer",
+            "description": "Pages to read; default 10.",
+            "minimum": 1,
+            "maximum": 50
+          },
+          "max_chars": {
+            "type": "integer",
+            "description": "Maximum returned text characters; default 30000. Narrow range/pages when truncated.",
+            "minimum": 100,
+            "maximum": 50000
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "additionalProperties": false,
+        "description": "Arguments for pdf read."
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "read PDF pages"
+          ],
+          "scope": "Read PDF text by page with bounded pagination; scanned pages need OCR.",
+          "preferredFor": "Read PDF text by page with bounded pagination; scanned pages need OCR.",
+          "overlapGroup": "documents"
+        }
+      }
+    },
+    {
+      "name": "pdf_write",
+      "description": "Create PDF from text or merge, select, reorder and rotate PDF pages. Aliases: write PDF; merge PDF; split PDF.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "output": {
+            "type": "string",
+            "description": "Workspace-relative output copy; original input is preserved."
+          },
+          "overwrite": {
+            "type": "boolean",
+            "description": "Replace an existing output file; default false. Input and output must differ."
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "create",
+              "assemble"
+            ],
+            "description": "create (default): text to PDF; assemble: source pages to PDF."
+          },
+          "text": {
+            "type": "string",
+            "description": "Plain text for create; blank lines separate paragraphs, form feed separates pages. Maximum 200000 characters.",
+            "maxLength": 200000
+          },
+          "title": {
+            "type": "string",
+            "description": "Optional title for a new PDF."
+          },
+          "sources": {
+            "description": "PDF inputs with optional page selections and rotations.",
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 30,
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "description": "Workspace-relative input file."
+                },
+                "pages": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 1000,
+                  "items": {
+                    "type": "integer",
+                    "description": "1-based page number.",
+                    "minimum": 1,
+                    "maximum": 100000
+                  },
+                  "description": "Ordered page selection; omitted means all pages."
+                },
+                "rotate": {
+                  "type": "integer",
+                  "enum": [
+                    0,
+                    90,
+                    180,
+                    270
+                  ],
+                  "description": "Clockwise rotation; default 0."
+                }
+              },
+              "required": [
+                "path"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "output"
+        ],
+        "additionalProperties": false,
+        "description": "Arguments for pdf write."
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "write PDF",
+            "merge PDF",
+            "split PDF"
+          ],
+          "scope": "Create PDF from text or merge, select, reorder and rotate PDF pages.",
+          "preferredFor": "Create PDF from text or merge, select, reorder and rotate PDF pages.",
+          "overlapGroup": "documents"
+        }
+      }
+    },
+    {
+      "name": "office_read",
+      "description": "Read Word/OpenDocument text, Excel/Calc cells and formulas, or PowerPoint/Impress slide text. Aliases: read DOC DOCX ODT XLS XLSX ODS PPT PPTX ODP.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Workspace-relative input file."
+          },
+          "max_chars": {
+            "type": "integer",
+            "description": "Maximum returned text characters; default 30000. Narrow range/pages when truncated.",
+            "minimum": 100,
+            "maximum": 50000
+          },
+          "sheet": {
+            "type": "string",
+            "description": "Spreadsheet sheet name; default first sheet."
+          },
+          "range": {
+            "type": "string",
+            "description": "Spreadsheet A1 range; default A1:T50, maximum 200 rows by 50 columns."
+          },
+          "start": {
+            "type": "integer",
+            "description": "First slide, 1-based; default 1.",
+            "minimum": 1,
+            "maximum": 100000
+          },
+          "count": {
+            "type": "integer",
+            "description": "Slides to read; default 10.",
+            "minimum": 1,
+            "maximum": 30
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "additionalProperties": false,
+        "description": "Arguments for office read."
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "read DOC DOCX ODT XLS XLSX ODS PPT PPTX ODP"
+          ],
+          "scope": "Read Word/OpenDocument text, Excel/Calc cells and formulas, or PowerPoint/Impress slide text.",
+          "preferredFor": "Read Word/OpenDocument text, Excel/Calc cells and formulas, or PowerPoint/Impress slide text.",
+          "overlapGroup": "documents"
+        }
+      }
+    },
+    {
+      "name": "office_edit",
+      "description": "Save an edited Office/OpenDocument copy: replace text or update spreadsheet cells and formulas. Aliases: edit Word Excel PowerPoint; edit Writer Calc Impress.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Workspace-relative input file."
+          },
+          "output": {
+            "type": "string",
+            "description": "Workspace-relative output copy; original input is preserved."
+          },
+          "overwrite": {
+            "type": "boolean",
+            "description": "Replace an existing output file; default false. Input and output must differ."
+          },
+          "replacements": {
+            "description": "Ordered literal text replacements; each must match.",
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 100,
+            "items": {
+              "type": "object",
+              "properties": {
+                "find": {
+                  "type": "string",
+                  "description": "Nonempty case-sensitive literal text."
+                },
+                "replace": {
+                  "type": "string",
+                  "description": "Replacement text."
+                },
+                "expected_count": {
+                  "type": "integer",
+                  "description": "Optional exact number of matches; mismatch cancels output.",
+                  "minimum": 0,
+                  "maximum": 100000
+                }
+              },
+              "required": [
+                "find",
+                "replace"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "cells": {
+            "description": "Explicit spreadsheet cell edits; supply value or formula per cell.",
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1000,
+            "items": {
+              "type": "object",
+              "properties": {
+                "sheet": {
+                  "type": "string",
+                  "description": "Sheet name; default first sheet."
+                },
+                "cell": {
+                  "type": "string",
+                  "description": "Single A1 cell address."
+                },
+                "value": {
+                  "type": [
+                    "string",
+                    "number",
+                    "null"
+                  ],
+                  "description": "Literal value; strings beginning with = remain text. Null clears the cell."
+                },
+                "formula": {
+                  "type": "string",
+                  "description": "Formula starting with =; supply instead of value."
+                }
+              },
+              "required": [
+                "cell"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "path",
+          "output"
+        ],
+        "additionalProperties": false,
+        "description": "Arguments for office edit."
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "edit Word Excel PowerPoint",
+            "edit Writer Calc Impress"
+          ],
+          "scope": "Save an edited Office/OpenDocument copy: replace text or update spreadsheet cells and formulas.",
+          "preferredFor": "Save an edited Office/OpenDocument copy: replace text or update spreadsheet cells and formulas.",
+          "overlapGroup": "documents"
+        }
+      }
+    },
+    {
+      "name": "office_export",
+      "description": "Export Office/OpenDocument files to PDF or another format in the same document family. Aliases: Office to PDF; LibreOffice conversion.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Workspace-relative input file."
+          },
+          "output": {
+            "type": "string",
+            "description": "Workspace-relative output copy; original input is preserved."
+          },
+          "overwrite": {
+            "type": "boolean",
+            "description": "Replace an existing output file; default false. Input and output must differ."
+          }
+        },
+        "required": [
+          "path",
+          "output"
+        ],
+        "additionalProperties": false,
+        "description": "Arguments for office export."
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "system",
+          "aliases": [
+            "Office to PDF",
+            "LibreOffice conversion"
+          ],
+          "scope": "Export Office/OpenDocument files to PDF or another format in the same document family.",
+          "preferredFor": "Export Office/OpenDocument files to PDF or another format in the same document family.",
+          "overlapGroup": "documents"
+        }
+      }
+    },
+    {
       "name": "local_daily_briefing",
       "description": "London Ontario daily briefing: current weather, seven-day forecast and CBC London headlines in a Markdown card. Aliases: morning briefing; London local weather news.",
       "inputSchema": {
@@ -148,7 +516,7 @@
     },
     {
       "name": "docker_container_stats",
-      "description": "Measure one Docker container\u2019s CPU, memory, network and disk I/O. Aliases: container resource usage.",
+      "description": "Measure one Docker container’s CPU, memory, network and disk I/O. Aliases: container resource usage.",
       "inputSchema": {
         "type": "object",
         "description": "Arguments for docker container stats.",
@@ -175,8 +543,8 @@
           "aliases": [
             "container resource usage"
           ],
-          "scope": "Measure one Docker container\u2019s CPU, memory, network and disk I/O.",
-          "preferredFor": "Measure one Docker container\u2019s CPU, memory, network and disk I/O."
+          "scope": "Measure one Docker container’s CPU, memory, network and disk I/O.",
+          "preferredFor": "Measure one Docker container’s CPU, memory, network and disk I/O."
         }
       }
     },
@@ -209,7 +577,7 @@
     },
     {
       "name": "docker_inspect_image",
-      "description": "Inspect a Docker image\u2019s architecture, layers, entrypoint and labels. Aliases: image configuration.",
+      "description": "Inspect a Docker image’s architecture, layers, entrypoint and labels. Aliases: image configuration.",
       "inputSchema": {
         "type": "object",
         "description": "Arguments for docker inspect image.",
@@ -236,8 +604,8 @@
           "aliases": [
             "image configuration"
           ],
-          "scope": "Inspect a Docker image\u2019s architecture, layers, entrypoint and labels.",
-          "preferredFor": "Inspect a Docker image\u2019s architecture, layers, entrypoint and labels."
+          "scope": "Inspect a Docker image’s architecture, layers, entrypoint and labels.",
+          "preferredFor": "Inspect a Docker image’s architecture, layers, entrypoint and labels."
         }
       }
     },
@@ -331,7 +699,7 @@
     },
     {
       "name": "docker_inspect_volume",
-      "description": "Inspect one Docker volume\u2019s mountpoint, driver and labels. Aliases: volume location.",
+      "description": "Inspect one Docker volume’s mountpoint, driver and labels. Aliases: volume location.",
       "inputSchema": {
         "type": "object",
         "description": "Arguments for docker inspect volume.",
@@ -358,8 +726,8 @@
           "aliases": [
             "volume location"
           ],
-          "scope": "Inspect one Docker volume\u2019s mountpoint, driver and labels.",
-          "preferredFor": "Inspect one Docker volume\u2019s mountpoint, driver and labels."
+          "scope": "Inspect one Docker volume’s mountpoint, driver and labels.",
+          "preferredFor": "Inspect one Docker volume’s mountpoint, driver and labels."
         }
       }
     },
@@ -2377,7 +2745,7 @@
     },
     {
       "name": "metasploit_info",
-      "description": "Inspect a Metasploit module\u2019s help and options. Aliases: msfconsole module details.",
+      "description": "Inspect a Metasploit module’s help and options. Aliases: msfconsole module details.",
       "inputSchema": {
         "type": "object",
         "description": "Arguments for metasploit info.",
@@ -2404,8 +2772,8 @@
           "aliases": [
             "msfconsole module details"
           ],
-          "scope": "Inspect a Metasploit module\u2019s help and options.",
-          "preferredFor": "Inspect a Metasploit module\u2019s help and options."
+          "scope": "Inspect a Metasploit module’s help and options.",
+          "preferredFor": "Inspect a Metasploit module’s help and options."
         }
       }
     },
@@ -2523,7 +2891,7 @@
     },
     {
       "name": "job_status",
-      "description": "Read a background job\u2019s status and output page; continue using next_offset. Aliases: poll job output.",
+      "description": "Read a background job’s status and output page; continue using next_offset. Aliases: poll job output.",
       "inputSchema": {
         "type": "object",
         "description": "Arguments for job status.",
@@ -2562,8 +2930,8 @@
           "aliases": [
             "poll job output"
           ],
-          "scope": "Read a background job\u2019s status and output page; continue using next_offset.",
-          "preferredFor": "Read a background job\u2019s status and output page; continue using next_offset."
+          "scope": "Read a background job’s status and output page; continue using next_offset.",
+          "preferredFor": "Read a background job’s status and output page; continue using next_offset."
         }
       }
     },
@@ -3082,7 +3450,7 @@
     },
     {
       "name": "dns_audit",
-      "description": "Audit an authorized DNS server\u2019s recursion, DNSSEC, NSID and optional AXFR zone-transfer behavior. Aliases: DNS server posture.",
+      "description": "Audit an authorized DNS server’s recursion, DNSSEC, NSID and optional AXFR zone-transfer behavior. Aliases: DNS server posture.",
       "inputSchema": {
         "type": "object",
         "description": "Arguments for dns audit.",
@@ -3124,8 +3492,8 @@
           "aliases": [
             "DNS server posture"
           ],
-          "scope": "Audit an authorized DNS server\u2019s recursion, DNSSEC, NSID and optional AXFR zone-transfer behavior.",
-          "preferredFor": "Audit an authorized DNS server\u2019s recursion, DNSSEC, NSID and optional AXFR zone-transfer behavior."
+          "scope": "Audit an authorized DNS server’s recursion, DNSSEC, NSID and optional AXFR zone-transfer behavior.",
+          "preferredFor": "Audit an authorized DNS server’s recursion, DNSSEC, NSID and optional AXFR zone-transfer behavior."
         }
       }
     },
@@ -3578,8 +3946,350 @@
       }
     },
     {
+      "name": "observe_broadcast_multicast",
+      "description": "Passively capture host ARP broadcasts and mDNS, LLMNR, SSDP multicast. Separates packet sources from address/name/service claims; sends no probes. Requires host capture permission; visibility does not prove failed isolation. Aliases: broadcast multicast leakage; passive ARP hostname services.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for observe broadcast multicast.",
+        "properties": {
+          "interface": {
+            "type": "string",
+            "description": "Physical host interface; omit to select the default Ethernet/Wi-Fi interface.",
+            "maxLength": 64
+          },
+          "duration_seconds": {
+            "type": "integer",
+            "description": "Capture duration; default 10, maximum 30.",
+            "minimum": 1,
+            "maximum": 30
+          },
+          "max_packets": {
+            "type": "integer",
+            "description": "Stop after this many matching packets; default 256, maximum 1000.",
+            "minimum": 1,
+            "maximum": 1000
+          },
+          "max_observations": {
+            "type": "integer",
+            "description": "Maximum unique evidence rows; default 128, maximum 256.",
+            "minimum": 1,
+            "maximum": 256
+          },
+          "protocols": {
+            "type": "array",
+            "description": "Protocols to observe; default all four.",
+            "items": {
+              "type": "string",
+              "description": "Discovery protocol.",
+              "enum": [
+                "arp",
+                "mdns",
+                "llmnr",
+                "ssdp"
+              ]
+            },
+            "minItems": 1,
+            "maxItems": 4,
+            "uniqueItems": true
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "broadcast multicast leakage",
+            "passive ARP hostname services"
+          ],
+          "scope": "Passively capture host ARP broadcasts and mDNS, LLMNR, SSDP multicast. Separates packet sources from address/name/service claims; sends no probes. Requires host capture permission; visibility does not prove failed isolation.",
+          "preferredFor": "Passively capture host ARP broadcasts and mDNS, LLMNR, SSDP multicast. Separates packet sources from address/name/service claims; sends no probes. Requires host capture permission; visibility does not prove failed isolation.",
+          "overlapGroup": "network-recon"
+        }
+      }
+    },
+    {
+      "name": "probe_gateway_proxy_arp",
+      "description": "Bounded host ARP sweep on a connected IPv4 prefix; compares replies with gateway MAC to identify Proxy ARP candidates. Gateway replies do not confirm peer liveness. Aliases: gateway proxy ARP; shared ARP responder MAC.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for probe gateway proxy arp.",
+        "properties": {
+          "interface": {
+            "type": "string",
+            "description": "Physical host interface; omit to select the default Ethernet/Wi-Fi interface.",
+            "maxLength": 64
+          },
+          "cidr": {
+            "type": "string",
+            "description": "Explicit directly connected IPv4 CIDR; omit to use selected local prefix. Oversized ranges are rejected.",
+            "maxLength": 18
+          },
+          "gateway": {
+            "type": "string",
+            "description": "Authorized IPv4 address on the selected interface subnet.",
+            "maxLength": 15
+          },
+          "max_hosts": {
+            "type": "integer",
+            "description": "Maximum addresses in the sweep; default 256, maximum 256.",
+            "minimum": 1,
+            "maximum": 256
+          },
+          "timeout_seconds": {
+            "type": "integer",
+            "description": "Response wait after sending; default 2, maximum 5.",
+            "minimum": 1,
+            "maximum": 5
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "gateway proxy ARP",
+            "shared ARP responder MAC"
+          ],
+          "scope": "Bounded host ARP sweep on a connected IPv4 prefix; compares replies with gateway MAC to identify Proxy ARP candidates. Gateway replies do not confirm peer liveness.",
+          "preferredFor": "Bounded host ARP sweep on a connected IPv4 prefix; compares replies with gateway MAC to identify Proxy ARP candidates. Gateway replies do not confirm peer liveness.",
+          "overlapGroup": "network-recon"
+        }
+      }
+    },
+    {
+      "name": "probe_gateway_hairpin",
+      "description": "Compare direct and gateway-addressed Ethernet ICMP probes to explicit same-subnet peers, with TTL=1 forwarding control. Reports possible hairpin routing; controlled peers and policy evidence are needed to confirm isolation bypass. Aliases: gateway hairpin routing; client isolation path comparison.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for probe gateway hairpin.",
+        "properties": {
+          "interface": {
+            "type": "string",
+            "description": "Physical host interface; omit to select the default Ethernet/Wi-Fi interface.",
+            "maxLength": 64
+          },
+          "gateway": {
+            "type": "string",
+            "description": "Authorized IPv4 address on the selected interface subnet.",
+            "maxLength": 15
+          },
+          "peer_targets": {
+            "type": "array",
+            "description": "Explicit known IPv4 peers on selected subnet; no automatic target expansion.",
+            "items": {
+              "type": "string",
+              "description": "Authorized IPv4 address on the selected interface subnet.",
+              "maxLength": 15
+            },
+            "minItems": 1,
+            "maxItems": 8,
+            "uniqueItems": true
+          },
+          "probes": {
+            "type": "integer",
+            "description": "Echo probes per path per peer; default 1, maximum 3.",
+            "minimum": 1,
+            "maximum": 3
+          },
+          "timeout_seconds": {
+            "type": "integer",
+            "description": "Wait per ARP/ICMP probe; default 1, maximum 2.",
+            "minimum": 1,
+            "maximum": 2
+          }
+        },
+        "required": [
+          "peer_targets"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "gateway hairpin routing",
+            "client isolation path comparison"
+          ],
+          "scope": "Compare direct and gateway-addressed Ethernet ICMP probes to explicit same-subnet peers, with TTL=1 forwarding control. Reports possible hairpin routing; controlled peers and policy evidence are needed to confirm isolation bypass.",
+          "preferredFor": "Compare direct and gateway-addressed Ethernet ICMP probes to explicit same-subnet peers, with TTL=1 forwarding control. Reports possible hairpin routing; controlled peers and policy evidence are needed to confirm isolation bypass.",
+          "overlapGroup": "network-recon"
+        }
+      }
+    },
+    {
+      "name": "observe_dns_cache",
+      "description": "Observe explicit names at an authorized LAN DNS server using nonrecursive queries. Returns validated responses, TTLs and timings; optional supplied TTL baseline. Cache data cannot identify a requesting client or confirm device presence. Aliases: DNS cache snooping; nonrecursive cache evidence.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for observe dns cache.",
+        "properties": {
+          "interface": {
+            "type": "string",
+            "description": "Physical host interface; omit to select the default Ethernet/Wi-Fi interface.",
+            "maxLength": 64
+          },
+          "server": {
+            "type": "string",
+            "description": "Authorized IPv4 address on the selected interface subnet.",
+            "maxLength": 15
+          },
+          "names": {
+            "type": "array",
+            "description": "Explicit hostnames or service domains; no built-in domain dictionary.",
+            "items": {
+              "type": "string",
+              "description": "DNS name.",
+              "maxLength": 253
+            },
+            "minItems": 1,
+            "maxItems": 16,
+            "uniqueItems": true
+          },
+          "record_type": {
+            "type": "string",
+            "description": "DNS record type; default A.",
+            "enum": [
+              "A",
+              "AAAA",
+              "PTR",
+              "SRV",
+              "TXT"
+            ]
+          },
+          "samples": {
+            "type": "integer",
+            "description": "Repeated nonrecursive samples per name; default 2, maximum 3.",
+            "minimum": 1,
+            "maximum": 3
+          },
+          "timeout_seconds": {
+            "type": "integer",
+            "description": "Wait per query; default 1, maximum 2.",
+            "minimum": 1,
+            "maximum": 2
+          },
+          "baseline_ttl": {
+            "type": "integer",
+            "description": "Optional known original TTL for the queried RRset; never guessed or fetched automatically.",
+            "minimum": 1,
+            "maximum": 2147483647
+          }
+        },
+        "required": [
+          "names"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "DNS cache snooping",
+            "nonrecursive cache evidence"
+          ],
+          "scope": "Observe explicit names at an authorized LAN DNS server using nonrecursive queries. Returns validated responses, TTLs and timings; optional supplied TTL baseline. Cache data cannot identify a requesting client or confirm device presence.",
+          "preferredFor": "Observe explicit names at an authorized LAN DNS server using nonrecursive queries. Returns validated responses, TTLs and timings; optional supplied TTL baseline. Cache data cannot identify a requesting client or confirm device presence.",
+          "overlapGroup": "network-recon"
+        }
+      }
+    },
+    {
+      "name": "discover_mdns_subnets",
+      "description": "Discover advertised host addresses and candidate subnet ranges through host mDNS/DNS-SD. Returns compact report rows, saves full raw audit evidence separately, distinguishes local prefixes, routing coverage and heuristic grouping, and treats outside-subnet advertisements as possible reflection rather than proof. Does not scan candidates. Aliases: mDNS subnet discovery; subnet ranges from advertised addresses; mDNS reflector evidence.",
+      "inputSchema": {
+        "type": "object",
+        "description": "Arguments for discover mdns subnets.",
+        "properties": {
+          "interface": {
+            "type": "string",
+            "description": "Optional host network interface. Omit to auto-select; reuse selected_interface.",
+            "maxLength": 64
+          },
+          "duration_seconds": {
+            "type": "integer",
+            "description": "Observation window; default 8, maximum 30 seconds.",
+            "minimum": 3,
+            "maximum": 30
+          },
+          "max_records": {
+            "type": "integer",
+            "description": "Maximum advertised records; default 256.",
+            "minimum": 16,
+            "maximum": 512
+          },
+          "max_queries": {
+            "type": "integer",
+            "description": "Maximum unique DNS-SD follow-up queries; default 96, maximum 256. Reaching the cap marks coverage partial.",
+            "minimum": 16,
+            "maximum": 256
+          },
+          "ipv4_candidate_prefix": {
+            "type": "integer",
+            "description": "Fallback IPv4 grouping prefix; default 24. Not an observed mask.",
+            "minimum": 20,
+            "maximum": 32
+          },
+          "ipv6_candidate_prefix": {
+            "type": "integer",
+            "description": "Fallback IPv6 grouping prefix; default 64. Not an observed mask.",
+            "minimum": 48,
+            "maximum": 128
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "ai.catalog": {
+          "domain": "security",
+          "aliases": [
+            "mDNS subnet discovery",
+            "subnet ranges from advertised addresses",
+            "mDNS reflector evidence"
+          ],
+          "scope": "Discover advertised host addresses and candidate subnet ranges through host mDNS/DNS-SD. Returns compact report rows, saves full raw audit evidence separately, distinguishes local prefixes, routing coverage and heuristic grouping, and treats outside-subnet advertisements as possible reflection rather than proof. Does not scan candidates.",
+          "preferredFor": "Discover advertised host addresses and candidate subnet ranges through host mDNS/DNS-SD. Returns compact report rows, saves full raw audit evidence separately, distinguishes local prefixes, routing coverage and heuristic grouping, and treats outside-subnet advertisements as possible reflection rather than proof. Does not scan candidates.",
+          "overlapGroup": "network-recon"
+        }
+      }
+    },
+    {
       "name": "get_host_interface_info",
-      "description": "Start local network reconnaissance here: inspect the laptop\u2019s physical Ethernet/Wi-Fi interfaces, addresses, gateway, DNS and link speed through the required host helper. Aliases: host network state; active laptop interfaces; network reconnaissance and mapping workflow.",
+      "description": "Start local network reconnaissance here: inspect the laptop’s physical Ethernet/Wi-Fi interfaces, addresses, gateway, DNS and link speed through the required host helper. Aliases: host network state; active laptop interfaces; network reconnaissance and mapping workflow.",
       "inputSchema": {
         "type": "object",
         "description": "Arguments for get host interface info.",
@@ -3611,8 +4321,8 @@
             "active laptop interfaces",
             "network reconnaissance and mapping workflow"
           ],
-          "scope": "Start local network reconnaissance here: inspect the laptop\u2019s physical Ethernet/Wi-Fi interfaces, addresses, gateway, DNS and link speed through the required host helper.",
-          "preferredFor": "Start local network reconnaissance here: inspect the laptop\u2019s physical Ethernet/Wi-Fi interfaces, addresses, gateway, DNS and link speed through the required host helper.",
+          "scope": "Start local network reconnaissance here: inspect the laptop’s physical Ethernet/Wi-Fi interfaces, addresses, gateway, DNS and link speed through the required host helper.",
+          "preferredFor": "Start local network reconnaissance here: inspect the laptop’s physical Ethernet/Wi-Fi interfaces, addresses, gateway, DNS and link speed through the required host helper.",
           "overlapGroup": "network-recon"
         }
       }
@@ -3786,7 +4496,10 @@
           },
           "rescan": {
             "type": "boolean",
-            "description": "Request an active Wi-Fi rescan; default false uses cached passive observations."
+            "enum": [
+              false
+            ],
+            "description": "Passive-only tool: omit or use false. Active rescans are rejected."
           },
           "use_airodump": {
             "type": "boolean",
@@ -3845,7 +4558,7 @@
           },
           "input_paths": {
             "type": "array",
-            "description": "Nonempty observation artifact paths returned by successful saves; omit data and input_path when using this field; merges their data without copying JSON. Include every discovery page.",
+            "description": "Nonempty observation artifact paths returned by successful saves; omit data and input_path when using this field; merges their data without copying JSON. Include host, topology and wireless observation paths plus every discovery page from this workflow; inspect missing_observations in the result.",
             "items": {
               "type": "string",
               "description": "Security workspace observation JSON path."
@@ -3855,7 +4568,7 @@
           },
           "output_base": {
             "type": "string",
-            "description": "Workspace-relative output basename without extension; default .security-results/network-map.",
+            "description": "Output basename without extension, stored under .security-results. Relative names are prefixed automatically; default .security-results/network-map. Absolute paths and traversal are rejected.",
             "maxLength": 240
           },
           "format": {
@@ -4419,7 +5132,7 @@
     },
     {
       "name": "file_hash",
-      "description": "Compute a workspace file\u2019s SHA-256, SHA-512 or MD5 digest. Aliases: file integrity checksum.",
+      "description": "Compute a workspace file’s SHA-256, SHA-512 or MD5 digest. Aliases: file integrity checksum.",
       "inputSchema": {
         "type": "object",
         "description": "Arguments for file hash.",
@@ -4455,8 +5168,8 @@
           "aliases": [
             "file integrity checksum"
           ],
-          "scope": "Compute a workspace file\u2019s SHA-256, SHA-512 or MD5 digest.",
-          "preferredFor": "Compute a workspace file\u2019s SHA-256, SHA-512 or MD5 digest.",
+          "scope": "Compute a workspace file’s SHA-256, SHA-512 or MD5 digest.",
+          "preferredFor": "Compute a workspace file’s SHA-256, SHA-512 or MD5 digest.",
           "overlapGroup": "artifact"
         }
       }
@@ -5173,7 +5886,7 @@
     },
     {
       "name": "calendar_list_events",
-      "description": "List Google Calendar events in a time range with optional text filtering. Aliases: upcoming meetings; calendar agenda.",
+      "description": "List Google Calendar events in a time range; omitted lower bound starts at the current time for upcoming events. Aliases: upcoming meetings; calendar agenda; next calendar events.",
       "inputSchema": {
         "type": "object",
         "description": "Arguments for calendar list events.",
@@ -5184,7 +5897,7 @@
           },
           "time_min": {
             "type": "string",
-            "description": "RFC3339 lower bound, e.g. 2026-09-30T00:00:00-04:00."
+            "description": "RFC3339 lower bound, e.g. 2026-09-30T00:00:00-04:00. Omit to use the current time and return upcoming events."
           },
           "time_max": {
             "type": "string",
@@ -5219,17 +5932,18 @@
           "domain": "google",
           "aliases": [
             "upcoming meetings",
-            "calendar agenda"
+            "calendar agenda",
+            "next calendar events"
           ],
-          "scope": "List Google Calendar events in a time range with optional text filtering.",
-          "preferredFor": "List Google Calendar events in a time range with optional text filtering.",
+          "scope": "List Google Calendar events in a time range; omitted lower bound starts at the current time for upcoming events.",
+          "preferredFor": "List Google Calendar events in a time range; omitted lower bound starts at the current time for upcoming events.",
           "overlapGroup": "calendar"
         }
       }
     },
     {
       "name": "calendar_get_event",
-      "description": "Read one Google Calendar event\u2019s complete details. Aliases: meeting details.",
+      "description": "Read one Google Calendar event’s complete details. Aliases: meeting details.",
       "inputSchema": {
         "type": "object",
         "description": "Arguments for calendar get event.",
@@ -5260,8 +5974,8 @@
           "aliases": [
             "meeting details"
           ],
-          "scope": "Read one Google Calendar event\u2019s complete details.",
-          "preferredFor": "Read one Google Calendar event\u2019s complete details.",
+          "scope": "Read one Google Calendar event’s complete details.",
+          "preferredFor": "Read one Google Calendar event’s complete details.",
           "overlapGroup": "calendar"
         }
       }
@@ -5648,7 +6362,7 @@
     },
     {
       "name": "drive_download_file",
-      "description": "Save a Drive file\u2019s original bytes or export a Google document to the workspace. Aliases: download PDF image attachment.",
+      "description": "Save a Drive file’s original bytes or export a Google document to the workspace. Aliases: download PDF image attachment.",
       "inputSchema": {
         "type": "object",
         "description": "Arguments for drive download file.",
@@ -5684,8 +6398,8 @@
           "aliases": [
             "download PDF image attachment"
           ],
-          "scope": "Save a Drive file\u2019s original bytes or export a Google document to the workspace.",
-          "preferredFor": "Save a Drive file\u2019s original bytes or export a Google document to the workspace.",
+          "scope": "Save a Drive file’s original bytes or export a Google document to the workspace.",
+          "preferredFor": "Save a Drive file’s original bytes or export a Google document to the workspace.",
           "overlapGroup": "drive"
         }
       }

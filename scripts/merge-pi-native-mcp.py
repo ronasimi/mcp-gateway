@@ -11,6 +11,12 @@ LEGACY_ROOT = {'directTools', 'scriptMode', 'disableProxyTool', 'exposeResources
 LEGACY_SERVER = {'directTools', 'searchKeywords', 'exposeResources', 'deferWithMissingMetadata',
                  'toolPrefix', 'eager', 'lazy', 'idleTimeout', 'cacheTTL', 'lifecycle', 'requestTimeoutMs', 'transport'}
 
+CURATED_HIDDEN = {
+    'searxng': {'engine_info', 'autocomplete'},
+    'memory': {'read_graph'},
+}
+
+
 CONSOLIDATED = {
     'security': {'tool_status': 'status', 'suricata_analyze_pcap': 'suricata_alerts', 'network_discover': 'perform_network_discovery', 'service_detect': 'port_scan',
                  'pcap_fields': 'pcap_analyze', 'pcap_summary': 'pcap_analyze',
@@ -52,8 +58,11 @@ def merge(existing, template):
         entry['exposure'] = 'deferred'
         entry['description'] = shipped['description']
         if shipped.get('toolExposure') or current.get('toolExposure'):
-            entry['toolExposure'] = {**shipped.get('toolExposure', {}),
-                                     **migrate_exposure(name, current.get('toolExposure', {}))}
+            exposure = {**shipped.get('toolExposure', {}),
+                        **migrate_exposure(name, current.get('toolExposure', {}))}
+            for tool_name in CURATED_HIDDEN.get(name, set()):
+                exposure[tool_name] = 'hidden'
+            entry['toolExposure'] = exposure
         servers[name] = entry
     result['mcpServers'] = servers
     return result

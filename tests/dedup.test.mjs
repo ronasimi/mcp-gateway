@@ -19,7 +19,7 @@ function rpc(server,requests,env={},imports=[]){
 const call=(name,args={})=>({method:'tools/call',params:{name,arguments:args}});
 
 test('every owned catalog has concise unique names and retires duplicate wrappers',()=>{
- const counts={system:56,security:59,google:23};
+ const counts={system:56,security:63,google:23};
  const retired=['host_network_info','network_scan_ports','image_thumbnail','network_discover','service_detect','dns_records','pcap_fields','pcap_summary','pcap_conversations','lldp_observe','cdp_observe','llmnr_nbns_observe'];
  for(const [server,count] of Object.entries(counts)){
   const tools=rpc(server,[{method:'tools/list'}])[0].result.tools;
@@ -128,5 +128,22 @@ test('Drive downloads preserve binary and JSON bytes, while read_text rejects bi
   const results=rpc('google',[call('drive_download_file',{file_id:'pdf',output:'out.pdf'}),call('drive_download_file',{file_id:'json',output:'out.json'}),call('drive_read_text',{file_id:'pdf'})],{MCP_WORKSPACE:dir,GOOGLE_TOKEN_FILE:tokenFile,GOOGLE_TOKEN_KEY_FILE:keyFile},['--import',mock]);
   assert.equal(results[0].result.isError,false);assert.equal(results[1].result.isError,false);assert.equal(results[2].result.isError,true);
   assert.deepEqual(await fs.readFile(path.join(dir,'out.pdf')),Buffer.from([0,255,10,13,128]));assert.equal(await fs.readFile(path.join(dir,'out.json'),'utf8'),' { "key" : 1 }\n');
+ }finally{await fs.rm(dir,{recursive:true,force:true});}
+});
+
+test('Calendar event listing defaults omitted lower bound to now and preserves explicit bounds',async()=>{
+ const dir=await fs.mkdtemp(path.join(os.tmpdir(),'calendar-upcoming-'));
+ try{
+  const key=randomBytes(32),iv=randomBytes(12),cipher=createCipheriv('aes-256-gcm',key,iv);
+  const encrypted=Buffer.concat([cipher.update(JSON.stringify({access_token:'fixture',expiry_date:Date.now()+3600000})),cipher.final()]);
+  const keyFile=path.join(dir,'key'),tokenFile=path.join(dir,'token.json');await fs.writeFile(keyFile,key.toString('hex'));
+  await fs.writeFile(tokenFile,JSON.stringify({version:1,algorithm:'AES-256-GCM',iv:iv.toString('base64'),tag:cipher.getAuthTag().toString('base64'),ciphertext:encrypted.toString('base64')}));
+  const mock=path.join(dir,'fetch.mjs');await fs.writeFile(mock,`globalThis.fetch=async input=>{const u=new URL(input);return Response.json({timeZone:'America/Toronto',items:[{summary:u.searchParams.get('timeMin')} ]});};`);
+  const before=Date.now();
+  const rows=rpc('google',[call('calendar_list_events',{max_results:3}),call('calendar_list_events',{time_min:'2026-01-02T03:04:05Z',max_results:1})],{GOOGLE_TOKEN_FILE:tokenFile,GOOGLE_TOKEN_KEY_FILE:keyFile},['--import',mock]);
+  const first=JSON.parse(rows[0].result.content[0].text),second=JSON.parse(rows[1].result.content[0].text),after=Date.now();
+  assert.equal(first.time_min_defaulted,true);assert.equal(first.events[0].summary,first.effective_time_min);
+  const effective=Date.parse(first.effective_time_min);assert(effective>=before-1000&&effective<=after+1000,first.effective_time_min);
+  assert.equal(second.time_min_defaulted,false);assert.equal(second.effective_time_min,'2026-01-02T03:04:05Z');assert.equal(second.events[0].summary,'2026-01-02T03:04:05Z');
  }finally{await fs.rm(dir,{recursive:true,force:true});}
 });

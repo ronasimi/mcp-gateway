@@ -1,6 +1,6 @@
 # Laptop and LAN reconnaissance
 
-The four observation tools use the required host helper over `/run/mcp-security-host/recon.sock`. The Security container fails explicitly when the helper is missing or broken. Rendering remains in the container so files land in the shared workspace.
+The nine host observation tools use the required host helper over `/run/mcp-security-host/recon.sock`. The Security container fails explicitly when the helper is missing or broken. Rendering remains in the container so files land in the shared workspace.
 
 Install or refresh the root-owned helper with `./scripts/install-security-host-recon-helper.sh`. The complete deployment script performs this step. On Arch, the helper installer reports any missing dependencies; `--install-deps` explicitly enables their installation. The service retains target allowlists, the active-probe gate and the packet-capture gate. It exposes no shell command endpoint.
 
@@ -31,3 +31,5 @@ Wi-Fi defaults to `nmcli --rescan no`, with `iw scan dump` for cached fallback. 
 Topology observations label uncertain isolation/reflection findings. Map generation requires collected host/interface/subnet data. Dotted edges show logical reachability with unknown physical attachment; dashed edges require observed Wi-Fi association. The tool returns actual output paths after successful rendering. HTML is a self-contained SVG document, not an interactive topology editor.
 
 Targeted protocol checks, `port_scan`, `network_interfaces`, osquery and packet capture retain their explicit **container** scope. OpenWrt tools inspect a separate, configured SSH target; use `openwrt_targets` to find real aliases.
+
+Client-isolation observations add passive ARP/mDNS/LLMNR/SSDP visibility, gateway Proxy ARP candidates, direct/gateway path comparison and nonrecursive DNS cache evidence. See [CLIENT-ISOLATION-ASSESSMENT.md](CLIENT-ISOLATION-ASSESSMENT.md) for deployment, bounds and interpretation.

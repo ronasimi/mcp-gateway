@@ -22,3 +22,7 @@ data/google/*
 # Security scanner runtime data/templates/cache.
 data/security/*
 !data/security/.gitkeep
+
+# Local update backups and Python bytecode.
+.isolation-tools-backups/
+__pycache__/

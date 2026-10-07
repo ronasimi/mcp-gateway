@@ -14,11 +14,26 @@ test('Pi prompt is positive, compact, and keeps domain routing', async () => {
   }
 });
 
-test('Pi MCP template uses native deferred exposure', async () => {
+test('Pi MCP template uses native deferred exposure with curated third-party discovery', async () => {
   const cfg = JSON.parse(await fs.readFile(new URL('../pi/mcp.json.example', import.meta.url), 'utf8'));
   assert.deepEqual(Object.keys(cfg), ['mcpServers']);
   for (const [name, server] of Object.entries(cfg.mcpServers)) {
     assert.equal(server.exposure, 'deferred', `${name} should use deferred native MCP exposure`);
     assert.equal(typeof server.url, 'string');
   }
+  assert.deepEqual(cfg.mcpServers.searxng.toolExposure, {engine_info:'hidden',autocomplete:'hidden',search:'deferred'});
+  assert.deepEqual(cfg.mcpServers.memory.toolExposure, {read_graph:'hidden',search_nodes:'deferred'});
+  assert.match(cfg.mcpServers.searxng.description, /Public web search/i);
+  assert.match(cfg.mcpServers.memory.description, /search_nodes/);
+});
+
+test('cross-server prompt section reuses loaded tools and distinguishes operation states', async () => {
+  const section = await fs.readFile(new URL('../pi/CROSS_SERVER_ORCHESTRATION.md', import.meta.url), 'utf8');
+  assert.doesNotMatch(section, negative);
+  assert.match(section, /inspect the active tool set/i);
+  assert.match(section, /public web search/i);
+  assert.match(section, /search memory nodes/i);
+  for (const state of ['success','empty','not tested','discovery failed','unavailable','failed']) assert.match(section, new RegExp('`'+state+'`'));
+  assert.match(section, /actual `tool_search` calls/i);
+  assert.match(section, /actual `mcp__\.\.\.` execution calls/i);
 });

@@ -398,7 +398,11 @@ test('host recon helper delegation excludes graphical map generation', async () 
     'analyze_wireless_environment',
     'discover_mdns_subnets',
     'get_host_interface_info',
-    'perform_network_discovery'
+    'observe_broadcast_multicast',
+    'observe_dns_cache',
+    'perform_network_discovery',
+    'probe_gateway_hairpin',
+    'probe_gateway_proxy_arp'
   ]);
   assert.equal(NETWORK_RECON_HOST_TOOL_NAMES.has('generate_graphical_network_map'), false);
   const installer=await fs.readFile(path.join(root,'scripts/install-security-host-recon-helper.sh'),'utf8');
@@ -495,7 +499,7 @@ test('MCP protocol validates calls, parses Nmap/ffuf, preserves large JSON and r
   const rpc=(method,params)=>new Promise(resolve=>{const id=++seq;pending.set(id,resolve);child.stdin.write(JSON.stringify({jsonrpc:'2.0',id,method,params})+'\n');});
   const call=(name,args)=>rpc('tools/call',{name,arguments:args});
   try {
-    const catalog=await rpc('tools/list',{}); assert.equal(catalog.tools.length,59);
+    const catalog=await rpc('tools/list',{}); assert.equal(catalog.tools.length,63);
     const interfaceTool=catalog.tools.find(t=>t.name==='network_interfaces');
     assert.match(interfaceTool.description,/container.*interfaces/i); assert.doesNotMatch(interfaceTool.description,/LAN|laptop|reconnaissance/i);
     const bad=await call('sqlmap',{}); assert.equal(bad.isError,true);

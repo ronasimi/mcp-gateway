@@ -13,6 +13,7 @@ done
 
 python3 scripts/merge-pi-native-mcp.py "$CONFIG_DIR/mcp.json" pi/mcp.json.example
 install -m 0644 pi/APPEND_SYSTEM.md "$CONFIG_DIR/APPEND_SYSTEM.md"
+python3 scripts/merge-pi-prompt-section.py "$CONFIG_DIR/APPEND_SYSTEM.md" pi/CROSS_SERVER_ORCHESTRATION.md
 
 echo "Installed stock Pi 1.0 native MCP/tool_search configuration into $CONFIG_DIR"
 echo "Backups use suffix: .bak.$ts"

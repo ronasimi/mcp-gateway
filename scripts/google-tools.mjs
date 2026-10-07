@@ -14,6 +14,7 @@ import {
   quoteDriveLiteral,
 } from './google-common.mjs';
 import { decorateCatalogTools, SERVER_CATALOG } from './catalog-metadata.mjs';
+import { startMcpStdioServer } from './mcp-stdio.mjs';
 
 const MAX_OUTPUT = Number(process.env.GOOGLE_TOOLS_MAX_OUTPUT || 65536);
 const GMAIL_WRITE = /^(1|true|yes)$/i.test(process.env.GOOGLE_GMAIL_WRITE || 'false');
@@ -111,10 +112,10 @@ const TOOLS = [
   },
   {
     name: 'calendar_list_events',
-    description: 'Google Calendar events: list events from a calendar over a time range, optionally filtered by text query. Returns event IDs, summaries, start/end, location, attendees, organizer, status, and links. Use for schedule lookup, upcoming meetings, agenda, appointments, or finding an event before updating it.',
+    description: 'Google Calendar events: list events from a calendar over a time range, optionally filtered by text query. When time_min is omitted, the lower bound defaults to the current time so the default result is upcoming events. Returns event IDs, summaries, start/end, location, attendees, organizer, status, and links. Use for schedule lookup, upcoming meetings, agenda, appointments, or finding an event before updating it.',
     inputSchema: s('List events from one Google Calendar.', {
       calendar_id: str('Calendar ID; default "primary".'),
-      time_min: str('RFC3339 lower bound, e.g. 2026-09-30T00:00:00-04:00.'),
+      time_min: str('RFC3339 lower bound, e.g. 2026-09-30T00:00:00-04:00. Omit to use the current time and return upcoming events.'),
       time_max: str('RFC3339 upper bound.'),
       query: str('Optional free-text Calendar search query.'),
       max_results: num('Maximum events; default 50, maximum 250.', { minimum: 1, maximum: 250 }),
@@ -451,13 +452,21 @@ async function callTool(name, a) {
       return { calendars: body.items || [], next_page_token: body.nextPageToken || null };
     }
     case 'calendar_list_events': {
+      const explicitTimeMin = typeof a.time_min === 'string' && a.time_min.trim() ? a.time_min.trim() : null;
+      const effectiveTimeMin = explicitTimeMin || new Date().toISOString();
       const params = {
-        timeMin: a.time_min, timeMax: a.time_max, q: a.query,
+        timeMin: effectiveTimeMin, timeMax: a.time_max, q: a.query,
         maxResults: Math.max(1, Math.min(250, Number(a.max_results || 50))), pageToken: a.page_token,
         singleEvents: true, orderBy: 'startTime',
       };
       const { body } = await googleFetch(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(a.calendar_id || 'primary')}/events?${qs(params)}`);
-      return { time_zone: body.timeZone, events: body.items || [], next_page_token: body.nextPageToken || null };
+      return {
+        time_zone: body.timeZone,
+        effective_time_min: effectiveTimeMin,
+        time_min_defaulted: explicitTimeMin === null,
+        events: body.items || [],
+        next_page_token: body.nextPageToken || null,
+      };
     }
     case 'calendar_get_event': {
       const { body } = await googleFetch(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(a.calendar_id || 'primary')}/events/${encodeURIComponent(a.event_id)}`);
@@ -586,43 +595,12 @@ async function callTool(name, a) {
   throw new Error(`unknown tool: ${name}`);
 }
 
-function response(id, result) { process.stdout.write(`${JSON.stringify({ jsonrpc: '2.0', id, result })}\n`); }
-function errorResponse(id, code, message, data) { process.stdout.write(`${JSON.stringify({ jsonrpc: '2.0', id, error: { code, message, ...(data ? { data } : {}) } })}\n`); }
-
-let input = '';
-process.stdin.setEncoding('utf8');
-process.stdin.on('data', chunk => {
-  input += chunk;
-  let idx;
-  while ((idx = input.indexOf('\n')) >= 0) {
-    const line = input.slice(0, idx).trim();
-    input = input.slice(idx + 1);
-    if (line) handle(line);
-  }
+startMcpStdioServer({
+  serverName:'local-google-workspace-tools',
+  serverVersion:'2.0.0',
+  instructions:SERVER_CATALOG.google.description,
+  tools:CATALOG_TOOLS,
+  callTool,
+  encodeResult:value=>clipText(value,MAX_OUTPUT),
+  encodeError:error=>clipText(error?.stack||String(error),MAX_OUTPUT),
 });
-
-async function handle(line) {
-  let msg;
-  try { msg = JSON.parse(line); } catch { return; }
-  if (msg.method === 'notifications/initialized' || msg.method === 'notifications/cancelled') return;
-  if (msg.id == null) return;
-  try {
-    if (msg.method === 'initialize') return response(msg.id, { protocolVersion: msg.params?.protocolVersion || '2025-06-18', capabilities: { tools: { listChanged: false } }, serverInfo: { name: 'local-google-workspace-tools', version: '2.0.0' }, instructions: SERVER_CATALOG.google.description });
-    if (msg.method === 'ping') return response(msg.id, {});
-    if (msg.method === 'tools/list') return response(msg.id, { tools: CATALOG_TOOLS });
-    if (msg.method === 'tools/call') {
-      const name = msg.params?.name;
-      const args = msg.params?.arguments || {};
-      if (!toolMap.has(name)) throw new Error(`unknown tool: ${name}`);
-      try {
-        const out = await callTool(name, args);
-        return response(msg.id, { content: [{ type: 'text', text: clipText(out, MAX_OUTPUT) }], isError: false });
-      } catch (e) {
-        return response(msg.id, { content: [{ type: 'text', text: clipText(e?.stack || String(e), MAX_OUTPUT) }], isError: true });
-      }
-    }
-    return errorResponse(msg.id, -32601, `Method not found: ${msg.method}`);
-  } catch (e) {
-    return errorResponse(msg.id, -32603, e?.message || String(e));
-  }
-}

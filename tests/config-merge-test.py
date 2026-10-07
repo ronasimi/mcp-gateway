@@ -47,6 +47,23 @@ class MergeTest(unittest.TestCase):
         self.assertNotIn('directTools', new['mcpServers']['system'])
         self.assertEqual(module.merge(new, template), new)
 
+
+    def test_shipped_third_party_discovery_hygiene_is_merged_idempotently(self):
+        import json
+        template = json.loads((Path(__file__).resolve().parents[1] / 'pi' / 'mcp.json.example').read_text())
+        old = {'mcpServers': {
+            'searxng': {'url': 'http://custom-searx/mcp', 'toolExposure': {'engine_info': 'direct'}},
+            'memory': {'url': 'http://custom-memory/mcp', 'toolExposure': {'read_graph': 'direct'}},
+        }}
+        new = module.merge(old, template)
+        self.assertEqual(new['mcpServers']['searxng']['toolExposure'],
+                         {'engine_info': 'hidden', 'autocomplete': 'hidden', 'search': 'deferred'})
+        self.assertEqual(new['mcpServers']['memory']['toolExposure'],
+                         {'read_graph': 'hidden', 'search_nodes': 'deferred'})
+        self.assertEqual(new['mcpServers']['searxng']['url'], 'http://custom-searx/mcp')
+        self.assertEqual(new['mcpServers']['memory']['url'], 'http://custom-memory/mcp')
+        self.assertEqual(module.merge(new, template), new)
+
     def test_adapter_timeout_converts_milliseconds_to_native_seconds(self):
         old = {'settings': {'scriptMode': True}, 'mcpServers': {'security': {
             'requestTimeoutMs': 330000, 'lifecycle': 'lazy', 'transport': 'http'}}}

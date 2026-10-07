@@ -13,10 +13,11 @@ UNIT=/etc/systemd/system/mcp-security-host-recon.service
 INSTALL_DEPS=false
 [[ "${1:-}" == "--install-deps" ]] && INSTALL_DEPS=true
 
-bins=(node nmap ip iw nmcli airodump-ng avahi-browse ethtool ping getent dig tshark)
-packages=(nodejs nmap iproute2 iw networkmanager aircrack-ng avahi ethtool iputils glibc bind wireshark-cli smbclient nfs-utils)
+bins=(python3 node nmap ip iw nmcli airodump-ng avahi-browse ethtool ping getent dig tshark)
+packages=(python python-scapy libpcap nodejs nmap iproute2 iw networkmanager aircrack-ng avahi ethtool iputils glibc bind wireshark-cli smbclient nfs-utils)
 missing=()
 for b in "${bins[@]}"; do command -v "$b" >/dev/null 2>&1 || missing+=("$b"); done
+if ! python3 -c 'import scapy.all' >/dev/null 2>&1; then missing+=("python-scapy"); fi
 if ((${#missing[@]})); then
   echo "Missing host binaries: ${missing[*]}" >&2
   if $INSTALL_DEPS && command -v pacman >/dev/null 2>&1; then
@@ -85,7 +86,13 @@ sudo install -d -m 0755 /opt/mcp-security-host
 sudo install -m 0755 "$ROOT/scripts/security-host-recon-helper.mjs" /opt/mcp-security-host/security-host-recon-helper.mjs
 sudo install -m 0644 "$ROOT/scripts/security-network-recon.mjs" /opt/mcp-security-host/security-network-recon.mjs
 sudo install -m 0644 "$ROOT/scripts/mdns-subnets.mjs" /opt/mcp-security-host/mdns-subnets.mjs
+sudo install -m 0644 "$ROOT/scripts/module-layout.mjs" /opt/mcp-security-host/module-layout.mjs
 sudo install -m 0644 "$ROOT/scripts/security-runtime.mjs" /opt/mcp-security-host/security-runtime.mjs
+sudo rm -rf /opt/mcp-security-host/src
+sudo install -d -m 0755 /opt/mcp-security-host/src
+sudo cp -R "$ROOT/src/." /opt/mcp-security-host/src/
+sudo find /opt/mcp-security-host/src -type d -exec chmod 0755 {} +
+sudo find /opt/mcp-security-host/src -type f -exec chmod 0644 {} +
 sudo install -m 0644 "$tmp" "$UNIT"
 sudo systemctl daemon-reload
 sudo systemctl enable mcp-security-host-recon.service

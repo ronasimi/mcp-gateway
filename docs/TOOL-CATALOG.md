@@ -2,10 +2,15 @@
 
 Generated from shipped tools/list responses.
 
-## system — 51 tools
+## system — 56 tools
 
 | Native name | Purpose |
 |---|---|
+| `mcp__system__pdf_read` | Read PDF text by page with bounded pagination; scanned pages need OCR. Aliases: read PDF pages. |
+| `mcp__system__pdf_write` | Create PDF from text or merge, select, reorder and rotate PDF pages. Aliases: write PDF; merge PDF; split PDF. |
+| `mcp__system__office_read` | Read Word/OpenDocument text, Excel/Calc cells and formulas, or PowerPoint/Impress slide text. Aliases: read DOC DOCX ODT XLS XLSX ODS PPT PPTX ODP. |
+| `mcp__system__office_edit` | Save an edited Office/OpenDocument copy: replace text or update spreadsheet cells and formulas. Aliases: edit Word Excel PowerPoint; edit Writer Calc Impress. |
+| `mcp__system__office_export` | Export Office/OpenDocument files to PDF or another format in the same document family. Aliases: Office to PDF; LibreOffice conversion. |
 | `mcp__system__local_daily_briefing` | London Ontario daily briefing: current weather, seven-day forecast and CBC London headlines in a Markdown card. Aliases: morning briefing; London local weather news. |
 | `mcp__system__docker_list_containers` | List Docker containers with names, state, health, ports and Compose service. Running containers by default. Aliases: docker ps; running containers. |
 | `mcp__system__docker_inspect_container` | Inspect one Docker container: configuration, mounts, networks, environment and health. Aliases: container details. |
@@ -58,7 +63,7 @@ Generated from shipped tools/list responses.
 | `mcp__system__document_convert` | Convert a document with Pandoc and write the requested output format. Aliases: document format conversion. |
 | `mcp__system__document_render_pdf_page` | Render one PDF page to a PNG image at a chosen resolution. Aliases: PDF page preview. |
 
-## security — 58 tools
+## security — 63 tools
 
 | Native name | Purpose |
 |---|---|
@@ -95,6 +100,11 @@ Generated from shipped tools/list responses.
 | `mcp__security__wsd_discover` | Probe WS-Discovery endpoints on a specified target, or multicast within the Security-container namespace. Aliases: WSD printer endpoints. |
 | `mcp__security__arp_discover` | Probe authorized IPv4 targets using ARP within the Security-container broadcast domain. Aliases: ARP neighbor sweep. |
 | `mcp__security__ndp_discover` | Read the IPv6 neighbor cache of the Security-container namespace. Aliases: NDP cached neighbors. |
+| `mcp__security__observe_broadcast_multicast` | Passively capture host ARP broadcasts and mDNS, LLMNR, SSDP multicast. Separates packet sources from address/name/service claims; sends no probes. Requires host capture permission; visibility does not prove failed isolation. Aliases: broadcast multicast leakage; passive ARP hostname services. |
+| `mcp__security__probe_gateway_proxy_arp` | Bounded host ARP sweep on a connected IPv4 prefix; compares replies with gateway MAC to identify Proxy ARP candidates. Gateway replies do not confirm peer liveness. Aliases: gateway proxy ARP; shared ARP responder MAC. |
+| `mcp__security__probe_gateway_hairpin` | Compare direct and gateway-addressed Ethernet ICMP probes to explicit same-subnet peers, with TTL=1 forwarding control. Reports possible hairpin routing; controlled peers and policy evidence are needed to confirm isolation bypass. Aliases: gateway hairpin routing; client isolation path comparison. |
+| `mcp__security__observe_dns_cache` | Observe explicit names at an authorized LAN DNS server using nonrecursive queries. Returns validated responses, TTLs and timings; optional supplied TTL baseline. Cache data cannot identify a requesting client or confirm device presence. Aliases: DNS cache snooping; nonrecursive cache evidence. |
+| `mcp__security__discover_mdns_subnets` | Discover advertised host addresses and candidate subnet ranges through host mDNS/DNS-SD. Returns compact report rows, saves full raw audit evidence separately, distinguishes local prefixes, routing coverage and heuristic grouping, and treats outside-subnet advertisements as possible reflection rather than proof. Does not scan candidates. Aliases: mDNS subnet discovery; subnet ranges from advertised addresses; mDNS reflector evidence. |
 | `mcp__security__get_host_interface_info` | Start local network reconnaissance here: inspect the laptop’s physical Ethernet/Wi-Fi interfaces, addresses, gateway, DNS and link speed through the required host helper. Aliases: host network state; active laptop interfaces; network reconnaissance and mapping workflow. |
 | `mcp__security__perform_network_discovery` | Discover and enumerate hosts on authorized local subnets through the required host helper. Full mode adds names, MAC/vendor, OS evidence, ports/services, shares and media devices. Aliases: LAN reconnaissance; comprehensive network discovery; reachable host inventory. |
 | `mcp__security__analyze_network_topology` | Analyze physical network topology through the required host helper: subnets, routes, gateways, mDNS visibility and optional LLDP/CDP or peer-isolation evidence. Virtual interfaces and VLANs are excluded. Aliases: routing relationships; network segmentation. |
@@ -135,7 +145,7 @@ Generated from shipped tools/list responses.
 | `mcp__google__gmail_send_draft` | Send an existing Gmail draft by ID. Requires Gmail writes and a send scope. Aliases: send prepared email. |
 | `mcp__google__gmail_modify_labels` | Add or remove labels on a Gmail message. Requires Gmail writes. Aliases: archive mark read star. |
 | `mcp__google__calendar_list_calendars` | List accessible Google calendars and their IDs. Aliases: available calendars. |
-| `mcp__google__calendar_list_events` | List Google Calendar events in a time range with optional text filtering. Aliases: upcoming meetings; calendar agenda. |
+| `mcp__google__calendar_list_events` | List Google Calendar events in a time range; omitted lower bound starts at the current time for upcoming events. Aliases: upcoming meetings; calendar agenda; next calendar events. |
 | `mcp__google__calendar_get_event` | Read one Google Calendar event’s complete details. Aliases: meeting details. |
 | `mcp__google__calendar_freebusy` | Read busy intervals for one or more calendars over a requested period. Aliases: calendar availability; meeting conflicts. |
 | `mcp__google__calendar_create_event` | Create a Google Calendar event. Requires Calendar writes and a matching OAuth scope. Aliases: schedule meeting. |
