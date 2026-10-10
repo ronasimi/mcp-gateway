@@ -1,11 +1,11 @@
-# Current owned MCP tool catalog
+# Owned MCP tool catalog
 
-Generated from shipped tools/list responses.
+Generated from the current source `tools/list` responses. Third-party browser, search and memory catalogs are maintained by their upstream services.
 
-## system — 56 tools
+## System · 56 tools
 
 | Native name | Purpose |
-|---|---|
+| :--- | :--- |
 | `mcp__system__pdf_read` | Read PDF text by page with bounded pagination; scanned pages need OCR. Aliases: read PDF pages. |
 | `mcp__system__pdf_write` | Create PDF from text or merge, select, reorder and rotate PDF pages. Aliases: write PDF; merge PDF; split PDF. |
 | `mcp__system__office_read` | Read Word/OpenDocument text, Excel/Calc cells and formulas, or PowerPoint/Impress slide text. Aliases: read DOC DOCX ODT XLS XLSX ODS PPT PPTX ODP. |
@@ -63,10 +63,11 @@ Generated from shipped tools/list responses.
 | `mcp__system__document_convert` | Convert a document with Pandoc and write the requested output format. Aliases: document format conversion. |
 | `mcp__system__document_render_pdf_page` | Render one PDF page to a PNG image at a chosen resolution. Aliases: PDF page preview. |
 
-## security — 63 tools
+## Security · 64 tools
 
 | Native name | Purpose |
-|---|---|
+| :--- | :--- |
+| `mcp__security__read_security_result` | Read selected fields or bounded pages from a saved Security JSON observation under .security-results; no new capture or scan. Aliases: retrieve saved observation; read spilled security artifact. |
 | `mcp__security__status` | Check installed executables, host-helper availability, Firecrawl configuration and background-job capacity. Aliases: backend availability. |
 | `mcp__security__firecrawl_scrape` | Fetch one web page as clean Markdown through the configured Firecrawl backend; credentials stay server-side. Aliases: website readable content. |
 | `mcp__security__firecrawl_map` | Enumerate website URLs through the configured Firecrawl backend. Aliases: website URL inventory. |
@@ -131,10 +132,10 @@ Generated from shipped tools/list responses.
 | `mcp__security__workspace_ioc_search` | Search workspace text files recursively for one literal indicator. Aliases: IOC scoping. |
 | `mcp__security__host_audit` | Audit mounted-host filesystem hardening with Lynis and summarize warnings and suggestions. Aliases: host hardening review. |
 
-## google — 23 tools
+## Google · 23 tools
 
 | Native name | Purpose |
-|---|---|
+| :--- | :--- |
 | `mcp__google__auth_status` | Check Google OAuth configuration and granted scopes; credentials remain server-side. Aliases: Google account authentication. |
 | `mcp__google__gmail_get_unread_count` | Return exact unread Gmail message and thread counts. Aliases: how many unread emails. |
 | `mcp__google__gmail_search_messages` | Find Gmail messages with a query; return matching records, metadata and snippets. Aliases: find email. |
@@ -158,3 +159,4 @@ Generated from shipped tools/list responses.
 | `mcp__google__drive_create_folder` | Create a folder in Google Drive. Requires Drive writes. Aliases: new Drive folder. |
 | `mcp__google__drive_upload_file` | Upload a workspace file to Google Drive. Requires Drive writes. Aliases: save file to Drive. |
 | `mcp__google__drive_delete_file` | Delete a Google Drive file by ID. Requires Drive writes. Aliases: remove Drive file. |
+

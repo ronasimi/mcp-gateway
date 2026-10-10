@@ -499,7 +499,7 @@ test('MCP protocol validates calls, parses Nmap/ffuf, preserves large JSON and r
   const rpc=(method,params)=>new Promise(resolve=>{const id=++seq;pending.set(id,resolve);child.stdin.write(JSON.stringify({jsonrpc:'2.0',id,method,params})+'\n');});
   const call=(name,args)=>rpc('tools/call',{name,arguments:args});
   try {
-    const catalog=await rpc('tools/list',{}); assert.equal(catalog.tools.length,63);
+    const catalog=await rpc('tools/list',{}); assert.equal(catalog.tools.length,64);
     const interfaceTool=catalog.tools.find(t=>t.name==='network_interfaces');
     assert.match(interfaceTool.description,/container.*interfaces/i); assert.doesNotMatch(interfaceTool.description,/LAN|laptop|reconnaissance/i);
     const bad=await call('sqlmap',{}); assert.equal(bad.isError,true);

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { SECURITY_RESULT_TOOL, readSecurityResult } from './security-result-reader.mjs';
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
 import path from 'node:path';
@@ -31,6 +32,7 @@ const bool = (description) => ({ type:'boolean', description });
 const arr = (description, items, extra={}) => ({ type:'array', description, items, ...extra });
 
 const TOOLS = [
+  SECURITY_RESULT_TOOL,
   ...EXTENDED_TOOLS,
   ...PROTOCOL_TOOLS,
   ...NETWORK_RECON_TOOLS,
@@ -63,6 +65,7 @@ const ACTIVE = new Set([...PROTOCOL_TOOL_NAMES,...NETWORK_RECON_ACTIVE_TOOL_NAME
 const WRITES_WORKSPACE = new Set(['generate_sbom','packet_capture','suricata_alerts',...NETWORK_RECON_WORKSPACE_WRITES]);
 const OPEN_WORLD = new Set([...ACTIVE]);
 for (const tool of TOOLS) {
+  tool.inputSchema={...tool.inputSchema,'x-pi-effect':ACTIVE.has(tool.name)?'active_probe':WRITES_WORKSPACE.has(tool.name)?(/capture|mdns|passive|observe_broadcast_multicast/.test(tool.name)?'passive_capture':'workspace_write'):'read'};
   if (tool.annotations) continue;
   tool.annotations={
     readOnlyHint: !WRITES_WORKSPACE.has(tool.name),
@@ -198,6 +201,7 @@ function redactSecretFinding(x){
 function countBy(items,keyFn){const out={}; for(const x of items){const k=keyFn(x)||'UNKNOWN'; out[k]=(out[k]||0)+1;} return out;}
 
 async function callTool(name,a={}){
+  if (name === SECURITY_RESULT_TOOL.name) return readSecurityResult(WORKSPACE,a);
   if (extendedNames.has(name)) return extended.call(name,a);
   if (PROTOCOL_TOOL_NAMES.has(name)) return protocol.call(name,a);
   if (NETWORK_RECON_TOOL_NAMES.has(name)) return networkRecon.call(name,a);

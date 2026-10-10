@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { OPENWRT_STATUS_COMMAND, parseOpenWrtStatus } from './openwrt-status.mjs';
 import fs from 'node:fs';
 import { DOCUMENT_TOOLS, callDocumentTool } from './document-tools.mjs';
 import { validateArguments } from './security-runtime.mjs';
@@ -112,6 +113,7 @@ const SYSTEM_OPEN_WORLD = new Set([
 ]);
 for (const tool of TOOLS) {
   const mutating = SYSTEM_MUTATING.has(tool.name);
+  tool.inputSchema={...tool.inputSchema,'x-pi-effect':mutating?'mutation':/^network_(?:dns_lookup|ping|trace_route|http_probe|port_check)$/.test(tool.name)?'active_probe':tool.name.startsWith('openwrt_')?'config_read':'read'};
   tool.annotations = {
     readOnlyHint: !mutating,
     destructiveHint: SYSTEM_DESTRUCTIVE.has(tool.name),
@@ -337,7 +339,7 @@ async function callTool(name,a={}){
       const aliases=[...new Set([...config.matchAll(/^\s*Host\s+([^#\n]+)/gim)].flatMap(m=>m[1].trim().split(/\s+/)).filter(x=>/^[A-Za-z0-9_.-]+$/.test(x)))];
       return {aliases,source:'configured SSH Host entries',includes_present:/^\s*Include\s+/im.test(config),note:'Literal aliases from the mounted SSH config; wildcard and Include entries are not expanded.'};
     }
-    case 'openwrt_status': return ssh(a.target,`echo '--- release ---'; cat /etc/openwrt_release 2>/dev/null || cat /etc/os-release; echo '--- uptime/load ---'; uptime; echo '--- memory ---'; free 2>/dev/null || cat /proc/meminfo; echo '--- mounts ---'; df -h; echo '--- board ---'; ubus call system board 2>/dev/null; echo '--- interfaces ---'; ubus call network.interface dump 2>/dev/null; echo '--- routes ---'; ip route 2>/dev/null || route -n`);
+    case 'openwrt_status': return parseOpenWrtStatus(await ssh(a.target,OPENWRT_STATUS_COMMAND),a.target);
     case 'openwrt_uci_show': return ssh(a.target,`uci show${a.package?' '+qsh(assertToken(a.package,'package')):''}`);
     case 'openwrt_uci_get': return ssh(a.target,`uci -q get ${qsh(a.key)}`);
     case 'openwrt_ubus_call': { const js=a.args||'{}'; JSON.parse(js); return ssh(a.target,`ubus call ${qsh(assertToken(a.object,'object'))} ${qsh(assertToken(a.method,'method'))} ${qsh(js)}`); }

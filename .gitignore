@@ -26,3 +26,12 @@ data/security/*
 # Local update backups and Python bytecode.
 .isolation-tools-backups/
 __pycache__/
+
+# Generated checks and source-replacement backups.
+__pycache__/
+*.pyc
+.clean-source-backups/
+.security-results/
+.env.*backup*
+data/
+secrets/

@@ -65,6 +65,7 @@ const system = {
   document_render_pdf_page: entry('Render one PDF page to a PNG image at a chosen resolution.', ['PDF page preview'], 'documents'),
 };
 const security = {
+  read_security_result: entry('Read selected fields or bounded pages from a saved Security JSON observation under .security-results; no new capture or scan.', ['retrieve saved observation','read spilled security artifact'], 'network-recon'),
   status: entry('Check installed executables, host-helper availability, Firecrawl configuration and background-job capacity.', ['backend availability']),
   firecrawl_scrape: entry('Fetch one web page as clean Markdown through the configured Firecrawl backend; credentials stay server-side.', ['website readable content'], 'web-content'),
   firecrawl_map: entry('Enumerate website URLs through the configured Firecrawl backend.', ['website URL inventory'], 'web-content'),

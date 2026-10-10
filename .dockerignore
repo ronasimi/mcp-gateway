@@ -1,0 +1,9 @@
+.git
+.env
+.env.*backup*
+data
+secrets
+.security-results
+.clean-source-backups
+**/__pycache__
+*.log

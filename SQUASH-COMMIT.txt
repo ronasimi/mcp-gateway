@@ -1,0 +1,20 @@
+refactor(mcp): consolidate bounded services and startup verification
+
+Keep shared core transport and domain modules with strict schemas, target
+policy, host-network provenance and bounded observation/report artifacts.
+
+Add structured OpenWrt status and confined Security JSON result retrieval.
+Ship the shared redaction dependency and fail Security image builds when
+actual MCP initialization or catalog discovery fails.
+
+Retain network discovery, mDNS candidate inference, passive multicast,
+isolation probes, mapping and Office/PDF support. Correct the document
+worker test import path and label environment-dependent integration skips.
+
+Replace overlapping release notes with current operations, network and
+development guides; generate the tool catalog from current source. Retire
+legacy Pi-1.0 deploy/prompt scripts and their matching tests, with Pi's
+current configuration owned by pi-docker.
+
+Validation: current Node/Python suites, 143 owned catalog tools, and the
+Security initialize/catalog check. Live service checks remain host work.

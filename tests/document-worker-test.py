@@ -1,5 +1,7 @@
+import sys
 import importlib.util, os, pathlib, tempfile, unittest
 spec=importlib.util.spec_from_file_location('worker',pathlib.Path(__file__).resolve().parents[1]/'scripts/office-documents.py')
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / 'scripts'))
 w=importlib.util.module_from_spec(spec);spec.loader.exec_module(w)
 class Documents(unittest.TestCase):
  def setUp(self):

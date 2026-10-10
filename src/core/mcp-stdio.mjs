@@ -1,3 +1,4 @@
+import { redact } from './redact.mjs';
 /**
  * Minimal JSON-RPC/MCP stdio server used by the local domain processes.
  * Domain modules own catalog metadata, argument validation, execution policy,
@@ -42,17 +43,19 @@ export function startMcpStdioServer({
         if(!tool) throw new Error(`unknown tool: ${name}`);
         try{
           if(validateCall) await validateCall(tool,args,name);
-          const value=await callTool(name,args);
-          const text=await encodeResult(value,{tool,name,args});
-          return response(msg.id,{content:[{type:'text',text:String(text)}],isError:false});
+          const value=redact(await callTool(name,args));
+          const text=await encodeResult(value,{tool,name,args:redact(args)});
+          return response(msg.id,{content:[{type:'text',text:String(redact(text))}],...(value && typeof value==='object' && !Array.isArray(value)?{structuredContent:value}:{}),isError:false});
         }catch(error){
-          const text=await encodeError(error,{tool,name,args});
-          return response(msg.id,{content:[{type:'text',text:String(text)}],isError:true});
+          const safeError=new Error(String(redact(error?.message || String(error))));
+          safeError.stack=String(redact(error?.stack || safeError.message));
+          const text=await encodeError(safeError,{tool,name,args:redact(args)});
+          return response(msg.id,{content:[{type:'text',text:String(redact(text))}],isError:true});
         }
       }
       return errorResponse(msg.id,-32601,`Method not found: ${msg.method}`);
     }catch(error){
-      return errorResponse(msg.id,-32603,error?.message||String(error));
+      return errorResponse(msg.id,-32603,redact(error?.message||String(error)));
     }
   }
 
