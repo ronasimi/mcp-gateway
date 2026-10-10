@@ -13,6 +13,7 @@ import { PROTOCOL_TOOLS, PROTOCOL_TOOL_NAMES, createProtocolSecurity } from './s
 import { resultEnvelope, NETWORK_RECON_TOOLS, NETWORK_RECON_TOOL_NAMES, NETWORK_RECON_ACTIVE_TOOL_NAMES, NETWORK_RECON_WORKSPACE_WRITES, createNetworkRecon } from './security-network-recon.mjs';
 import { decorateCatalogTools, SERVER_CATALOG } from './catalog-metadata.mjs';
 import { startMcpStdioServer } from './mcp-stdio.mjs';
+import {MASSCAN_TOOL,createMasscan} from './security-masscan.mjs';
 
 const WORKSPACE = path.resolve(process.env.MCP_WORKSPACE || '/workspace');
 const HOST_ROOT = path.resolve(process.env.MCP_HOST_ROOT || '/host');
@@ -33,6 +34,7 @@ const arr = (description, items, extra={}) => ({ type:'array', description, item
 
 const TOOLS = [
   SECURITY_RESULT_TOOL,
+  MASSCAN_TOOL,
   ...EXTENDED_TOOLS,
   ...PROTOCOL_TOOLS,
   ...NETWORK_RECON_TOOLS,
@@ -61,7 +63,7 @@ const TOOLS = [
   { name:'host_audit', description:'Read-only host hardening audit: run Lynis against the mounted host root and return warnings, suggestions, and a compact audit summary. Use for blue-team configuration/hardening review; host filesystem is mounted read-only.', inputSchema:s('Run a bounded Lynis host hardening audit.', {timeout_seconds:num('Maximum runtime; default 180, maximum 300.',{minimum:30,maximum:300})}) },
 ];
 
-const ACTIVE = new Set([...PROTOCOL_TOOL_NAMES,...NETWORK_RECON_ACTIVE_TOOL_NAMES,'port_scan','tls_audit','http_headers_audit','web_server_audit','vulnerability_scan','web_content_discover']);
+const ACTIVE = new Set([...PROTOCOL_TOOL_NAMES,...NETWORK_RECON_ACTIVE_TOOL_NAMES,'masscan_scan','port_scan','tls_audit','http_headers_audit','web_server_audit','vulnerability_scan','web_content_discover']);
 const WRITES_WORKSPACE = new Set(['generate_sbom','packet_capture','suricata_alerts',...NETWORK_RECON_WORKSPACE_WRITES]);
 const OPEN_WORLD = new Set([...ACTIVE]);
 for (const tool of TOOLS) {
@@ -70,12 +72,13 @@ for (const tool of TOOLS) {
   tool.annotations={
     readOnlyHint: !WRITES_WORKSPACE.has(tool.name),
     destructiveHint:false,
-    idempotentHint: !['packet_capture'].includes(tool.name),
+    idempotentHint: !['packet_capture','observe_broadcast_multicast'].includes(tool.name),
     openWorldHint:OPEN_WORLD.has(tool.name),
   };
 }
 const CATALOG_TOOLS = decorateCatalogTools(TOOLS, 'security');
 const toolMap=new Map(TOOLS.map(t=>[t.name,t]));
+const masscan=createMasscan({runStatus,requireActive,assertAuthorizedTarget,validateArguments});
 const extended = createExtendedSecurity({ runStatus, safeWorkspace, assertAuthorizedTarget, assertAuthorizedUrl });
 const protocol = createProtocolSecurity({ runStatus, assertAuthorizedTarget, requireActive, requireCapture });
 const networkRecon = createNetworkRecon({ runStatus, safeWorkspace, assertAuthorizedTarget, requireActive, requireCapture, validateArguments, hostRoot: HOST_ROOT });
@@ -201,6 +204,7 @@ function redactSecretFinding(x){
 function countBy(items,keyFn){const out={}; for(const x of items){const k=keyFn(x)||'UNKNOWN'; out[k]=(out[k]||0)+1;} return out;}
 
 async function callTool(name,a={}){
+  if (name===MASSCAN_TOOL.name) return masscan.call(a);
   if (name === SECURITY_RESULT_TOOL.name) return readSecurityResult(WORKSPACE,a);
   if (extendedNames.has(name)) return extended.call(name,a);
   if (PROTOCOL_TOOL_NAMES.has(name)) return protocol.call(name,a);
@@ -304,7 +308,7 @@ async function encodeResult(value) {
 
 startMcpStdioServer({
   serverName:'local-security-tools',
-  serverVersion:'2.0.0',
+  serverVersion:'2.1.0',
   instructions:SERVER_CATALOG.security.description,
   tools:CATALOG_TOOLS,
   callTool,

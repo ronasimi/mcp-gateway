@@ -14,7 +14,7 @@ function setup(overrides={}){
 }
 test('all four tools publish host scope, discovery metadata and bounded schemas',()=>{
  for(const name of ['observe_broadcast_multicast','probe_gateway_proxy_arp','probe_gateway_hairpin','observe_dns_cache']){
-  assert(NETWORK_RECON_HOST_TOOL_NAMES.has(name));assert(NETWORK_RECON_ACTIVE_TOOL_NAMES.has(name));
+  assert(NETWORK_RECON_HOST_TOOL_NAMES.has(name));assert.equal(NETWORK_RECON_ACTIVE_TOOL_NAMES.has(name),name!=='observe_broadcast_multicast');
   const tool=NETWORK_RECON_TOOLS.find(t=>t.name===name);assert(tool);
   const catalog=decorateCatalogTools([tool],'security')[0];assert(catalog._meta['ai.catalog'].aliases.length);
   assert.equal(tool.inputSchema.additionalProperties,false);

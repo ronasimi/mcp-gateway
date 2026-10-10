@@ -63,11 +63,12 @@ Generated from the current source `tools/list` responses. Third-party browser, s
 | `mcp__system__document_convert` | Convert a document with Pandoc and write the requested output format. Aliases: document format conversion. |
 | `mcp__system__document_render_pdf_page` | Render one PDF page to a PNG image at a chosen resolution. Aliases: PDF page preview. |
 
-## Security · 64 tools
+## Security · 65 tools
 
 | Native name | Purpose |
 | :--- | :--- |
 | `mcp__security__read_security_result` | Read selected fields or bounded pages from a saved Security JSON observation under .security-results; no new capture or scan. Aliases: retrieve saved observation; read spilled security artifact. |
+| `mcp__security__masscan_scan` | Bounded Masscan TCP SYN scan from the Security container: explicit authorized IPv4/CIDR and ports, packet-rate/deadline caps, no banners or spoofing. Requires active-scan authorization; use Nmap port_scan for service detection. Aliases: masscan; massscan; masscan TCP scan; bounded SYN port scan. |
 | `mcp__security__status` | Check installed executables, host-helper availability, Firecrawl configuration and background-job capacity. Aliases: backend availability. |
 | `mcp__security__firecrawl_scrape` | Fetch one web page as clean Markdown through the configured Firecrawl backend; credentials stay server-side. Aliases: website readable content. |
 | `mcp__security__firecrawl_map` | Enumerate website URLs through the configured Firecrawl backend. Aliases: website URL inventory. |
@@ -159,4 +160,3 @@ Generated from the current source `tools/list` responses. Third-party browser, s
 | `mcp__google__drive_create_folder` | Create a folder in Google Drive. Requires Drive writes. Aliases: new Drive folder. |
 | `mcp__google__drive_upload_file` | Upload a workspace file to Google Drive. Requires Drive writes. Aliases: save file to Drive. |
 | `mcp__google__drive_delete_file` | Delete a Google Drive file by ID. Requires Drive writes. Aliases: remove Drive file. |
-

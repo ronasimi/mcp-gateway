@@ -1,4 +1,4 @@
-refactor(mcp): consolidate bounded services and startup verification
+feat(security): add bounded Masscan to the clean r24 gateway
 
 Keep shared core transport and domain modules with strict schemas, target
 policy, host-network provenance and bounded observation/report artifacts.
@@ -18,3 +18,17 @@ current configuration owned by pi-docker.
 
 Validation: current Node/Python suites, 143 owned catalog tools, and the
 Security initialize/catalog check. Live service checks remain host work.
+
+Classify broadcast/multicast observation as a fresh passive capture,
+retain active gates for ARP/hairpin/DNS probes, and validate these
+public effect and freshness declarations at build-time startup.
+
+Add an IPv4 TCP SYN Masscan tool with whole-CIDR authorization, port and
+probe caps, bounded rate/deadline, argv-only execution and no ambient
+config. Parse scoped list observations, preserve large results, and
+report partial execution explicitly. Pin the binary and include offline
+image checks; retain container scope and existing active-scan gates.
+
+Validation: 110 Node tests passed (2 environment skips), 19 Python tests,
+catalog and startup validation, plus mocked CLI/MCP integration.
+No live scan or Docker build was performed in this environment.

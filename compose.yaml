@@ -149,6 +149,7 @@ services:
         SUBFINDER_VERSION: ${SUBFINDER_VERSION:-2.16.0}
         FIRECRAWL_CLI_VERSION: ${FIRECRAWL_CLI_VERSION:-1.25.1}
         METASPLOIT_VERSION: ${METASPLOIT_VERSION:-6.5.3~20260818061200~1rapid7-1}
+        MASSCAN_VERSION: ${MASSCAN_VERSION:-2:1.3.2+ds1-1}
     image: local/agent-mcp-security:latest
     container_name: mcp-security
     # Shared artifacts are readable by the Pi container (GID 1000).

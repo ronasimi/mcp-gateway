@@ -37,7 +37,7 @@ export const EXTENDED_TOOLS = [
 export function createExtendedSecurity(ctx) {
   const { runStatus, safeWorkspace, assertAuthorizedTarget, assertAuthorizedUrl } = ctx;
   const jobs = new JobManager();
-  const binaries = ['nmap', 'dig', 'ip', 'iw', 'nmcli', 'airodump-ng', 'avahi-browse', 'dot', 'ethtool', 'firecrawl', 'ffuf', 'subfinder', 'searchsploit', 'sqlmap', 'msfconsole', 'nc', 'socat', 'jq', 'tshark', 'suricata', 'osqueryi', 'yara', 'r2'];
+  const binaries = ['nmap', 'masscan', 'dig', 'ip', 'iw', 'nmcli', 'airodump-ng', 'avahi-browse', 'dot', 'ethtool', 'firecrawl', 'ffuf', 'subfinder', 'searchsploit', 'sqlmap', 'msfconsole', 'nc', 'socat', 'jq', 'tshark', 'suricata', 'osqueryi', 'yara', 'r2'];
   const stripAnsi = s => String(s).replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '');
   function parsed(result) {
     if (result.code !== 0) throw new Error(`command failed (${result.code}): ${result.stderr.slice(0,2000) || result.stdout.slice(0,2000)}`);

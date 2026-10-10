@@ -78,3 +78,7 @@ bash scripts/check.sh
 The check runs current Node and Python suites, validates owned catalogs and checks Security startup without executing scans. [Development](docs/DEVELOPMENT.md) describes prerequisites, environment-dependent skips and source boundaries.
 
 [Setup, credentials and troubleshooting →](docs/OPERATIONS.md)
+
+## Bounded Masscan
+
+Security includes `masscan_scan` for explicit authorized IPv4 TCP SYN scans, alongside Nmap `port_scan` for service detection. Rate, address/port count, total probes and process duration are bounded. It uses the Security-container namespace; passive physical LAN observation remains a separate operation. See [usage and limits](docs/NETWORK.md#masscan).

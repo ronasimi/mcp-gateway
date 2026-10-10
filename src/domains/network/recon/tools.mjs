@@ -68,5 +68,5 @@ export const NETWORK_RECON_HOST_TOOL_NAMES = new Set([
   'analyze_network_topology',
   'analyze_wireless_environment'
 ]);
-export const NETWORK_RECON_ACTIVE_TOOL_NAMES = new Set([...ISOLATION_TOOL_NAMES,'discover_mdns_subnets','perform_network_discovery','analyze_network_topology','analyze_wireless_environment']);
-export const NETWORK_RECON_WORKSPACE_WRITES = new Set(['generate_graphical_network_map']);
+export const NETWORK_RECON_ACTIVE_TOOL_NAMES = new Set([...ISOLATION_TOOL_NAMES].filter(name=>name!=='observe_broadcast_multicast').concat(['discover_mdns_subnets','perform_network_discovery','analyze_network_topology','analyze_wireless_environment']));
+export const NETWORK_RECON_WORKSPACE_WRITES = new Set(['generate_graphical_network_map','observe_broadcast_multicast']);

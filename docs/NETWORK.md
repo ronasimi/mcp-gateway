@@ -65,3 +65,38 @@ Use the returned `host_table_markdown` and `candidate_table_markdown` for exact 
 Full raw evidence and compact recovery reports are separate artifacts. When a response is truncated, recover `report_path` first. Use `read_security_result` for selected fields under `.security-results`; its schema bounds pagination and rejects traversal, symlinks and prototype selectors. Retrieval is not a fresh network operation.
 
 Maps require observed data or saved input paths. Unknown physical attachment stays visibly uncertain; logical reachability does not prove a physical link. HTML is a self-contained SVG view. Download the returned actual artifact paths rather than treating opaque Pi result references as filenames.
+
+## Passive observation metadata
+
+`observe_broadcast_multicast` publishes `x-pi-effect: passive_capture`, `readOnlyHint: false` because it saves an observation artifact, and `idempotentHint: false` because later captures observe new traffic. It is not in the active-tool set. ARP, hairpin and DNS-cache probe operations remain `active_probe`. The startup verifier checks these public catalog declarations without executing probes.
+
+## Masscan
+
+Discover `security masscan scan`, then invoke the exact returned `mcp__security__masscan_scan` through `tool_invoke`. Both `masscan` and the common `massscan` spelling identify this scanner; discovery does not substitute Nmap or passive capture. The public effect is `active_probe`, with non-idempotent annotations to keep subsequent requested scans fresh.
+
+Example arguments after explicitly authorizing the target scan and enabling Pi's runtime opt-in:
+
+```json
+{"target":"192.168.1.10","ports":"22,80,443","rate_limit":100,"timeout_seconds":60}
+```
+
+This is an illustrative target; use the actual authorized address. The tool takes one literal IPv4 address or CIDR, never a hostname or IPv6 target. CIDRs are normalized and checked against the gateway target allowlist in their entirety. `interface`, when supplied, must be a Security-container interface, not a host-helper interface.
+
+| Bound | Value |
+| :--- | :--- |
+| Addresses | At most 4,096, `/20` or narrower |
+| TCP ports | Required; at most 1,024 distinct ports |
+| Host/port probes | At most 262,144 per call |
+| Packet rate | Default 100; maximum 1,000 packets/second |
+| Process deadline | Default 60; maximum 180 seconds |
+| Receive wait | 5 seconds; accounted for in the deadline |
+| Retries | 0 |
+| Captured subprocess output | 1 MiB; overflow stops the process and marks results incomplete |
+
+Scope/rate combinations that cannot fit within the selected deadline are rejected before execution. No arbitrary CLI flags, source spoofing, banner collection, config paths or shell commands are exposed. An ambient `/etc/masscan/masscan.conf` containing options is rejected; the clean image removes that implicit configuration.
+
+Target address, requested port and planned probe counts describe the requested scope, not measured packets sent. The scanner emits list-format observations. The gateway parses and deduplicates them, rejects unexpected addresses/ports/protocols, and reports timeouts, output caps and parse problems as incomplete evidence. Large results are stored under `.security-results` and retrieved with `read_security_result`. A successful process with no returned ports does not prove that the ports are closed. Use Nmap `port_scan` for service/version detection.
+
+This tool runs inside the existing Security-container namespace with `NET_RAW`; no host-network mode, extra host-helper privilege or firewall change is introduced. Reachability and return traffic depend on your deployment. Physical-interface and isolation claims still need the host-helper observations.
+
+Upstream references: [Masscan usage/output](https://github.com/robertdavidgraham/masscan), [Masscan manual](https://github.com/robertdavidgraham/masscan/blob/master/doc/masscan.8.markdown), [pinned Debian Bookworm package](https://packages.debian.org/bookworm/masscan).

@@ -10,6 +10,7 @@ ARG SEMGREP_VERSION=1.178.0
 ARG SUBFINDER_VERSION=2.16.0
 ARG FIRECRAWL_CLI_VERSION=1.25.1
 ARG METASPLOIT_VERSION=6.5.3~20260818061200~1rapid7-1
+ARG MASSCAN_VERSION=2:1.3.2+ds1-1
 
 ENV DEBIAN_FRONTEND=noninteractive \
     NODE_ENV=production \
@@ -53,6 +54,7 @@ RUN set -eux; \
        iw \
        jq \
        lynis \
+       "masscan=${MASSCAN_VERSION}" \
        nikto \
        nmap \
        netcat-openbsd \
@@ -72,6 +74,7 @@ RUN set -eux; \
        unzip \
        yara; \
     apt-get install -y --no-install-recommends -t bookworm-backports suricata; \
+    rm -f /etc/masscan/masscan.conf; \
     rm -rf /var/lib/apt/lists/*; \
     npm install -g --omit=dev "supergateway@${SUPERGATEWAY_VERSION}"; \
     npm cache clean --force
@@ -104,6 +107,7 @@ COPY config/metasploit-release.asc /opt/mcp/metasploit-release.asc
 RUN sh /opt/mcp/install-security-extras.sh
 COPY scripts/security-result-reader.mjs scripts/security-tools.mjs scripts/security-runtime.mjs scripts/security-extended.mjs scripts/security-protocols.mjs scripts/security-network-recon.mjs scripts/mdns-subnets.mjs scripts/module-layout.mjs scripts/mcp-stdio.mjs /opt/mcp/
 COPY src /opt/mcp/src
+COPY scripts/security-masscan.mjs /opt/mcp/security-masscan.mjs
 COPY scripts/verify-security-startup.mjs /opt/mcp/verify-security-startup.mjs
 RUN node /opt/mcp/verify-security-startup.mjs
 COPY scripts/prepare-security-results.mjs /opt/mcp/prepare-security-results.mjs
@@ -130,7 +134,10 @@ RUN chmod 0755 /opt/mcp/security-tools.mjs \
     && command -v syft \
     && command -v yara \
     && command -v tshark \
-    && command -v suricata
+    && command -v suricata \
+    && command -v masscan \
+    && masscan --regress \
+    && masscan 192.0.2.1 -p80 --rate 100 --wait 5 --retries 0 --open -oL - --echo > /dev/null
 
 # Best-effort rule/template/bootstrap data. Runtime scans still return a clear error if an upstream feed is unavailable.
 RUN mkdir -p /data/security \
