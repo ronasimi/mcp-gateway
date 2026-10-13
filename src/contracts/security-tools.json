@@ -1,0 +1,4441 @@
+[
+  {
+    "name": "security_read_result",
+    "description": "Read selected fields or bounded pages from a saved Security JSON observation under .security-results; no new capture or scan. Use when you need retrieve saved observation. Do not use for operations outside this scope: Read selected fields or bounded pages from a saved Security JSON observation under .security-results; no new capture or scan..",
+    "annotations": {
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Exact .security-results/...json artifact path. Required. Format: string. Example: \".security-results/observation.json\".",
+          "maxLength": 1024,
+          "minLength": 1,
+          "examples": [
+            ".security-results/observation.json"
+          ]
+        },
+        "selector": {
+          "type": "string",
+          "description": "Dot path within saved JSON, e.g. protocol_packet_counts, observations, or network_observe_broadcast_multicast.observations. Omit to list top-level fields. Optional. If omitted: List top-level artifact fields. Format: string. Example: \"observations\".",
+          "maxLength": 512,
+          "examples": [
+            "observations"
+          ]
+        },
+        "offset": {
+          "type": "integer",
+          "description": "Zero-based item or character offset; use next_offset for continuation. Optional. If omitted, default: 0. Format: integer. Example: 0.",
+          "minimum": 0,
+          "maximum": 100000000,
+          "default": 0,
+          "examples": [
+            0
+          ]
+        },
+        "limit": {
+          "type": "integer",
+          "description": "Maximum array items per page; default 20. Optional. If omitted, default: 20. Format: integer. Example: 20.",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 20,
+          "examples": [
+            20
+          ]
+        },
+        "max_chars": {
+          "type": "integer",
+          "description": "Maximum encoded response characters; default 2048, including metadata. Optional. If omitted, default: 2048. Format: integer. Example: 2048.",
+          "minimum": 512,
+          "maximum": 4096,
+          "default": 2048,
+          "examples": [
+            2048
+          ]
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "description": "Arguments for security_read_result. Required fields are listed in required; omission behavior is documented per field.",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "retrieve saved observation",
+          "read spilled security artifact"
+        ],
+        "scope": "Read selected fields or bounded pages from a saved Security JSON observation under .security-results; no new capture or scan.",
+        "preferredFor": "Read selected fields or bounded pages from a saved Security JSON observation under .security-results; no new capture or scan. Use when you need retrieve saved observation. Do not use for operations outside this scope: Read selected fields or bounded pages from a saved Security JSON observation under .security-results; no new capture or scan..",
+        "overlapGroup": "network-recon",
+        "legacyName": "read_security_result"
+      }
+    }
+  },
+  {
+    "name": "masscan_scan_ports",
+    "description": "Perform bounded Masscan TCP SYN scan from the Security container: explicit authorized IPv4/CIDR and ports, packet-rate/deadline caps, no banners or spoofing. Requires active-scan authorization; use Nmap nmap_scan_ports for service detection. Use when you need masscan. Use nmap_scan_ports for service detection; do not supply hostnames or IPv6.",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for masscan_scan_ports. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "target": {
+          "type": "string",
+          "description": "One authorized IPv4 address or CIDR; maximum 4096 addresses (/20). No hostnames, lists or IPv6. Required. Format: string. Example: \"192.168.1.1\".",
+          "maxLength": 32,
+          "minLength": 1,
+          "pattern": "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}(?:/(?:2[0-9]|3[0-2]))?$",
+          "examples": [
+            "192.168.1.1"
+          ]
+        },
+        "ports": {
+          "type": "string",
+          "description": "Required TCP ports or ranges, e.g. 22,80,443 or 1-1024. Maximum 1024 distinct ports. Required. Format: string. Example: \"22,80,443\".",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[0-9]+(?:-[0-9]+)?(?:,[0-9]+(?:-[0-9]+)?)*$",
+          "examples": [
+            "22,80,443"
+          ]
+        },
+        "rate_limit": {
+          "type": "integer",
+          "description": "Packets per second; default 100, maximum 1000. Optional. If omitted, default: 100. Format: integer. Example: 100.",
+          "minimum": 1,
+          "maximum": 1000,
+          "default": 100,
+          "examples": [
+            100
+          ]
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "description": "Total process deadline, including a five-second receive wait; default 60, maximum 180. Must accommodate the requested probe count/rate. Optional. If omitted, default: 60. Format: integer. Example: 60.",
+          "minimum": 10,
+          "maximum": 180,
+          "default": 60,
+          "examples": [
+            60
+          ]
+        },
+        "interface": {
+          "type": "string",
+          "description": "Optional Security-container interface (not a physical host interface); otherwise Masscan selects its route. Optional. If omitted, auto-select an interface in this tool\u2019s documented namespace. Format: string. Example: \"eth0\".",
+          "maxLength": 15,
+          "pattern": "^[A-Za-z0-9_.:-]+$",
+          "examples": [
+            "eth0"
+          ]
+        }
+      },
+      "required": [
+        "target",
+        "ports"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "active_probe",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "idempotentHint": false,
+      "destructiveHint": false,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "masscan",
+          "massscan",
+          "masscan TCP scan",
+          "bounded SYN port scan"
+        ],
+        "scope": "Bounded Masscan TCP SYN scan from the Security container: explicit authorized IPv4/CIDR and ports, packet-rate/deadline caps, no banners or spoofing. Requires active-scan authorization; use Nmap port_scan for service detection.",
+        "preferredFor": "Perform bounded Masscan TCP SYN scan from the Security container: explicit authorized IPv4/CIDR and ports, packet-rate/deadline caps, no banners or spoofing. Requires active-scan authorization; use Nmap nmap_scan_ports for service detection. Use when you need masscan. Use nmap_scan_ports for service detection; do not supply hostnames or IPv6.",
+        "legacyName": "masscan_scan"
+      }
+    }
+  },
+  {
+    "name": "security_get_status",
+    "description": "Check installed executables, host-helper availability, Firecrawl configuration and background-job capacity. Use when you need backend availability. Do not use for operations outside this scope: Check installed executables, host-helper availability, Firecrawl configuration and background-job capacity..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for security_get_status. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "backend availability"
+        ],
+        "scope": "Check installed executables, host-helper availability, Firecrawl configuration and background-job capacity.",
+        "preferredFor": "Check installed executables, host-helper availability, Firecrawl configuration and background-job capacity. Use when you need backend availability. Do not use for operations outside this scope: Check installed executables, host-helper availability, Firecrawl configuration and background-job capacity..",
+        "legacyName": "status"
+      }
+    }
+  },
+  {
+    "name": "firecrawl_scrape_page",
+    "description": "Fetch one web page as clean Markdown through the configured Firecrawl backend; credentials stay server-side. Use when you need website readable content. Use firecrawl_map_site for URL inventory and network_probe_http for transport diagnostics.",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for firecrawl_scrape_page. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "url": {
+          "type": "string",
+          "description": "URL to scrape. Required. Format: string. Example: \"https://example.com/\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "pattern": "^https?://[^\\s]+$",
+          "examples": [
+            "https://example.com/"
+          ]
+        },
+        "max_chars": {
+          "type": "integer",
+          "description": "Maximum Markdown characters returned; default 12000. Optional. If omitted, default: 12000. Format: integer. Example: 12000.",
+          "minimum": 100,
+          "maximum": 20000,
+          "default": 12000,
+          "examples": [
+            12000
+          ]
+        }
+      },
+      "required": [
+        "url"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "website readable content"
+        ],
+        "scope": "Fetch one web page as clean Markdown through the configured Firecrawl backend; credentials stay server-side.",
+        "preferredFor": "Fetch one web page as clean Markdown through the configured Firecrawl backend; credentials stay server-side. Use when you need website readable content. Use firecrawl_map_site for URL inventory and network_probe_http for transport diagnostics.",
+        "overlapGroup": "web-content",
+        "legacyName": "firecrawl_scrape"
+      }
+    }
+  },
+  {
+    "name": "firecrawl_map_site",
+    "description": "Enumerate website URLs through the configured Firecrawl backend. Use when you need website URL inventory. Use web_discover_paths for active path guessing; this tool inventories backend-discovered URLs.",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for firecrawl_map_site. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "url": {
+          "type": "string",
+          "description": "Website URL to map. Required. Format: string. Example: \"https://example.com/\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "pattern": "^https?://[^\\s]+$",
+          "examples": [
+            "https://example.com/"
+          ]
+        },
+        "limit": {
+          "type": "integer",
+          "description": "Maximum discovered URLs; default 100. Optional. If omitted, default: 100. Format: integer. Example: 100.",
+          "minimum": 1,
+          "maximum": 500,
+          "default": 100,
+          "examples": [
+            100
+          ]
+        }
+      },
+      "required": [
+        "url"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "website URL inventory"
+        ],
+        "scope": "Enumerate website URLs through the configured Firecrawl backend.",
+        "preferredFor": "Enumerate website URLs through the configured Firecrawl backend. Use when you need website URL inventory. Use web_discover_paths for active path guessing; this tool inventories backend-discovered URLs.",
+        "overlapGroup": "web-content",
+        "legacyName": "firecrawl_map"
+      }
+    }
+  },
+  {
+    "name": "dns_enumerate_subdomains",
+    "description": "Find subdomains in public sources with passive Subfinder OSINT. Use when you need passive subdomains. Do not use for operations outside this scope: Find subdomains in public sources with passive Subfinder OSINT..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for dns_enumerate_subdomains. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "domain": {
+          "type": "string",
+          "description": "Domain whose subdomains are requested. Required. Format: string. Example: \"example.com\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "example.com"
+          ]
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "description": "Deadline in seconds; defaults vary by tool, maximum 300. Optional. If omitted, default: 120. Format: integer. Example: 120.",
+          "minimum": 5,
+          "maximum": 300,
+          "default": 120,
+          "examples": [
+            120
+          ]
+        },
+        "max_results": {
+          "type": "integer",
+          "description": "Maximum names returned; default 100. Optional. If omitted, default: 100. Format: integer. Example: 100.",
+          "minimum": 1,
+          "maximum": 500,
+          "default": 100,
+          "examples": [
+            100
+          ]
+        }
+      },
+      "required": [
+        "domain"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "passive subdomains"
+        ],
+        "scope": "Find subdomains in public sources with passive Subfinder OSINT.",
+        "preferredFor": "Find subdomains in public sources with passive Subfinder OSINT. Use when you need passive subdomains. Do not use for operations outside this scope: Find subdomains in public sources with passive Subfinder OSINT..",
+        "legacyName": "subdomain_enum"
+      }
+    }
+  },
+  {
+    "name": "exploit_search_catalog",
+    "description": "Search the local Exploit-DB catalogue by CVE or service version; returns references only. Use when you need Searchsploit lookup. Do not use for operations outside this scope: Search the local Exploit-DB catalogue by CVE or service version; returns references only..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for exploit_search_catalog. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "Search words, service version or CVE. Required. Format: string. Example: \"error\".",
+          "minLength": 1,
+          "maxLength": 200,
+          "examples": [
+            "error"
+          ]
+        },
+        "limit": {
+          "type": "integer",
+          "description": "Maximum records returned; default 20. Optional. If omitted, default: 20. Format: integer. Example: 20.",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 20,
+          "examples": [
+            20
+          ]
+        }
+      },
+      "required": [
+        "query"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "Searchsploit lookup"
+        ],
+        "scope": "Search the local Exploit-DB catalogue by CVE or service version; returns references only.",
+        "preferredFor": "Search the local Exploit-DB catalogue by CVE or service version; returns references only. Use when you need Searchsploit lookup. Do not use for operations outside this scope: Search the local Exploit-DB catalogue by CVE or service version; returns references only..",
+        "legacyName": "exploit_search"
+      }
+    }
+  },
+  {
+    "name": "exploit_read_source",
+    "description": "Read an Exploit-DB source excerpt by EDB ID for analysis. Use when you need review exploit code. Do not use for operations outside this scope: Read an Exploit-DB source excerpt by EDB ID for analysis..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for exploit_read_source. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "edb_id": {
+          "type": "integer",
+          "description": "Numeric Exploit-DB ID. Required. Format: integer. Example: 1.",
+          "minimum": 1,
+          "maximum": 999999,
+          "examples": [
+            1
+          ]
+        },
+        "start_line": {
+          "type": "integer",
+          "description": "First source line, one-based; default 1. Optional. If omitted, default: 1. Format: integer. Example: 1.",
+          "minimum": 1,
+          "maximum": 100000,
+          "default": 1,
+          "examples": [
+            1
+          ]
+        },
+        "max_lines": {
+          "type": "integer",
+          "description": "Maximum source lines returned; default 120. Optional. If omitted, default: 120. Format: integer. Example: 120.",
+          "minimum": 1,
+          "maximum": 300,
+          "default": 120,
+          "examples": [
+            120
+          ]
+        }
+      },
+      "required": [
+        "edb_id"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "review exploit code"
+        ],
+        "scope": "Read an Exploit-DB source excerpt by EDB ID for analysis.",
+        "preferredFor": "Read an Exploit-DB source excerpt by EDB ID for analysis. Use when you need review exploit code. Do not use for operations outside this scope: Read an Exploit-DB source excerpt by EDB ID for analysis..",
+        "legacyName": "exploit_source"
+      }
+    }
+  },
+  {
+    "name": "sqlmap_test_injection",
+    "description": "Run bounded SQL-injection detection or explicitly requested database-name enumeration on an authorized URL. Use when you need sqlmap_test_injection injection test. Do not use for operations outside this scope: Run bounded SQL-injection detection or explicitly requested database-name enumeration on an authorized URL..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for sqlmap_test_injection. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "url": {
+          "type": "string",
+          "description": "Authorized URL including the parameter to test. Required. Format: string. Example: \"https://example.com/\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "pattern": "^https?://[^\\s]+$",
+          "examples": [
+            "https://example.com/"
+          ]
+        },
+        "parameter": {
+          "type": "string",
+          "description": "Specific GET/POST parameter name, if known. Optional. If omitted: Let sqlmap_test_injection select eligible URL/body parameters. Format: string. Example: \"example\".",
+          "maxLength": 100,
+          "examples": [
+            "example"
+          ]
+        },
+        "data": {
+          "type": "string",
+          "description": "Optional URL-encoded POST body. Optional. If omitted: Use the supplied URL without a POST body. Format: string. Example: \"example\".",
+          "maxLength": 4096,
+          "examples": [
+            "example"
+          ]
+        },
+        "action": {
+          "type": "string",
+          "description": "Default detect; database names require enumerate_databases. Optional. If omitted, default: \"detect\". Allowed values: detect, current_database, enumerate_databases. Example: \"detect\".",
+          "enum": [
+            "detect",
+            "current_database",
+            "enumerate_databases"
+          ],
+          "maxLength": 4096,
+          "default": "detect",
+          "examples": [
+            "detect"
+          ]
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "description": "Deadline in seconds; defaults vary by tool, maximum 300. Optional. If omitted, default: 120. Format: integer. Example: 120.",
+          "minimum": 5,
+          "maximum": 300,
+          "default": 120,
+          "examples": [
+            120
+          ]
+        }
+      },
+      "required": [
+        "url"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "active_probe",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "sqlmap injection test"
+        ],
+        "scope": "Run bounded SQL-injection detection or explicitly requested database-name enumeration on an authorized URL.",
+        "preferredFor": "Run bounded SQL-injection detection or explicitly requested database-name enumeration on an authorized URL. Use when you need sqlmap_test_injection injection test. Do not use for operations outside this scope: Run bounded SQL-injection detection or explicitly requested database-name enumeration on an authorized URL..",
+        "legacyName": "sqlmap"
+      }
+    }
+  },
+  {
+    "name": "metasploit_get_module_info",
+    "description": "Inspect a Metasploit module\u2019s help and options. Use when you need msfconsole module details. Do not use for operations outside this scope: Inspect a Metasploit module\u2019s help and options..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for metasploit_get_module_info. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "module": {
+          "type": "string",
+          "description": "Full auxiliary/scanner/... or exploit/... module path. Required. Format: string. Example: \"auxiliary/scanner/ssh/ssh_version\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "auxiliary/scanner/ssh/ssh_version"
+          ]
+        }
+      },
+      "required": [
+        "module"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "msfconsole module details"
+        ],
+        "scope": "Inspect a Metasploit module\u2019s help and options.",
+        "preferredFor": "Inspect a Metasploit module\u2019s help and options. Use when you need msfconsole module details. Do not use for operations outside this scope: Inspect a Metasploit module\u2019s help and options..",
+        "legacyName": "metasploit_info"
+      }
+    }
+  },
+  {
+    "name": "metasploit_execute_module",
+    "description": "Check or run a Metasploit module on one authorized target. Returns a background job ID for job_get_status. Use when you need Metasploit module execution. Do not use for operations outside this scope: Check or run a Metasploit module on one authorized target. Returns a background job ID for job_get_status..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for metasploit_execute_module. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "module": {
+          "type": "string",
+          "description": "Full auxiliary/scanner/... or exploit/... module path. Required. Format: string. Example: \"auxiliary/scanner/ssh/ssh_version\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "auxiliary/scanner/ssh/ssh_version"
+          ]
+        },
+        "target": {
+          "type": "string",
+          "description": "One authorized target IP or hostname, never a range. Required. Format: string. Example: \"192.168.1.1\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "192.168.1.1"
+          ]
+        },
+        "action": {
+          "type": "string",
+          "description": "Default check. run explicitly launches the module. Optional. If omitted, default: \"check\". Allowed values: check, run. Example: \"check\".",
+          "enum": [
+            "check",
+            "run"
+          ],
+          "maxLength": 4096,
+          "default": "check",
+          "examples": [
+            "check"
+          ]
+        },
+        "options": {
+          "type": "object",
+          "description": "Module settings such as RPORT, TARGETURI, PAYLOAD, LHOST or LPORT; RHOST/RHOSTS are supplied from target. Optional. If omitted, default: {}. Format: object. Example: {}.",
+          "additionalProperties": {
+            "type": "string",
+            "description": "Single console-safe setting value. Required. Format: string. Example: \"example\".",
+            "maxLength": 512,
+            "examples": [
+              "example"
+            ]
+          },
+          "required": [],
+          "default": {},
+          "examples": [
+            {}
+          ]
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "description": "Deadline in seconds; defaults vary by tool, maximum 300. Optional. If omitted, default: 120. Format: integer. Example: 120.",
+          "minimum": 5,
+          "maximum": 300,
+          "default": 120,
+          "examples": [
+            120
+          ]
+        }
+      },
+      "required": [
+        "module",
+        "target"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "active_probe",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "Metasploit module execution"
+        ],
+        "scope": "Check or run a Metasploit module on one authorized target. Returns a background job ID for job_status.",
+        "preferredFor": "Check or run a Metasploit module on one authorized target. Returns a background job ID for job_get_status. Use when you need Metasploit module execution. Do not use for operations outside this scope: Check or run a Metasploit module on one authorized target. Returns a background job ID for job_get_status..",
+        "legacyName": "metasploit_run"
+      }
+    }
+  },
+  {
+    "name": "listener_start_tcp",
+    "description": "Start a bounded Netcat or Socat callback listener on a published container port. Returns a background job ID. Use when you need TCP callback listener. Do not use for operations outside this scope: Start a bounded Netcat or Socat callback listener on a published container port. Returns a background job ID..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for listener_start_tcp. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "engine": {
+          "type": "string",
+          "description": "Listener implementation; default nc. Optional. If omitted, default: \"nc\". Allowed values: nc, socat. Example: \"nc\".",
+          "enum": [
+            "nc",
+            "socat"
+          ],
+          "maxLength": 4096,
+          "default": "nc",
+          "examples": [
+            "nc"
+          ]
+        },
+        "port": {
+          "type": "integer",
+          "description": "Published container port, 4444 through 4453. Required. Format: integer. Example: 4444.",
+          "minimum": 4444,
+          "maximum": 4453,
+          "examples": [
+            4444
+          ]
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "description": "Deadline in seconds; defaults vary by tool, maximum 300. Optional. If omitted, default: 120. Format: integer. Example: 120.",
+          "minimum": 5,
+          "maximum": 300,
+          "default": 120,
+          "examples": [
+            120
+          ]
+        }
+      },
+      "required": [
+        "port"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "active_probe",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "TCP callback listener"
+        ],
+        "scope": "Start a bounded Netcat or Socat callback listener on a published container port. Returns a background job ID.",
+        "preferredFor": "Start a bounded Netcat or Socat callback listener on a published container port. Returns a background job ID. Use when you need TCP callback listener. Do not use for operations outside this scope: Start a bounded Netcat or Socat callback listener on a published container port. Returns a background job ID..",
+        "legacyName": "listener_start"
+      }
+    }
+  },
+  {
+    "name": "job_get_status",
+    "description": "Read a background job\u2019s security_get_status and output page; continue using next_offset. Use when you need poll job output. Do not use for operations outside this scope: Read a background job\u2019s security_get_status and output page; continue using next_offset..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for job_get_status. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "job_id": {
+          "type": "string",
+          "description": "ID returned by a background tool. Required. Format: string. Example: \"job-123\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "job-123"
+          ]
+        },
+        "offset": {
+          "type": "integer",
+          "description": "Absolute output byte offset; default 0. Optional. If omitted, default: 0. Format: integer. Example: 0.",
+          "minimum": 0,
+          "maximum": 2147483647,
+          "default": 0,
+          "examples": [
+            0
+          ]
+        },
+        "max_bytes": {
+          "type": "integer",
+          "description": "Maximum output bytes; default 8000. Optional. If omitted, default: 8000. Format: integer. Example: 8000.",
+          "minimum": 128,
+          "maximum": 12000,
+          "default": 8000,
+          "examples": [
+            8000
+          ]
+        }
+      },
+      "required": [
+        "job_id"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "poll job output"
+        ],
+        "scope": "Read a background job\u2019s status and output page; continue using next_offset.",
+        "preferredFor": "Read a background job\u2019s security_get_status and output page; continue using next_offset. Use when you need poll job output. Do not use for operations outside this scope: Read a background job\u2019s security_get_status and output page; continue using next_offset..",
+        "legacyName": "job_status"
+      }
+    }
+  },
+  {
+    "name": "job_send_input",
+    "description": "Send text to an existing interactive listener job. Use when you need write listener input. Do not use for operations outside this scope: Send text to an existing interactive listener job..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for job_send_input. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "job_id": {
+          "type": "string",
+          "description": "Listener job ID. Required. Format: string. Example: \"job-123\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "job-123"
+          ]
+        },
+        "input": {
+          "type": "string",
+          "description": "Text to send, including any required newline. Required. Format: string. Example: \"images/input.png\".",
+          "maxLength": 4096,
+          "examples": [
+            "images/input.png"
+          ]
+        }
+      },
+      "required": [
+        "job_id",
+        "input"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "workspace_write",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "write listener input"
+        ],
+        "scope": "Send text to an existing interactive listener job.",
+        "preferredFor": "Send text to an existing interactive listener job. Use when you need write listener input. Do not use for operations outside this scope: Send text to an existing interactive listener job..",
+        "legacyName": "job_send"
+      }
+    }
+  },
+  {
+    "name": "job_stop_process",
+    "description": "Stop a background job and its child processes. Use when you need cancel running job. Do not use for operations outside this scope: Stop a background job and its child processes..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for job_stop_process. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "job_id": {
+          "type": "string",
+          "description": "ID returned by a background tool. Required. Format: string. Example: \"job-123\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "job-123"
+          ]
+        }
+      },
+      "required": [
+        "job_id"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "workspace_write",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "cancel running job"
+        ],
+        "scope": "Stop a background job and its child processes.",
+        "preferredFor": "Stop a background job and its child processes. Use when you need cancel running job. Do not use for operations outside this scope: Stop a background job and its child processes..",
+        "legacyName": "job_stop"
+      }
+    }
+  },
+  {
+    "name": "json_query_file",
+    "description": "Filter a workspace JSON or JSONL file with a bounded json_query_file expression. Use when you need JSON query. Do not use for operations outside this scope: Filter a workspace JSON or JSONL file with a bounded json_query_file expression..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for json_query_file. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Workspace-relative input file. Required. Format: string. Example: \"reports/input.json\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "reports/input.json"
+          ]
+        },
+        "filter": {
+          "type": "string",
+          "description": "json_query_file expression; default . Optional. If omitted, default: \".\". Format: string. Example: \".\".",
+          "maxLength": 4096,
+          "default": ".",
+          "examples": [
+            "."
+          ]
+        },
+        "limit": {
+          "type": "integer",
+          "description": "Maximum output JSON records; default 100. Optional. If omitted, default: 100. Format: integer. Example: 100.",
+          "minimum": 1,
+          "maximum": 500,
+          "default": 100,
+          "examples": [
+            100
+          ]
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "JSON query"
+        ],
+        "scope": "Filter a workspace JSON or JSONL file with a bounded jq expression.",
+        "preferredFor": "Filter a workspace JSON or JSONL file with a bounded json_query_file expression. Use when you need JSON query. Do not use for operations outside this scope: Filter a workspace JSON or JSONL file with a bounded json_query_file expression..",
+        "legacyName": "jq"
+      }
+    }
+  },
+  {
+    "name": "pcap_analyze_file",
+    "description": "Analyze a saved PCAP with Tshark: protocol hierarchy, endpoint conversations or selected packet fields. Use when you need analyze PCAP. Use pcap_capture_packets for live capture or suricata_analyze_capture for installed IDS-rule alerts.",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for pcap_analyze_file. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Workspace-relative input file. Required. Format: string. Example: \"captures/input.pcap\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "captures/input.pcap"
+          ]
+        },
+        "view": {
+          "type": "string",
+          "description": "Analysis view; default summary. Optional. If omitted, default: \"summary\". Allowed values: summary, conversations, fields. Example: \"summary\".",
+          "enum": [
+            "summary",
+            "conversations",
+            "fields"
+          ],
+          "maxLength": 4096,
+          "default": "summary",
+          "examples": [
+            "summary"
+          ]
+        },
+        "protocol": {
+          "type": "string",
+          "description": "Conversation type; default ip. Optional. If omitted, default: \"ip\". Allowed values: ip, ipv6, tcp, udp. Example: \"ip\".",
+          "enum": [
+            "ip",
+            "ipv6",
+            "tcp",
+            "udp"
+          ],
+          "maxLength": 4096,
+          "default": "ip",
+          "examples": [
+            "ip"
+          ]
+        },
+        "display_filter": {
+          "type": "string",
+          "description": "Wireshark display filter such as dns or tcp.flags.syn == 1. Optional. If omitted: Do not apply a display filter. Format: string. Example: \"dns\".",
+          "maxLength": 1000,
+          "examples": [
+            "dns"
+          ]
+        },
+        "fields": {
+          "type": "array",
+          "description": "Fields to extract; default timestamp, source, destination, ports and protocol. Optional. If omitted, default: [\"frame.time_epoch\", \"ip.src\", \"ip.dst\", \"tcp.srcport\", \"tcp.dstport\", \"_ws.col.Protocol\"]. Format: array. Example: [\"frame.time_epoch\", \"ip.src\", \"ip.dst\", \"tcp.srcport\", \"tcp.dstport\", \"_ws.col.Protocol\"].",
+          "items": {
+            "type": "string",
+            "description": "Tshark field such as ip.src or dns.qry.name. Required. Format: string. Example: \"example\".",
+            "minLength": 1,
+            "maxLength": 4096,
+            "examples": [
+              "example"
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 16,
+          "default": [
+            "frame.time_epoch",
+            "ip.src",
+            "ip.dst",
+            "tcp.srcport",
+            "tcp.dstport",
+            "_ws.col.Protocol"
+          ],
+          "examples": [
+            [
+              "frame.time_epoch",
+              "ip.src",
+              "ip.dst",
+              "tcp.srcport",
+              "tcp.dstport",
+              "_ws.col.Protocol"
+            ]
+          ]
+        },
+        "packet_limit": {
+          "type": "integer",
+          "description": "Maximum packets to examine, before display filtering; default 1000. Optional. If omitted, default: 1000. Format: integer. Example: 1000.",
+          "minimum": 1,
+          "maximum": 20000,
+          "default": 1000,
+          "examples": [
+            1000
+          ]
+        },
+        "max_rows": {
+          "type": "integer",
+          "description": "Maximum matching rows returned; default 100. Optional. If omitted, default: 100. Format: integer. Example: 100.",
+          "minimum": 1,
+          "maximum": 300,
+          "default": 100,
+          "examples": [
+            100
+          ]
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "analyze PCAP",
+          "top talkers",
+          "packet field extraction"
+        ],
+        "scope": "Analyze a saved PCAP with Tshark: protocol hierarchy, endpoint conversations or selected packet fields.",
+        "preferredFor": "Analyze a saved PCAP with Tshark: protocol hierarchy, endpoint conversations or selected packet fields. Use when you need analyze PCAP. Use pcap_capture_packets for live capture or suricata_analyze_capture for installed IDS-rule alerts.",
+        "overlapGroup": "pcap",
+        "legacyName": "pcap_analyze"
+      }
+    }
+  },
+  {
+    "name": "suricata_test_rules",
+    "description": "Validate Suricata rules and optionally replay only those rules against a saved PCAP with hit statistics. Use when you need IDS rule testing. Use suricata_analyze_capture for the installed ruleset.",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for suricata_test_rules. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "rules": {
+          "type": "string",
+          "description": "Workspace-relative .rules file. Required. Format: string. Example: \"rules/local.rules\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "rules/local.rules"
+          ]
+        },
+        "pcap": {
+          "type": "string",
+          "description": "Optional workspace-relative PCAP/PCAPNG. Optional. If omitted: Validate rules without replaying packets. Format: string. Example: \"captures/input.pcap\".",
+          "maxLength": 4096,
+          "examples": [
+            "captures/input.pcap"
+          ]
+        },
+        "max_alerts": {
+          "type": "integer",
+          "description": "Maximum alert records returned; default 100. Optional. If omitted, default: 100. Format: integer. Example: 100.",
+          "minimum": 1,
+          "maximum": 300,
+          "default": 100,
+          "examples": [
+            100
+          ]
+        }
+      },
+      "required": [
+        "rules"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "IDS rule testing"
+        ],
+        "scope": "Validate Suricata rules and optionally replay only those rules against a saved PCAP with hit statistics.",
+        "preferredFor": "Validate Suricata rules and optionally replay only those rules against a saved PCAP with hit statistics. Use when you need IDS rule testing. Use suricata_analyze_capture for the installed ruleset.",
+        "overlapGroup": "pcap",
+        "legacyName": "suricata_test_rules"
+      }
+    }
+  },
+  {
+    "name": "osquery_query_container",
+    "description": "Run a read-only SQL query through osqueryi inside the Security container. Use when you need container osquery_query_container SQL. Do not use for operations outside this scope: Run a read-only SQL query through osqueryi inside the Security container..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for osquery_query_container. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "SQL, e.g. SELECT * FROM listening_ports;. Required. Format: string. Example: \"SELECT * FROM listening_ports;\".",
+          "maxLength": 8192,
+          "minLength": 1,
+          "examples": [
+            "SELECT * FROM listening_ports;"
+          ]
+        },
+        "limit": {
+          "type": "integer",
+          "description": "Maximum rows returned; default 100. Optional. If omitted, default: 100. Format: integer. Example: 100.",
+          "minimum": 1,
+          "maximum": 500,
+          "default": 100,
+          "examples": [
+            100
+          ]
+        }
+      },
+      "required": [
+        "query"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "container osquery SQL"
+        ],
+        "scope": "Run a read-only SQL query through osqueryi inside the Security container.",
+        "preferredFor": "Run a read-only SQL query through osqueryi inside the Security container. Use when you need container osquery_query_container SQL. Do not use for operations outside this scope: Run a read-only SQL query through osqueryi inside the Security container..",
+        "legacyName": "osquery"
+      }
+    }
+  },
+  {
+    "name": "binary_analyze_file",
+    "description": "Inspect binary metadata, imports, exports, section strings, functions or disassembly using sandboxed Radare2. Use when you need binary structure analysis. Use file_extract_strings to inspect raw strings outside recognized binary sections; do not execute the input.",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for binary_analyze_file. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Workspace-relative input file. Required. Format: string. Example: \"reports/input.json\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "reports/input.json"
+          ]
+        },
+        "operation": {
+          "type": "string",
+          "description": "Analysis operation; default info. Optional. If omitted, default: \"info\". Allowed values: info, imports, exports, strings, functions, disassemble. Example: \"info\".",
+          "enum": [
+            "info",
+            "imports",
+            "exports",
+            "strings",
+            "functions",
+            "disassemble"
+          ],
+          "maxLength": 4096,
+          "default": "info",
+          "examples": [
+            "info"
+          ]
+        },
+        "address": {
+          "type": "string",
+          "description": "Disassembly virtual address as decimal or 0x hex; default entry0. Optional. If omitted: Use entry0 for disassembly. Format: string. Example: \"0x1000\".",
+          "maxLength": 4096,
+          "examples": [
+            "0x1000"
+          ]
+        },
+        "count": {
+          "type": "integer",
+          "description": "Maximum disassembly instructions; default 64. Optional. If omitted, default: 64. Format: integer. Example: 64.",
+          "minimum": 1,
+          "maximum": 256,
+          "default": 64,
+          "examples": [
+            64
+          ]
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "binary structure analysis"
+        ],
+        "scope": "Inspect binary metadata, imports, exports, section strings, functions or disassembly using sandboxed Radare2.",
+        "preferredFor": "Inspect binary metadata, imports, exports, section strings, functions or disassembly using sandboxed Radare2. Use when you need binary structure analysis. Use file_extract_strings to inspect raw strings outside recognized binary sections; do not execute the input.",
+        "overlapGroup": "artifact",
+        "legacyName": "binary_analyze"
+      }
+    }
+  },
+  {
+    "name": "mdns_discover_services",
+    "description": "Probe mDNS/DNS-SD services on a specified target, or multicast within the Security-container namespace. Use when you need Zeroconf service TXT. Use mdns_discover_subnets for host-helper subnet inference; container multicast does not inventory the host LAN.",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for mdns_discover_services. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "target": {
+          "type": "string",
+          "description": "Authorized private/allowlisted hostname or IP address. Optional. If omitted, use container-local broadcast or multicast discovery. Format: string. Example: \"192.168.1.1\".",
+          "maxLength": 4096,
+          "examples": [
+            "192.168.1.1"
+          ]
+        },
+        "interface": {
+          "type": "string",
+          "description": "Optional interface visible inside the mcp-security container, such as eth0. Optional. If omitted, auto-select an interface in this tool\u2019s documented namespace. Format: string. Example: \"eth0\".",
+          "maxLength": 64,
+          "pattern": "^[A-Za-z0-9_.:-]+$",
+          "examples": [
+            "eth0"
+          ]
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "description": "Maximum protocol probe duration in seconds; default 15, maximum 60. Optional. If omitted, default: 15. Format: integer. Example: 15.",
+          "minimum": 3,
+          "maximum": 60,
+          "default": 15,
+          "examples": [
+            15
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false,
+      "x-pi-effect": "active_probe",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "Zeroconf service TXT"
+        ],
+        "scope": "Probe mDNS/DNS-SD services on a specified target, or multicast within the Security-container namespace.",
+        "preferredFor": "Probe mDNS/DNS-SD services on a specified target, or multicast within the Security-container namespace. Use when you need Zeroconf service TXT. Use mdns_discover_subnets for host-helper subnet inference; container multicast does not inventory the host LAN.",
+        "legacyName": "mdns_discover"
+      }
+    }
+  },
+  {
+    "name": "upnp_discover_devices",
+    "description": "Probe a target for UPnP/SSDP device metadata, or multicast within the Security-container namespace. Use when you need UPnP product description. Do not use for operations outside this scope: Probe a target for UPnP/SSDP device metadata, or multicast within the Security-container namespace..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for upnp_discover_devices. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "target": {
+          "type": "string",
+          "description": "Authorized private/allowlisted hostname or IP address. Optional. If omitted, use container-local broadcast or multicast discovery. Format: string. Example: \"192.168.1.1\".",
+          "maxLength": 4096,
+          "examples": [
+            "192.168.1.1"
+          ]
+        },
+        "interface": {
+          "type": "string",
+          "description": "Optional interface visible inside the mcp-security container, such as eth0. Optional. If omitted, auto-select an interface in this tool\u2019s documented namespace. Format: string. Example: \"eth0\".",
+          "maxLength": 64,
+          "pattern": "^[A-Za-z0-9_.:-]+$",
+          "examples": [
+            "eth0"
+          ]
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "description": "Maximum protocol probe duration in seconds; default 15, maximum 60. Optional. If omitted, default: 15. Format: integer. Example: 15.",
+          "minimum": 3,
+          "maximum": 60,
+          "default": 15,
+          "examples": [
+            15
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false,
+      "x-pi-effect": "active_probe",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "UPnP product description"
+        ],
+        "scope": "Probe a target for UPnP/SSDP device metadata, or multicast within the Security-container namespace.",
+        "preferredFor": "Probe a target for UPnP/SSDP device metadata, or multicast within the Security-container namespace. Use when you need UPnP product description. Do not use for operations outside this scope: Probe a target for UPnP/SSDP device metadata, or multicast within the Security-container namespace..",
+        "legacyName": "upnp_discover"
+      }
+    }
+  },
+  {
+    "name": "dhcp_discover_options",
+    "description": "Read DHCP options using target DHCPINFORM, or broadcast within the Security-container namespace. Use when you need DHCP server options. Do not use for operations outside this scope: Read DHCP options using target DHCPINFORM, or broadcast within the Security-container namespace..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for dhcp_discover_options. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "target": {
+          "type": "string",
+          "description": "Authorized private/allowlisted hostname or IP address. Optional. If omitted, use container-local broadcast or multicast discovery. Format: string. Example: \"192.168.1.1\".",
+          "maxLength": 4096,
+          "examples": [
+            "192.168.1.1"
+          ]
+        },
+        "interface": {
+          "type": "string",
+          "description": "Optional interface visible inside the mcp-security container, such as eth0. Optional. If omitted, auto-select an interface in this tool\u2019s documented namespace. Format: string. Example: \"eth0\".",
+          "maxLength": 64,
+          "pattern": "^[A-Za-z0-9_.:-]+$",
+          "examples": [
+            "eth0"
+          ]
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "description": "Maximum protocol probe duration in seconds; default 15, maximum 60. Optional. If omitted, default: 15. Format: integer. Example: 15.",
+          "minimum": 3,
+          "maximum": 60,
+          "default": 15,
+          "examples": [
+            15
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false,
+      "x-pi-effect": "active_probe",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "DHCP server options"
+        ],
+        "scope": "Read DHCP options using target DHCPINFORM, or broadcast within the Security-container namespace.",
+        "preferredFor": "Read DHCP options using target DHCPINFORM, or broadcast within the Security-container namespace. Use when you need DHCP server options. Do not use for operations outside this scope: Read DHCP options using target DHCPINFORM, or broadcast within the Security-container namespace..",
+        "legacyName": "dhcp_discover"
+      }
+    }
+  },
+  {
+    "name": "dhcp6_discover_options",
+    "description": "Read DHCPv6 advertisements by multicast within the Security-container namespace. Use when you need DHCPv6 options. Do not use for operations outside this scope: Read DHCPv6 advertisements by multicast within the Security-container namespace..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for dhcp6_discover_options. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "interface": {
+          "type": "string",
+          "description": "Optional interface visible inside the mcp-security container, such as eth0. Optional. If omitted, auto-select an interface in this tool\u2019s documented namespace. Format: string. Example: \"eth0\".",
+          "maxLength": 64,
+          "pattern": "^[A-Za-z0-9_.:-]+$",
+          "examples": [
+            "eth0"
+          ]
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "description": "Maximum protocol probe duration in seconds; default 15, maximum 60. Optional. If omitted, default: 15. Format: integer. Example: 15.",
+          "minimum": 3,
+          "maximum": 60,
+          "default": 15,
+          "examples": [
+            15
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false,
+      "x-pi-effect": "active_probe",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "DHCPv6 options"
+        ],
+        "scope": "Read DHCPv6 advertisements by multicast within the Security-container namespace.",
+        "preferredFor": "Read DHCPv6 advertisements by multicast within the Security-container namespace. Use when you need DHCPv6 options. Do not use for operations outside this scope: Read DHCPv6 advertisements by multicast within the Security-container namespace..",
+        "legacyName": "dhcp6_discover"
+      }
+    }
+  },
+  {
+    "name": "dns_audit_server",
+    "description": "Audit an authorized DNS server\u2019s recursion, DNSSEC, NSID and optional AXFR zone-transfer behavior. Use when you need DNS server posture. Do not use for operations outside this scope: Audit an authorized DNS server\u2019s recursion, DNSSEC, NSID and optional AXFR zone-transfer behavior..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for dns_audit_server. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "server": {
+          "type": "string",
+          "description": "Authorized private/allowlisted hostname or IP address. Required. Format: string. Example: \"192.168.1.1\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "192.168.1.1"
+          ]
+        },
+        "domain": {
+          "type": "string",
+          "description": "Domain to query and, if requested, use for the AXFR check. Required. Format: string. Example: \"example.com\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "example.com"
+          ]
+        },
+        "check_axfr": {
+          "type": "boolean",
+          "description": "Attempt one AXFR request; default false. Optional. If omitted, default: false. Format: boolean. Example: false.",
+          "default": false,
+          "examples": [
+            false
+          ]
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "description": "Maximum protocol probe duration in seconds; default 15, maximum 60. Optional. If omitted, default: 15. Format: integer. Example: 15.",
+          "minimum": 3,
+          "maximum": 60,
+          "default": 15,
+          "examples": [
+            15
+          ]
+        }
+      },
+      "required": [
+        "server",
+        "domain"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "active_probe",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "DNS server posture"
+        ],
+        "scope": "Audit an authorized DNS server\u2019s recursion, DNSSEC, NSID and optional AXFR zone-transfer behavior.",
+        "preferredFor": "Audit an authorized DNS server\u2019s recursion, DNSSEC, NSID and optional AXFR zone-transfer behavior. Use when you need DNS server posture. Do not use for operations outside this scope: Audit an authorized DNS server\u2019s recursion, DNSSEC, NSID and optional AXFR zone-transfer behavior..",
+        "legacyName": "dns_audit"
+      }
+    }
+  },
+  {
+    "name": "snmp_discover_system",
+    "description": "Read SNMP system identification from an authorized target using bounded probes. Use when you need SNMP system metadata. Do not use for operations outside this scope: Read SNMP system identification from an authorized target using bounded probes..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for snmp_discover_system. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "target": {
+          "type": "string",
+          "description": "Authorized private/allowlisted hostname or IP address. Required. Format: string. Example: \"192.168.1.1\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "192.168.1.1"
+          ]
+        },
+        "port": {
+          "type": "integer",
+          "description": "SNMP UDP port; default 161. Optional. If omitted, default: 161. Format: integer. Example: 161.",
+          "minimum": 1,
+          "maximum": 65535,
+          "default": 161,
+          "examples": [
+            161
+          ]
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "description": "Maximum protocol probe duration in seconds; default 15, maximum 60. Optional. If omitted, default: 15. Format: integer. Example: 15.",
+          "minimum": 3,
+          "maximum": 60,
+          "default": 15,
+          "examples": [
+            15
+          ]
+        }
+      },
+      "required": [
+        "target"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "active_probe",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "SNMP system metadata"
+        ],
+        "scope": "Read SNMP system identification from an authorized target using bounded probes.",
+        "preferredFor": "Read SNMP system identification from an authorized target using bounded probes. Use when you need SNMP system metadata. Do not use for operations outside this scope: Read SNMP system identification from an authorized target using bounded probes..",
+        "legacyName": "snmp_discover"
+      }
+    }
+  },
+  {
+    "name": "snmp_list_interfaces",
+    "description": "Read interface addresses and link metadata exposed by an authorized SNMP target. Use when you need SNMP interface table. Do not use for operations outside this scope: Read interface addresses and link metadata exposed by an authorized SNMP target..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for snmp_list_interfaces. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "target": {
+          "type": "string",
+          "description": "Authorized private/allowlisted hostname or IP address. Required. Format: string. Example: \"192.168.1.1\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "192.168.1.1"
+          ]
+        },
+        "port": {
+          "type": "integer",
+          "description": "SNMP UDP port; default 161. Optional. If omitted, default: 161. Format: integer. Example: 161.",
+          "minimum": 1,
+          "maximum": 65535,
+          "default": 161,
+          "examples": [
+            161
+          ]
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "description": "Maximum protocol probe duration in seconds; default 15, maximum 60. Optional. If omitted, default: 15. Format: integer. Example: 15.",
+          "minimum": 3,
+          "maximum": 60,
+          "default": 15,
+          "examples": [
+            15
+          ]
+        }
+      },
+      "required": [
+        "target"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "active_probe",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "SNMP interface table"
+        ],
+        "scope": "Read interface addresses and link metadata exposed by an authorized SNMP target.",
+        "preferredFor": "Read interface addresses and link metadata exposed by an authorized SNMP target. Use when you need SNMP interface table. Do not use for operations outside this scope: Read interface addresses and link metadata exposed by an authorized SNMP target..",
+        "legacyName": "snmp_interfaces"
+      }
+    }
+  },
+  {
+    "name": "smb_audit_server",
+    "description": "Audit SMB dialects, signing and anonymous server metadata on an authorized target. Use when you need SMB signing posture. Do not use for operations outside this scope: Audit SMB dialects, signing and anonymous server metadata on an authorized target..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for smb_audit_server. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "target": {
+          "type": "string",
+          "description": "Authorized private/allowlisted hostname or IP address. Required. Format: string. Example: \"192.168.1.1\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "192.168.1.1"
+          ]
+        },
+        "port": {
+          "type": "integer",
+          "description": "SMB TCP port; default 445. Optional. If omitted, default: 445. Format: integer. Example: 445.",
+          "minimum": 1,
+          "maximum": 65535,
+          "default": 445,
+          "examples": [
+            445
+          ]
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "description": "Maximum protocol probe duration in seconds; default 15, maximum 60. Optional. If omitted, default: 15. Format: integer. Example: 15.",
+          "minimum": 3,
+          "maximum": 60,
+          "default": 15,
+          "examples": [
+            15
+          ]
+        }
+      },
+      "required": [
+        "target"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "active_probe",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "SMB signing posture"
+        ],
+        "scope": "Audit SMB dialects, signing and anonymous server metadata on an authorized target.",
+        "preferredFor": "Audit SMB dialects, signing and anonymous server metadata on an authorized target. Use when you need SMB signing posture. Do not use for operations outside this scope: Audit SMB dialects, signing and anonymous server metadata on an authorized target..",
+        "legacyName": "smb_audit"
+      }
+    }
+  },
+  {
+    "name": "smb_list_shares",
+    "description": "Enumerate SMB shares and anonymous-access metadata on an authorized target. Use when you need SMB share permissions. Do not use for operations outside this scope: Enumerate SMB shares and anonymous-access metadata on an authorized target..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for smb_list_shares. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "target": {
+          "type": "string",
+          "description": "Authorized private/allowlisted hostname or IP address. Required. Format: string. Example: \"192.168.1.1\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "192.168.1.1"
+          ]
+        },
+        "port": {
+          "type": "integer",
+          "description": "SMB TCP port; default 445. Optional. If omitted, default: 445. Format: integer. Example: 445.",
+          "minimum": 1,
+          "maximum": 65535,
+          "default": 445,
+          "examples": [
+            445
+          ]
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "description": "Maximum protocol probe duration in seconds; default 15, maximum 60. Optional. If omitted, default: 15. Format: integer. Example: 15.",
+          "minimum": 3,
+          "maximum": 60,
+          "default": 15,
+          "examples": [
+            15
+          ]
+        }
+      },
+      "required": [
+        "target"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "active_probe",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "SMB share permissions"
+        ],
+        "scope": "Enumerate SMB shares and anonymous-access metadata on an authorized target.",
+        "preferredFor": "Enumerate SMB shares and anonymous-access metadata on an authorized target. Use when you need SMB share permissions. Do not use for operations outside this scope: Enumerate SMB shares and anonymous-access metadata on an authorized target..",
+        "legacyName": "smb_shares"
+      }
+    }
+  },
+  {
+    "name": "ntp_discover_server",
+    "description": "Read NTP time, stratum, reference ID and implementation details from an authorized target. Use when you need NTP server information. Do not use for operations outside this scope: Read NTP time, stratum, reference ID and implementation details from an authorized target..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for ntp_discover_server. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "target": {
+          "type": "string",
+          "description": "Authorized private/allowlisted hostname or IP address. Required. Format: string. Example: \"192.168.1.1\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "192.168.1.1"
+          ]
+        },
+        "port": {
+          "type": "integer",
+          "description": "NTP UDP port; default 123. Optional. If omitted, default: 123. Format: integer. Example: 123.",
+          "minimum": 1,
+          "maximum": 65535,
+          "default": 123,
+          "examples": [
+            123
+          ]
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "description": "Maximum protocol probe duration in seconds; default 15, maximum 60. Optional. If omitted, default: 15. Format: integer. Example: 15.",
+          "minimum": 3,
+          "maximum": 60,
+          "default": 15,
+          "examples": [
+            15
+          ]
+        }
+      },
+      "required": [
+        "target"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "active_probe",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "NTP server information"
+        ],
+        "scope": "Read NTP time, stratum, reference ID and implementation details from an authorized target.",
+        "preferredFor": "Read NTP time, stratum, reference ID and implementation details from an authorized target. Use when you need NTP server information. Do not use for operations outside this scope: Read NTP time, stratum, reference ID and implementation details from an authorized target..",
+        "legacyName": "ntp_discover"
+      }
+    }
+  },
+  {
+    "name": "ldap_discover_directory",
+    "description": "Read LDAP RootDSE capabilities, naming contexts and authentication mechanisms from an authorized target. Use when you need directory server RootDSE. Do not use for operations outside this scope: Read LDAP RootDSE capabilities, naming contexts and authentication mechanisms from an authorized target..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for ldap_discover_directory. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "target": {
+          "type": "string",
+          "description": "Authorized private/allowlisted hostname or IP address. Required. Format: string. Example: \"192.168.1.1\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "192.168.1.1"
+          ]
+        },
+        "port": {
+          "type": "integer",
+          "description": "LDAP TCP port; default 389. Common values are 389 and 636. Optional. If omitted, default: 389. Format: integer. Example: 389.",
+          "minimum": 1,
+          "maximum": 65535,
+          "default": 389,
+          "examples": [
+            389
+          ]
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "description": "Maximum protocol probe duration in seconds; default 15, maximum 60. Optional. If omitted, default: 15. Format: integer. Example: 15.",
+          "minimum": 3,
+          "maximum": 60,
+          "default": 15,
+          "examples": [
+            15
+          ]
+        }
+      },
+      "required": [
+        "target"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "active_probe",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "directory server RootDSE"
+        ],
+        "scope": "Read LDAP RootDSE capabilities, naming contexts and authentication mechanisms from an authorized target.",
+        "preferredFor": "Read LDAP RootDSE capabilities, naming contexts and authentication mechanisms from an authorized target. Use when you need directory server RootDSE. Do not use for operations outside this scope: Read LDAP RootDSE capabilities, naming contexts and authentication mechanisms from an authorized target..",
+        "legacyName": "ldap_discover"
+      }
+    }
+  },
+  {
+    "name": "network_observe_protocol",
+    "description": "Perform passively observe LLDP, CDP or LLMNR/NBNS packets on a Security-container interface. Requires packet-capture permission. Use when you need passive protocol advertisements. Use network_observe_broadcast_multicast for physical-host ARP/mDNS/LLMNR/SSDP evidence.",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for network_observe_protocol. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "protocol": {
+          "type": "string",
+          "description": "Protocol to observe. Required. Allowed values: lldp, cdp, llmnr_nbns. Example: \"lldp\".",
+          "enum": [
+            "lldp",
+            "cdp",
+            "llmnr_nbns"
+          ],
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "lldp"
+          ]
+        },
+        "interface": {
+          "type": "string",
+          "description": "Interface visible inside mcp-security. Required. Format: string. Example: \"eth0\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "pattern": "^[A-Za-z0-9_.:-]+$",
+          "examples": [
+            "eth0"
+          ]
+        },
+        "duration_seconds": {
+          "type": "integer",
+          "description": "Observation duration; default 8, maximum 30 seconds. Optional. If omitted, default: 8. Format: integer. Example: 8.",
+          "minimum": 1,
+          "maximum": 30,
+          "default": 8,
+          "examples": [
+            8
+          ]
+        },
+        "max_packets": {
+          "type": "integer",
+          "description": "Packet limit; default 50, or 100 for LLMNR/NBNS; maximum 300. Optional. If omitted, use 100 for llmnr_nbns, otherwise 50. Format: integer. Example: 1.",
+          "minimum": 1,
+          "maximum": 300,
+          "examples": [
+            1
+          ]
+        }
+      },
+      "required": [
+        "protocol",
+        "interface"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "passive_capture",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "passive protocol advertisements"
+        ],
+        "scope": "Passively observe LLDP, CDP or LLMNR/NBNS packets on a Security-container interface. Requires packet-capture permission.",
+        "preferredFor": "Perform passively observe LLDP, CDP or LLMNR/NBNS packets on a Security-container interface. Requires packet-capture permission. Use when you need passive protocol advertisements. Use network_observe_broadcast_multicast for physical-host ARP/mDNS/LLMNR/SSDP evidence.",
+        "legacyName": "protocol_observe"
+      }
+    }
+  },
+  {
+    "name": "wsd_discover_devices",
+    "description": "Probe WS-Discovery endpoints on a specified target, or multicast within the Security-container namespace. Use when you need WSD printer endpoints. Do not use for operations outside this scope: Probe WS-Discovery endpoints on a specified target, or multicast within the Security-container namespace..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for wsd_discover_devices. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "target": {
+          "type": "string",
+          "description": "Authorized private/allowlisted hostname or IP address. Optional. If omitted, use container-local broadcast or multicast discovery. Format: string. Example: \"192.168.1.1\".",
+          "maxLength": 4096,
+          "examples": [
+            "192.168.1.1"
+          ]
+        },
+        "interface": {
+          "type": "string",
+          "description": "Optional interface visible inside the mcp-security container, such as eth0. Optional. If omitted, auto-select an interface in this tool\u2019s documented namespace. Format: string. Example: \"eth0\".",
+          "maxLength": 64,
+          "pattern": "^[A-Za-z0-9_.:-]+$",
+          "examples": [
+            "eth0"
+          ]
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "description": "Maximum protocol probe duration in seconds; default 15, maximum 60. Optional. If omitted, default: 15. Format: integer. Example: 15.",
+          "minimum": 3,
+          "maximum": 60,
+          "default": 15,
+          "examples": [
+            15
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false,
+      "x-pi-effect": "active_probe",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "WSD printer endpoints"
+        ],
+        "scope": "Probe WS-Discovery endpoints on a specified target, or multicast within the Security-container namespace.",
+        "preferredFor": "Probe WS-Discovery endpoints on a specified target, or multicast within the Security-container namespace. Use when you need WSD printer endpoints. Do not use for operations outside this scope: Probe WS-Discovery endpoints on a specified target, or multicast within the Security-container namespace..",
+        "legacyName": "wsd_discover"
+      }
+    }
+  },
+  {
+    "name": "arp_discover_hosts",
+    "description": "Probe authorized IPv4 targets using ARP within the Security-container broadcast domain. Use when you need ARP neighbor sweep. Do not use for operations outside this scope: Probe authorized IPv4 targets using ARP within the Security-container broadcast domain..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for arp_discover_hosts. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "target": {
+          "type": "string",
+          "description": "Authorized private/allowlisted IPv4 address or CIDR. Required. Format: string. Example: \"192.168.1.1\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "192.168.1.1"
+          ]
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "description": "Maximum protocol probe duration in seconds; default 15, maximum 60. Optional. If omitted, default: 15. Format: integer. Example: 15.",
+          "minimum": 3,
+          "maximum": 60,
+          "default": 15,
+          "examples": [
+            15
+          ]
+        }
+      },
+      "required": [
+        "target"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "active_probe",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "ARP neighbor sweep"
+        ],
+        "scope": "Probe authorized IPv4 targets using ARP within the Security-container broadcast domain.",
+        "preferredFor": "Probe authorized IPv4 targets using ARP within the Security-container broadcast domain. Use when you need ARP neighbor sweep. Do not use for operations outside this scope: Probe authorized IPv4 targets using ARP within the Security-container broadcast domain..",
+        "legacyName": "arp_discover"
+      }
+    }
+  },
+  {
+    "name": "ndp_list_neighbors",
+    "description": "Read the IPv6 neighbor cache of the Security-container namespace. Use when you need NDP cached neighbors. Do not use for operations outside this scope: Read the IPv6 neighbor cache of the Security-container namespace..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for ndp_list_neighbors. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "interface": {
+          "type": "string",
+          "description": "Optional interface visible inside the mcp-security container, such as eth0. Optional. If omitted, auto-select an interface in this tool\u2019s documented namespace. Format: string. Example: \"eth0\".",
+          "maxLength": 64,
+          "pattern": "^[A-Za-z0-9_.:-]+$",
+          "examples": [
+            "eth0"
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false,
+      "x-pi-effect": "active_probe",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "NDP cached neighbors"
+        ],
+        "scope": "Read the IPv6 neighbor cache of the Security-container namespace.",
+        "preferredFor": "Read the IPv6 neighbor cache of the Security-container namespace. Use when you need NDP cached neighbors. Do not use for operations outside this scope: Read the IPv6 neighbor cache of the Security-container namespace..",
+        "legacyName": "ndp_discover"
+      }
+    }
+  },
+  {
+    "name": "network_observe_broadcast_multicast",
+    "description": "Perform passively capture host ARP broadcasts and mDNS, LLMNR, SSDP multicast. Separates packet sources from address/name/service claims; sends no probes. Requires host capture permission; visibility does not prove failed isolation. Use when you need broadcast multicast leakage.",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for network_observe_broadcast_multicast. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "interface": {
+          "type": "string",
+          "description": "Physical host interface; omit to select the default Ethernet/Wi-Fi interface. Optional. If omitted, auto-select an interface in this tool\u2019s documented namespace. Format: string. Example: \"eth0\".",
+          "maxLength": 64,
+          "pattern": "^[A-Za-z0-9_.:-]+$",
+          "examples": [
+            "eth0"
+          ]
+        },
+        "duration_seconds": {
+          "type": "integer",
+          "description": "Capture duration; default 10, maximum 30. Optional. If omitted, default: 10. Format: integer. Example: 10.",
+          "minimum": 1,
+          "maximum": 30,
+          "default": 10,
+          "examples": [
+            10
+          ]
+        },
+        "max_packets": {
+          "type": "integer",
+          "description": "Stop after this many matching packets; default 256, maximum 1000. Optional. If omitted, default: 256. Format: integer. Example: 256.",
+          "minimum": 1,
+          "maximum": 1000,
+          "default": 256,
+          "examples": [
+            256
+          ]
+        },
+        "max_observations": {
+          "type": "integer",
+          "description": "Maximum unique evidence rows; default 128, maximum 256. Optional. If omitted, default: 128. Format: integer. Example: 128.",
+          "minimum": 1,
+          "maximum": 256,
+          "default": 128,
+          "examples": [
+            128
+          ]
+        },
+        "protocols": {
+          "type": "array",
+          "description": "Protocols to observe; default all four. Optional. If omitted, default: [\"arp\", \"mdns\", \"llmnr\", \"ssdp\"]. Format: array. Example: [\"arp\", \"mdns\", \"llmnr\", \"ssdp\"].",
+          "items": {
+            "type": "string",
+            "description": "Discovery protocol. Required. Allowed values: arp, mdns, llmnr, ssdp. Example: \"arp\".",
+            "enum": [
+              "arp",
+              "mdns",
+              "llmnr",
+              "ssdp"
+            ],
+            "minLength": 1,
+            "maxLength": 4096,
+            "examples": [
+              "arp"
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 4,
+          "uniqueItems": true,
+          "default": [
+            "arp",
+            "mdns",
+            "llmnr",
+            "ssdp"
+          ],
+          "examples": [
+            [
+              "arp",
+              "mdns",
+              "llmnr",
+              "ssdp"
+            ]
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false,
+      "x-pi-effect": "passive_capture",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "broadcast multicast leakage",
+          "passive ARP hostname services"
+        ],
+        "scope": "Passively capture host ARP broadcasts and mDNS, LLMNR, SSDP multicast. Separates packet sources from address/name/service claims; sends no probes. Requires host capture permission; visibility does not prove failed isolation.",
+        "preferredFor": "Perform passively capture host ARP broadcasts and mDNS, LLMNR, SSDP multicast. Separates packet sources from address/name/service claims; sends no probes. Requires host capture permission; visibility does not prove failed isolation. Use when you need broadcast multicast leakage.",
+        "overlapGroup": "network-recon",
+        "legacyName": "observe_broadcast_multicast"
+      }
+    }
+  },
+  {
+    "name": "network_probe_gateway_proxy_arp",
+    "description": "Perform bounded host ARP sweep on a connected IPv4 prefix; compares replies with gateway MAC to identify Proxy ARP candidates. Gateway replies do not confirm peer liveness. Use when you need gateway proxy ARP. Do not use for operations outside this scope: Bounded host ARP sweep on a connected IPv4 prefix; compares replies with gateway MAC to identify Proxy ARP candidates. Gateway replies do not confirm peer liveness..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for network_probe_gateway_proxy_arp. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "interface": {
+          "type": "string",
+          "description": "Physical host interface; omit to select the default Ethernet/Wi-Fi interface. Optional. If omitted, auto-select an interface in this tool\u2019s documented namespace. Format: string. Example: \"eth0\".",
+          "maxLength": 64,
+          "pattern": "^[A-Za-z0-9_.:-]+$",
+          "examples": [
+            "eth0"
+          ]
+        },
+        "cidr": {
+          "type": "string",
+          "description": "Explicit directly connected IPv4 CIDR; omit to use selected local prefix. Oversized ranges are rejected. Optional. If omitted, use the selected directly connected prefix. Format: string. Example: \"192.168.1.0/24\".",
+          "maxLength": 18,
+          "examples": [
+            "192.168.1.0/24"
+          ]
+        },
+        "gateway": {
+          "type": "string",
+          "description": "Authorized IPv4 address on the selected interface subnet. Optional. If omitted: Select the interface default gateway. Format: string. Example: \"192.168.1.1\".",
+          "maxLength": 15,
+          "examples": [
+            "192.168.1.1"
+          ]
+        },
+        "max_hosts": {
+          "type": "integer",
+          "description": "Maximum addresses in the sweep; default 256, maximum 256. Optional. If omitted, default: 256. Format: integer. Example: 256.",
+          "minimum": 1,
+          "maximum": 256,
+          "default": 256,
+          "examples": [
+            256
+          ]
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "description": "Response wait after sending; default 2, maximum 5. Optional. If omitted, default: 2. Format: integer. Example: 2.",
+          "minimum": 1,
+          "maximum": 5,
+          "default": 2,
+          "examples": [
+            2
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false,
+      "x-pi-effect": "active_probe",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "gateway proxy ARP",
+          "shared ARP responder MAC"
+        ],
+        "scope": "Bounded host ARP sweep on a connected IPv4 prefix; compares replies with gateway MAC to identify Proxy ARP candidates. Gateway replies do not confirm peer liveness.",
+        "preferredFor": "Perform bounded host ARP sweep on a connected IPv4 prefix; compares replies with gateway MAC to identify Proxy ARP candidates. Gateway replies do not confirm peer liveness. Use when you need gateway proxy ARP. Do not use for operations outside this scope: Bounded host ARP sweep on a connected IPv4 prefix; compares replies with gateway MAC to identify Proxy ARP candidates. Gateway replies do not confirm peer liveness..",
+        "overlapGroup": "network-recon",
+        "legacyName": "probe_gateway_proxy_arp"
+      }
+    }
+  },
+  {
+    "name": "network_probe_gateway_hairpin",
+    "description": "Compare direct and gateway-addressed Ethernet ICMP probes to explicit same-subnet peers, with TTL=1 forwarding control. Reports possible hairpin routing; controlled peers and policy evidence are needed to confirm isolation bypass. Use when you need gateway hairpin routing.",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for network_probe_gateway_hairpin. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "interface": {
+          "type": "string",
+          "description": "Physical host interface; omit to select the default Ethernet/Wi-Fi interface. Optional. If omitted, auto-select an interface in this tool\u2019s documented namespace. Format: string. Example: \"eth0\".",
+          "maxLength": 64,
+          "pattern": "^[A-Za-z0-9_.:-]+$",
+          "examples": [
+            "eth0"
+          ]
+        },
+        "gateway": {
+          "type": "string",
+          "description": "Authorized IPv4 address on the selected interface subnet. Optional. If omitted: Select the interface default gateway. Format: string. Example: \"192.168.1.1\".",
+          "maxLength": 15,
+          "examples": [
+            "192.168.1.1"
+          ]
+        },
+        "peer_targets": {
+          "type": "array",
+          "description": "Explicit known IPv4 peers on selected subnet; no automatic target expansion. Required. Format: array. Example: [\"192.168.1.2\"].",
+          "items": {
+            "type": "string",
+            "description": "Authorized IPv4 address on the selected interface subnet. Required. Format: string. Example: \"192.168.1.2\".",
+            "maxLength": 15,
+            "minLength": 1,
+            "examples": [
+              "192.168.1.2"
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 8,
+          "uniqueItems": true,
+          "examples": [
+            [
+              "192.168.1.2"
+            ]
+          ]
+        },
+        "probes": {
+          "type": "integer",
+          "description": "Echo probes per path per peer; default 1, maximum 3. Optional. If omitted, default: 1. Format: integer. Example: 1.",
+          "minimum": 1,
+          "maximum": 3,
+          "default": 1,
+          "examples": [
+            1
+          ]
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "description": "Wait per ARP/ICMP probe; default 1, maximum 2. Optional. If omitted, default: 1. Format: integer. Example: 1.",
+          "minimum": 1,
+          "maximum": 2,
+          "default": 1,
+          "examples": [
+            1
+          ]
+        }
+      },
+      "required": [
+        "peer_targets"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "active_probe",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "gateway hairpin routing",
+          "client isolation path comparison"
+        ],
+        "scope": "Compare direct and gateway-addressed Ethernet ICMP probes to explicit same-subnet peers, with TTL=1 forwarding control. Reports possible hairpin routing; controlled peers and policy evidence are needed to confirm isolation bypass.",
+        "preferredFor": "Compare direct and gateway-addressed Ethernet ICMP probes to explicit same-subnet peers, with TTL=1 forwarding control. Reports possible hairpin routing; controlled peers and policy evidence are needed to confirm isolation bypass. Use when you need gateway hairpin routing.",
+        "overlapGroup": "network-recon",
+        "legacyName": "probe_gateway_hairpin"
+      }
+    }
+  },
+  {
+    "name": "dns_observe_cache",
+    "description": "Observe explicit names at an authorized LAN DNS server using nonrecursive queries. Returns validated responses, TTLs and timings; optional supplied TTL baseline. Cache data cannot identify a requesting client or confirm device presence. Use when you need DNS cache snooping.",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for dns_observe_cache. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "interface": {
+          "type": "string",
+          "description": "Physical host interface; omit to select the default Ethernet/Wi-Fi interface. Optional. If omitted, auto-select an interface in this tool\u2019s documented namespace. Format: string. Example: \"eth0\".",
+          "maxLength": 64,
+          "pattern": "^[A-Za-z0-9_.:-]+$",
+          "examples": [
+            "eth0"
+          ]
+        },
+        "server": {
+          "type": "string",
+          "description": "Authorized IPv4 address on the selected interface subnet. Optional. If omitted: Select the interface LAN DNS server. Format: string. Example: \"192.168.1.1\".",
+          "maxLength": 15,
+          "examples": [
+            "192.168.1.1"
+          ]
+        },
+        "names": {
+          "type": "array",
+          "description": "Explicit hostnames or service domains; no built-in domain dictionary. Required. Format: array. Example: [\"example\"].",
+          "items": {
+            "type": "string",
+            "description": "DNS name. Required. Format: string. Example: \"example\".",
+            "maxLength": 253,
+            "minLength": 1,
+            "examples": [
+              "example"
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 16,
+          "uniqueItems": true,
+          "examples": [
+            [
+              "example"
+            ]
+          ]
+        },
+        "record_type": {
+          "type": "string",
+          "description": "DNS record type; default A. Optional. If omitted, default: \"A\". Allowed values: A, AAAA, PTR, SRV, TXT. Example: \"A\".",
+          "enum": [
+            "A",
+            "AAAA",
+            "PTR",
+            "SRV",
+            "TXT"
+          ],
+          "maxLength": 4096,
+          "default": "A",
+          "examples": [
+            "A"
+          ]
+        },
+        "samples": {
+          "type": "integer",
+          "description": "Repeated nonrecursive samples per name; default 2, maximum 3. Optional. If omitted, default: 2. Format: integer. Example: 2.",
+          "minimum": 1,
+          "maximum": 3,
+          "default": 2,
+          "examples": [
+            2
+          ]
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "description": "Wait per query; default 1, maximum 2. Optional. If omitted, default: 1. Format: integer. Example: 1.",
+          "minimum": 1,
+          "maximum": 2,
+          "default": 1,
+          "examples": [
+            1
+          ]
+        },
+        "baseline_ttl": {
+          "type": "integer",
+          "description": "Optional known original TTL for the queried RRset; never guessed or fetched automatically. Optional. If omitted: Do not compare against an original TTL. Format: integer. Example: 1.",
+          "minimum": 1,
+          "maximum": 2147483647,
+          "examples": [
+            1
+          ]
+        }
+      },
+      "required": [
+        "names"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "active_probe",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "DNS cache snooping",
+          "nonrecursive cache evidence"
+        ],
+        "scope": "Observe explicit names at an authorized LAN DNS server using nonrecursive queries. Returns validated responses, TTLs and timings; optional supplied TTL baseline. Cache data cannot identify a requesting client or confirm device presence.",
+        "preferredFor": "Observe explicit names at an authorized LAN DNS server using nonrecursive queries. Returns validated responses, TTLs and timings; optional supplied TTL baseline. Cache data cannot identify a requesting client or confirm device presence. Use when you need DNS cache snooping.",
+        "overlapGroup": "network-recon",
+        "legacyName": "observe_dns_cache"
+      }
+    }
+  },
+  {
+    "name": "mdns_discover_subnets",
+    "description": "Discover advertised host addresses and candidate subnet ranges through host mDNS/DNS-SD. Returns compact report rows, saves full raw audit evidence separately, distinguishes local prefixes, routing coverage and heuristic grouping, and treats outside-subnet advertisements as possible reflection rather than proof. Does not scan candidates. Use when you need mDNS subnet discovery. Use network_discover_hosts for active inventory; advertised prefixes do not prove subnet masks or reflector presence.",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for mdns_discover_subnets. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "interface": {
+          "type": "string",
+          "description": "Optional host network interface. Omit to auto-select; reuse selected_interface. Optional. If omitted, auto-select an interface in this tool\u2019s documented namespace. Format: string. Example: \"eth0\".",
+          "maxLength": 64,
+          "pattern": "^[A-Za-z0-9_.:-]+$",
+          "examples": [
+            "eth0"
+          ]
+        },
+        "duration_seconds": {
+          "type": "integer",
+          "description": "Observation window; default 8, maximum 30 seconds. Optional. If omitted, default: 8. Format: integer. Example: 8.",
+          "minimum": 3,
+          "maximum": 30,
+          "default": 8,
+          "examples": [
+            8
+          ]
+        },
+        "max_records": {
+          "type": "integer",
+          "description": "Maximum advertised records; default 256. Optional. If omitted, default: 256. Format: integer. Example: 256.",
+          "minimum": 16,
+          "maximum": 512,
+          "default": 256,
+          "examples": [
+            256
+          ]
+        },
+        "max_queries": {
+          "type": "integer",
+          "description": "Maximum unique DNS-SD follow-up queries; default 96, maximum 256. Reaching the cap marks coverage partial. Optional. If omitted, default: 96. Format: integer. Example: 96.",
+          "minimum": 16,
+          "maximum": 256,
+          "default": 96,
+          "examples": [
+            96
+          ]
+        },
+        "ipv4_candidate_prefix": {
+          "type": "integer",
+          "description": "Fallback IPv4 grouping prefix; default 24. Not an observed mask. Optional. If omitted, default: 24. Format: integer. Example: 24.",
+          "minimum": 20,
+          "maximum": 32,
+          "default": 24,
+          "examples": [
+            24
+          ]
+        },
+        "ipv6_candidate_prefix": {
+          "type": "integer",
+          "description": "Fallback IPv6 grouping prefix; default 64. Not an observed mask. Optional. If omitted, default: 64. Format: integer. Example: 64.",
+          "minimum": 48,
+          "maximum": 128,
+          "default": 64,
+          "examples": [
+            64
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false,
+      "x-pi-effect": "active_probe",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "mDNS subnet discovery",
+          "subnet ranges from advertised addresses",
+          "mDNS reflector evidence"
+        ],
+        "scope": "Discover advertised host addresses and candidate subnet ranges through host mDNS/DNS-SD. Returns compact report rows, saves full raw audit evidence separately, distinguishes local prefixes, routing coverage and heuristic grouping, and treats outside-subnet advertisements as possible reflection rather than proof. Does not scan candidates.",
+        "preferredFor": "Discover advertised host addresses and candidate subnet ranges through host mDNS/DNS-SD. Returns compact report rows, saves full raw audit evidence separately, distinguishes local prefixes, routing coverage and heuristic grouping, and treats outside-subnet advertisements as possible reflection rather than proof. Does not scan candidates. Use when you need mDNS subnet discovery. Use network_discover_hosts for active inventory; advertised prefixes do not prove subnet masks or reflector presence.",
+        "overlapGroup": "network-recon",
+        "legacyName": "discover_mdns_subnets"
+      }
+    }
+  },
+  {
+    "name": "network_get_host_interfaces",
+    "description": "Start local network reconnaissance here: inspect the laptop\u2019s physical Ethernet/Wi-Fi interfaces, addresses, gateway, DNS and link speed through the required host helper. Use when you need host network state. Use network_list_container_interfaces for the Security-container namespace.",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for network_get_host_interfaces. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "interface": {
+          "type": "string",
+          "description": "Optional host network interface. Omit to auto-select; reuse selected_interface. Optional. If omitted, auto-select an interface in this tool\u2019s documented namespace. Format: string. Example: \"eth0\".",
+          "maxLength": 64,
+          "pattern": "^[A-Za-z0-9_.:-]+$",
+          "examples": [
+            "eth0"
+          ]
+        },
+        "internet_check": {
+          "type": "boolean",
+          "description": "Check default-route, DNS-resolution, and one ICMP reachability probe to a fixed public resolver; default true. Optional. If omitted, default: true. Format: boolean. Example: true.",
+          "default": true,
+          "examples": [
+            true
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false,
+      "x-pi-effect": "active_probe",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "host network state",
+          "active laptop interfaces",
+          "network reconnaissance and mapping workflow"
+        ],
+        "scope": "Start local network reconnaissance here: inspect the laptop\u2019s physical Ethernet/Wi-Fi interfaces, addresses, gateway, DNS and link speed through the required host helper.",
+        "preferredFor": "Start local network reconnaissance here: inspect the laptop\u2019s physical Ethernet/Wi-Fi interfaces, addresses, gateway, DNS and link speed through the required host helper. Use when you need host network state. Use network_list_container_interfaces for the Security-container namespace.",
+        "overlapGroup": "network-recon",
+        "legacyName": "get_host_interface_info"
+      }
+    }
+  },
+  {
+    "name": "network_discover_hosts",
+    "description": "Discover and enumerate hosts on authorized local subnets through the required host helper. Full mode adds names, MAC/vendor, OS evidence, ports/services, shares and media devices. Use when you need LAN reconnaissance. Use mdns_discover_subnets for advertised subnet hints; do not treat advertisements as confirmed live hosts.",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for network_discover_hosts. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "cidrs": {
+          "type": "array",
+          "description": "One to four authorized IPv4 CIDRs. Omit to infer directly connected networks from the active interface. Optional. If omitted, infer directly connected host networks. Format: array. Example: [\"192.168.1.0/24\"].",
+          "items": {
+            "type": "string",
+            "description": "Authorized private/allowlisted IPv4 CIDR such as 192.168.1.0/24. Required. Format: string. Example: \"192.168.1.0/24\".",
+            "maxLength": 64,
+            "minLength": 1,
+            "examples": [
+              "192.168.1.0/24"
+            ]
+          },
+          "maxItems": 4,
+          "minItems": 1,
+          "examples": [
+            [
+              "192.168.1.0/24"
+            ]
+          ]
+        },
+        "interface": {
+          "type": "string",
+          "description": "Optional host network interface. Omit to auto-select; reuse selected_interface. Optional. If omitted, auto-select an interface in this tool\u2019s documented namespace. Format: string. Example: \"eth0\".",
+          "maxLength": 64,
+          "pattern": "^[A-Za-z0-9_.:-]+$",
+          "examples": [
+            "eth0"
+          ]
+        },
+        "detail": {
+          "type": "string",
+          "description": "Inventory depth; hosts discovers reachable addresses only, full also enriches names, OS, ports and services. Default full. Optional. If omitted, default: \"full\". Allowed values: hosts, full. Example: \"full\".",
+          "enum": [
+            "hosts",
+            "full"
+          ],
+          "maxLength": 4096,
+          "default": "full",
+          "examples": [
+            "full"
+          ]
+        },
+        "host_offset": {
+          "type": "integer",
+          "description": "Live-host page offset returned as next_offset; default 0. Optional. If omitted, default: 0. Format: integer. Example: 0.",
+          "minimum": 0,
+          "maximum": 65535,
+          "default": 0,
+          "examples": [
+            0
+          ]
+        },
+        "max_hosts": {
+          "type": "integer",
+          "description": "Maximum live hosts to enrich; default 64, maximum 128. Optional. If omitted, default: 64. Format: integer. Example: 64.",
+          "minimum": 1,
+          "maximum": 128,
+          "default": 64,
+          "examples": [
+            64
+          ]
+        },
+        "port_profile": {
+          "type": "string",
+          "description": "Port coverage: quick=top 100, standard=top 1000 plus common share/media ports, full=all TCP ports. Full is limited to at most 16 hosts. Optional. If omitted, default: \"standard\". Allowed values: quick, standard, full. Example: \"standard\".",
+          "enum": [
+            "quick",
+            "standard",
+            "full"
+          ],
+          "maxLength": 4096,
+          "default": "standard",
+          "examples": [
+            "standard"
+          ]
+        },
+        "os_detection": {
+          "type": "boolean",
+          "description": "Attempt Nmap OS fingerprinting; default true. Requires raw-packet privileges. Optional. If omitted, default: true. Format: boolean. Example: true.",
+          "default": true,
+          "examples": [
+            true
+          ]
+        },
+        "resolve_names": {
+          "type": "boolean",
+          "description": "Resolve names using DHCP lease files, reverse DNS, and mDNS where available; default true. Optional. If omitted, default: true. Format: boolean. Example: true.",
+          "default": true,
+          "examples": [
+            true
+          ]
+        },
+        "include_shares": {
+          "type": "boolean",
+          "description": "Enumerate SMB/NFS shares read-only when their services are detected; default true. Optional. If omitted, default: true. Format: boolean. Example: true.",
+          "default": true,
+          "examples": [
+            true
+          ]
+        },
+        "include_media": {
+          "type": "boolean",
+          "description": "Probe common UPnP/DLNA/Plex/Jellyfin/Emby ports and metadata; default true. Optional. If omitted, default: true. Format: boolean. Example: true.",
+          "default": true,
+          "examples": [
+            true
+          ]
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "description": "Total call budget across all scan and enrichment phases; default 240, maximum 300 seconds. Optional. If omitted, default: 240. Format: integer. Example: 240.",
+          "minimum": 30,
+          "maximum": 300,
+          "default": 240,
+          "examples": [
+            240
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false,
+      "x-pi-effect": "active_probe",
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "port_profile": {
+                "const": "full"
+              }
+            },
+            "required": [
+              "port_profile"
+            ]
+          },
+          "then": {
+            "properties": {
+              "max_hosts": {
+                "maximum": 16
+              }
+            },
+            "required": [
+              "max_hosts"
+            ]
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "LAN reconnaissance",
+          "comprehensive network discovery",
+          "reachable host inventory"
+        ],
+        "scope": "Discover and enumerate hosts on authorized local subnets through the required host helper. Full mode adds names, MAC/vendor, OS evidence, ports/services, shares and media devices.",
+        "preferredFor": "Discover and enumerate hosts on authorized local subnets through the required host helper. Full mode adds names, MAC/vendor, OS evidence, ports/services, shares and media devices. Use when you need LAN reconnaissance. Use mdns_discover_subnets for advertised subnet hints; do not treat advertisements as confirmed live hosts.",
+        "overlapGroup": "network-recon",
+        "legacyName": "perform_network_discovery"
+      }
+    }
+  },
+  {
+    "name": "network_analyze_topology",
+    "description": "Analyze physical network topology through the required host helper: subnets, routes, gateways, mDNS visibility and optional LLDP/CDP or peer-isolation evidence. Virtual interfaces and VLANs are excluded. Use when you need routing relationships. Do not use for operations outside this scope: Analyze physical network topology through the required host helper: subnets, routes, gateways, mDNS visibility and optional LLDP/CDP or peer-isolation evidence. Virtual interfaces and VLANs are excluded..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for network_analyze_topology. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "interface": {
+          "type": "string",
+          "description": "Optional host network interface. Omit to auto-select; reuse selected_interface. Optional. If omitted, auto-select an interface in this tool\u2019s documented namespace. Format: string. Example: \"eth0\".",
+          "maxLength": 64,
+          "pattern": "^[A-Za-z0-9_.:-]+$",
+          "examples": [
+            "eth0"
+          ]
+        },
+        "peer_targets": {
+          "type": "array",
+          "description": "Known authorized peer IPs expected to be on the same local network. Supplying peers enables the client-isolation test. Optional. If omitted: Do not run peer-isolation probes. Format: array. Example: [\"192.168.1.2\"].",
+          "items": {
+            "type": "string",
+            "description": "Authorized peer IPv4 address. Required. Format: string. Example: \"192.168.1.2\".",
+            "minLength": 1,
+            "maxLength": 4096,
+            "examples": [
+              "192.168.1.2"
+            ]
+          },
+          "maxItems": 16,
+          "minItems": 1,
+          "examples": [
+            [
+              "192.168.1.2"
+            ]
+          ]
+        },
+        "observe_mdns": {
+          "type": "boolean",
+          "description": "Browse mDNS/DNS-SD services for topology hints; default true. Optional. If omitted, default: true. Format: boolean. Example: true.",
+          "default": true,
+          "examples": [
+            true
+          ]
+        },
+        "observe_l2": {
+          "type": "boolean",
+          "description": "Passively observe LLDP/CDP for topology hints; default false and requires SECURITY_ALLOW_PACKET_CAPTURE=true. Optional. If omitted, default: false. Format: boolean. Example: false.",
+          "default": false,
+          "examples": [
+            false
+          ]
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "description": "Observation/probe duration per bounded operation; default 8, maximum 30. Optional. If omitted, default: 8. Format: integer. Example: 8.",
+          "minimum": 3,
+          "maximum": 30,
+          "default": 8,
+          "examples": [
+            8
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false,
+      "x-pi-effect": "active_probe",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "routing relationships",
+          "network segmentation"
+        ],
+        "scope": "Analyze physical network topology through the required host helper: subnets, routes, gateways, mDNS visibility and optional LLDP/CDP or peer-isolation evidence. Virtual interfaces and VLANs are excluded.",
+        "preferredFor": "Analyze physical network topology through the required host helper: subnets, routes, gateways, mDNS visibility and optional LLDP/CDP or peer-isolation evidence. Virtual interfaces and VLANs are excluded. Use when you need routing relationships. Do not use for operations outside this scope: Analyze physical network topology through the required host helper: subnets, routes, gateways, mDNS visibility and optional LLDP/CDP or peer-isolation evidence. Virtual interfaces and VLANs are excluded..",
+        "overlapGroup": "network-recon",
+        "legacyName": "analyze_network_topology"
+      }
+    }
+  },
+  {
+    "name": "wireless_analyze_environment",
+    "description": "Assess laptop Wi-Fi through the required host helper: SSID/BSSID, signal, link rate, channel width, nearby access points and channel overlap. Passive cached observations by default. Use when you need passive wireless assessment. Do not use for operations outside this scope: Assess laptop Wi-Fi through the required host helper: SSID/BSSID, signal, link rate, channel width, nearby access points and channel overlap. Passive cached observations by default..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for wireless_analyze_environment. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "interface": {
+          "type": "string",
+          "description": "Optional host network interface. Omit to auto-select; reuse selected_interface. Optional. If omitted, auto-select an interface in this tool\u2019s documented namespace. Format: string. Example: \"eth0\".",
+          "maxLength": 64,
+          "pattern": "^[A-Za-z0-9_.:-]+$",
+          "examples": [
+            "eth0"
+          ]
+        },
+        "rescan": {
+          "type": "boolean",
+          "enum": [
+            false
+          ],
+          "description": "Passive-only tool: omit or use false. Active rescans are rejected. Optional. If omitted, default: false. Allowed values: False. Example: false.",
+          "default": false,
+          "examples": [
+            false
+          ]
+        },
+        "use_airodump": {
+          "type": "boolean",
+          "description": "Also collect passive airodump-ng observations; default false. Requires monitor_interface and SECURITY_ALLOW_PACKET_CAPTURE=true. Optional. If omitted, default: false. Format: boolean. Example: false.",
+          "default": false,
+          "examples": [
+            false
+          ]
+        },
+        "monitor_interface": {
+          "type": "string",
+          "description": "Optional host network interface. Omit to auto-select; reuse selected_interface. Optional. If omitted: Required when use_airodump=true; unused otherwise. Format: string. Example: \"wlan0mon\".",
+          "maxLength": 64,
+          "pattern": "^[A-Za-z0-9_.:-]+$",
+          "examples": [
+            "wlan0mon"
+          ]
+        },
+        "duration_seconds": {
+          "type": "integer",
+          "description": "airodump passive observation duration; default 10, maximum 30. Optional. If omitted, default: 10. Format: integer. Example: 10.",
+          "minimum": 3,
+          "maximum": 30,
+          "default": 10,
+          "examples": [
+            10
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false,
+      "x-pi-effect": "passive_capture",
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "use_airodump": {
+                "const": true
+              }
+            },
+            "required": [
+              "use_airodump"
+            ]
+          },
+          "then": {
+            "required": [
+              "monitor_interface"
+            ]
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "passive wireless assessment",
+          "wifi survey",
+          "wireless network assessment"
+        ],
+        "scope": "Assess laptop Wi-Fi through the required host helper: SSID/BSSID, signal, link rate, channel width, nearby access points and channel overlap. Passive cached observations by default.",
+        "preferredFor": "Assess laptop Wi-Fi through the required host helper: SSID/BSSID, signal, link rate, channel width, nearby access points and channel overlap. Passive cached observations by default. Use when you need passive wireless assessment. Do not use for operations outside this scope: Assess laptop Wi-Fi through the required host helper: SSID/BSSID, signal, link rate, channel width, nearby access points and channel overlap. Passive cached observations by default..",
+        "overlapGroup": "network-recon",
+        "legacyName": "analyze_wireless_environment"
+      }
+    }
+  },
+  {
+    "name": "network_render_map",
+    "description": "Render collected network reconnaissance data into Graphviz SVG and HTML topology maps. Pass returned observation_path values as input_paths; no JSON copying needed. Use when you need graphical network map. Use discovery tools to collect missing observations; rendering does not probe the network.",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for network_render_map. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "data": {
+          "type": "object",
+          "description": "Aggregated object containing outputs from network_get_host_interfaces, network_discover_hosts, network_analyze_topology and/or wireless_analyze_environment. Optional. If omitted: Supply input_path or input_paths instead. Format: object. Example: {\"host\": {\"hostname\": \"laptop\"}}.",
+          "additionalProperties": {
+            "$ref": "#/definitions/json_value"
+          },
+          "required": [],
+          "examples": [
+            {
+              "host": {
+                "hostname": "laptop"
+              }
+            }
+          ]
+        },
+        "input_path": {
+          "type": "string",
+          "description": "Workspace-relative JSON file containing aggregated network data. Optional. If omitted: Supply data or input_paths instead. Format: string. Example: \".security-results/observations.json\".",
+          "maxLength": 4096,
+          "examples": [
+            ".security-results/observations.json"
+          ]
+        },
+        "input_paths": {
+          "type": "array",
+          "description": "Nonempty observation artifact paths returned by successful saves; omit data and input_path when using this field; merges their data without copying JSON. Include host, topology and wireless observation paths plus every discovery page from this workflow; inspect missing_observations in the result. Optional. If omitted: Supply data or input_path instead. Format: array. Example: [\"example\"].",
+          "items": {
+            "type": "string",
+            "description": "Security workspace observation JSON path. Required. Format: string. Example: \"example\".",
+            "minLength": 1,
+            "maxLength": 4096,
+            "examples": [
+              "example"
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 128,
+          "examples": [
+            [
+              "example"
+            ]
+          ]
+        },
+        "output_base": {
+          "type": "string",
+          "description": "Output basename without extension, stored under .security-results. Relative names are prefixed automatically; default .security-results/network-map. Absolute paths and traversal are rejected. Optional. If omitted, default: \".security-results/network-map\". Format: string. Example: \".security-results/network-map\".",
+          "maxLength": 240,
+          "default": ".security-results/network-map",
+          "examples": [
+            ".security-results/network-map"
+          ]
+        },
+        "format": {
+          "type": "string",
+          "description": "Map output format. Optional. If omitted, default: \"both\". Allowed values: svg, html, both. Example: \"both\".",
+          "enum": [
+            "svg",
+            "html",
+            "both"
+          ],
+          "maxLength": 4096,
+          "default": "both",
+          "examples": [
+            "both"
+          ]
+        },
+        "title": {
+          "type": "string",
+          "description": "Optional map title; maximum 120 characters. Optional. If omitted: Use the built-in network-map title. Format: string. Example: \"Network map\".",
+          "maxLength": 120,
+          "examples": [
+            "Network map"
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false,
+      "x-pi-effect": "workspace_write",
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "definitions": {
+        "json_value": {
+          "description": "A JSON value from a saved reconnaissance result.",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/json_value"
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": {
+                "$ref": "#/definitions/json_value"
+              }
+            }
+          ]
+        }
+      },
+      "oneOf": [
+        {
+          "required": [
+            "data"
+          ]
+        },
+        {
+          "required": [
+            "input_path"
+          ]
+        },
+        {
+          "required": [
+            "input_paths"
+          ]
+        }
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "graphical network map",
+          "network mapping",
+          "topology diagram"
+        ],
+        "scope": "Render collected network reconnaissance data into Graphviz SVG and HTML topology maps. Pass returned observation_path values as input_paths; no JSON copying needed.",
+        "preferredFor": "Render collected network reconnaissance data into Graphviz SVG and HTML topology maps. Pass returned observation_path values as input_paths; no JSON copying needed. Use when you need graphical network map. Use discovery tools to collect missing observations; rendering does not probe the network.",
+        "overlapGroup": "network-recon",
+        "legacyName": "generate_graphical_network_map"
+      }
+    }
+  },
+  {
+    "name": "nmap_scan_ports",
+    "description": "Scan authorized TCP targets from the Security container. Enable service_detection for product/version fingerprints. Use when you need TCP open ports. Use network_check_port for one TCP connection check and masscan_scan_ports for bounded SYN discovery.",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for nmap_scan_ports. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "target": {
+          "type": "string",
+          "description": "Authorized hostname, IP address, or CIDR. Required. Format: string. Example: \"192.168.1.1\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "192.168.1.1"
+          ]
+        },
+        "ports": {
+          "type": "string",
+          "description": "Port expression such as 22,80,443 or 1-1024; default top 1000. Optional. If omitted, scan the top 1000 TCP ports. Format: string. Example: \"22,80,443\".",
+          "maxLength": 4096,
+          "examples": [
+            "22,80,443"
+          ]
+        },
+        "service_detection": {
+          "type": "boolean",
+          "description": "Identify service products and versions; default false. Optional. If omitted, default: false. Format: boolean. Example: false.",
+          "default": false,
+          "examples": [
+            false
+          ]
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "description": "Total scan deadline; default 60, or 90 with service detection; maximum 240 seconds. Optional. If omitted, use 60 seconds, or 90 when service_detection=true. Format: integer. Example: 5.",
+          "minimum": 5,
+          "maximum": 240,
+          "examples": [
+            5
+          ]
+        }
+      },
+      "required": [
+        "target"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "active_probe",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "TCP open ports",
+          "service version detection"
+        ],
+        "scope": "Scan authorized TCP targets from the Security container. Enable service_detection for product/version fingerprints.",
+        "preferredFor": "Scan authorized TCP targets from the Security container. Enable service_detection for product/version fingerprints. Use when you need TCP open ports. Use network_check_port for one TCP connection check and masscan_scan_ports for bounded SYN discovery.",
+        "legacyName": "port_scan"
+      }
+    }
+  },
+  {
+    "name": "tls_audit_service",
+    "description": "Audit TLS protocol support, certificates and cipher suites on an authorized service. Use when you need SSL configuration. Do not use for operations outside this scope: Audit TLS protocol support, certificates and cipher suites on an authorized service..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for tls_audit_service. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "host": {
+          "type": "string",
+          "description": "Hostname or IP address. Required. Format: string. Example: \"192.168.1.1\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "192.168.1.1"
+          ]
+        },
+        "port": {
+          "type": "integer",
+          "description": "TLS port; default 443. Optional. If omitted, default: 443. Format: integer. Example: 443.",
+          "minimum": 1,
+          "maximum": 65535,
+          "default": 443,
+          "examples": [
+            443
+          ]
+        }
+      },
+      "required": [
+        "host"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "active_probe",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "SSL configuration"
+        ],
+        "scope": "Audit TLS protocol support, certificates and cipher suites on an authorized service.",
+        "preferredFor": "Audit TLS protocol support, certificates and cipher suites on an authorized service. Use when you need SSL configuration. Do not use for operations outside this scope: Audit TLS protocol support, certificates and cipher suites on an authorized service..",
+        "legacyName": "tls_audit"
+      }
+    }
+  },
+  {
+    "name": "http_audit_headers",
+    "description": "Audit CSP, HSTS, frame protection and other HTTP response headers on an authorized URL. Use when you need web security headers. Use network_probe_http for connectivity/timing or web_scan_vulnerabilities for CVE checks.",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for http_audit_headers. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "url": {
+          "type": "string",
+          "description": "Authorized http:// or https:// URL. Required. Format: string. Example: \"https://example.com/\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "pattern": "^https?://[^\\s]+$",
+          "examples": [
+            "https://example.com/"
+          ]
+        }
+      },
+      "required": [
+        "url"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "active_probe",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "web security headers"
+        ],
+        "scope": "Audit CSP, HSTS, frame protection and other HTTP response headers on an authorized URL.",
+        "preferredFor": "Audit CSP, HSTS, frame protection and other HTTP response headers on an authorized URL. Use when you need web security headers. Use network_probe_http for connectivity/timing or web_scan_vulnerabilities for CVE checks.",
+        "overlapGroup": "http",
+        "legacyName": "http_headers_audit"
+      }
+    }
+  },
+  {
+    "name": "web_audit_server",
+    "description": "Check an authorized web server for exposed files and risky defaults using bounded Nikto probes. Use when you need Nikto misconfiguration. Do not use for operations outside this scope: Check an authorized web server for exposed files and risky defaults using bounded Nikto probes..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for web_audit_server. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "url": {
+          "type": "string",
+          "description": "Authorized http:// or https:// URL. Required. Format: string. Example: \"https://example.com/\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "pattern": "^https?://[^\\s]+$",
+          "examples": [
+            "https://example.com/"
+          ]
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "description": "Maximum runtime; default 90, maximum 180. Optional. If omitted, default: 90. Format: integer. Example: 90.",
+          "minimum": 15,
+          "maximum": 180,
+          "default": 90,
+          "examples": [
+            90
+          ]
+        }
+      },
+      "required": [
+        "url"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "active_probe",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "Nikto misconfiguration"
+        ],
+        "scope": "Check an authorized web server for exposed files and risky defaults using bounded Nikto probes.",
+        "preferredFor": "Check an authorized web server for exposed files and risky defaults using bounded Nikto probes. Use when you need Nikto misconfiguration. Do not use for operations outside this scope: Check an authorized web server for exposed files and risky defaults using bounded Nikto probes..",
+        "legacyName": "web_server_audit"
+      }
+    }
+  },
+  {
+    "name": "web_scan_vulnerabilities",
+    "description": "Scan an authorized URL with bounded Nuclei CVE and misconfiguration templates. Use when you need known vulnerability detection. Do not use for operations outside this scope: Scan an authorized URL with bounded Nuclei CVE and misconfiguration templates..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for web_scan_vulnerabilities. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "url": {
+          "type": "string",
+          "description": "Authorized http:// or https:// URL. Required. Format: string. Example: \"https://example.com/\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "pattern": "^https?://[^\\s]+$",
+          "examples": [
+            "https://example.com/"
+          ]
+        },
+        "severities": {
+          "type": "array",
+          "description": "Severities to include; default low,medium,high,critical. Optional. If omitted, default: [\"low\", \"medium\", \"high\", \"critical\"]. Format: array. Example: [\"low\", \"medium\", \"high\", \"critical\"].",
+          "items": {
+            "type": "string",
+            "description": "One severity. Required. Allowed values: info, low, medium, high, critical. Example: \"info\".",
+            "enum": [
+              "info",
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ],
+            "minLength": 1,
+            "maxLength": 4096,
+            "examples": [
+              "info"
+            ]
+          },
+          "maxItems": 5,
+          "default": [
+            "low",
+            "medium",
+            "high",
+            "critical"
+          ],
+          "examples": [
+            [
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ]
+          ]
+        },
+        "rate_limit": {
+          "type": "integer",
+          "description": "Maximum requests per second; default 20, maximum 50. Optional. If omitted, default: 20. Format: integer. Example: 20.",
+          "minimum": 1,
+          "maximum": 50,
+          "default": 20,
+          "examples": [
+            20
+          ]
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "description": "Maximum total runtime; default 120, maximum 300. Optional. If omitted, default: 120. Format: integer. Example: 120.",
+          "minimum": 15,
+          "maximum": 300,
+          "default": 120,
+          "examples": [
+            120
+          ]
+        }
+      },
+      "required": [
+        "url"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "active_probe",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "known vulnerability detection"
+        ],
+        "scope": "Scan an authorized URL with bounded Nuclei CVE and misconfiguration templates.",
+        "preferredFor": "Scan an authorized URL with bounded Nuclei CVE and misconfiguration templates. Use when you need known vulnerability detection. Do not use for operations outside this scope: Scan an authorized URL with bounded Nuclei CVE and misconfiguration templates..",
+        "legacyName": "vulnerability_scan"
+      }
+    }
+  },
+  {
+    "name": "web_discover_paths",
+    "description": "Probe paths on an authorized website using bounded ffuf requests and an explicit security_get_status-code filter. Use when you need web directory fuzzing. Use firecrawl_map_site for backend-discovered links.",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for web_discover_paths. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "url": {
+          "type": "string",
+          "description": "Base authorized http:// or https:// URL. FUZZ is appended when absent. Required. Format: string. Example: \"https://example.com/\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "pattern": "^https?://[^\\s]+$",
+          "examples": [
+            "https://example.com/"
+          ]
+        },
+        "wordlist": {
+          "type": "string",
+          "description": "Optional workspace-relative wordlist; omit for the built-in common path list. Optional. If omitted: Use the built-in common path list. Format: string. Example: \"wordlists/paths.txt\".",
+          "maxLength": 4096,
+          "examples": [
+            "wordlists/paths.txt"
+          ]
+        },
+        "status_codes": {
+          "type": "array",
+          "description": "HTTP security_get_status codes to return; default only 200. Optional. If omitted, default: [200]. Format: array. Example: [200].",
+          "items": {
+            "type": "integer",
+            "description": "HTTP security_get_status code. Required. Format: integer. Example: 100.",
+            "minimum": 100,
+            "maximum": 599,
+            "examples": [
+              100
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 10,
+          "default": [
+            200
+          ],
+          "examples": [
+            [
+              200
+            ]
+          ]
+        },
+        "rate_limit": {
+          "type": "integer",
+          "description": "Requests per second; default 20, maximum 50. Optional. If omitted, default: 20. Format: integer. Example: 20.",
+          "minimum": 1,
+          "maximum": 50,
+          "default": 20,
+          "examples": [
+            20
+          ]
+        },
+        "concurrency": {
+          "type": "integer",
+          "description": "Concurrent workers; default 10, maximum 30. Optional. If omitted, default: 10. Format: integer. Example: 10.",
+          "minimum": 1,
+          "maximum": 30,
+          "default": 10,
+          "examples": [
+            10
+          ]
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "description": "Maximum runtime; default 60, maximum 180. Optional. If omitted, default: 60. Format: integer. Example: 60.",
+          "minimum": 10,
+          "maximum": 180,
+          "default": 60,
+          "examples": [
+            60
+          ]
+        }
+      },
+      "required": [
+        "url"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "active_probe",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "web directory fuzzing"
+        ],
+        "scope": "Probe paths on an authorized website using bounded ffuf requests and an explicit status-code filter.",
+        "preferredFor": "Probe paths on an authorized website using bounded ffuf requests and an explicit security_get_status-code filter. Use when you need web directory fuzzing. Use firecrawl_map_site for backend-discovered links.",
+        "legacyName": "web_content_discover"
+      }
+    }
+  },
+  {
+    "name": "workspace_scan_vulnerabilities",
+    "description": "Scan workspace dependencies, IaC and secrets using Trivy; choose scanners to control coverage. Use when you need dependency vulnerabilities. Use workspace_scan_code for source-pattern analysis or workspace_scan_secrets for focused secret checks.",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for workspace_scan_vulnerabilities. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Workspace-relative file or directory; default current workspace. Optional. If omitted, default: current workspace (.). Format: string. Example: \".\".",
+          "maxLength": 4096,
+          "default": ".",
+          "examples": [
+            "."
+          ]
+        },
+        "scanners": {
+          "type": "array",
+          "description": "Trivy scanners; default vuln,misconfig,secret. Optional. If omitted, default: [\"vuln\", \"misconfig\", \"secret\"]. Format: array. Example: [\"vuln\", \"misconfig\", \"secret\"].",
+          "items": {
+            "type": "string",
+            "description": "Scanner. Required. Allowed values: vuln, misconfig, secret. Example: \"vuln\".",
+            "enum": [
+              "vuln",
+              "misconfig",
+              "secret"
+            ],
+            "minLength": 1,
+            "maxLength": 4096,
+            "examples": [
+              "vuln"
+            ]
+          },
+          "maxItems": 3,
+          "default": [
+            "vuln",
+            "misconfig",
+            "secret"
+          ],
+          "examples": [
+            [
+              "vuln",
+              "misconfig",
+              "secret"
+            ]
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "dependency vulnerabilities",
+          "configuration audit"
+        ],
+        "scope": "Scan workspace dependencies, IaC and secrets using Trivy; choose scanners to control coverage.",
+        "preferredFor": "Scan workspace dependencies, IaC and secrets using Trivy; choose scanners to control coverage. Use when you need dependency vulnerabilities. Use workspace_scan_code for source-pattern analysis or workspace_scan_secrets for focused secret checks.",
+        "legacyName": "workspace_vuln_scan"
+      }
+    }
+  },
+  {
+    "name": "workspace_scan_secrets",
+    "description": "Scan current workspace files with Gitleaks for exposed credentials. Returns redacted findings; excludes Git history. Use when you need credential leak detection. Use workspace_scan_vulnerabilities for combined dependency/IaC/secret coverage; Git history is excluded.",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for workspace_scan_secrets. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Workspace-relative directory; default current workspace. Optional. If omitted, default: current workspace (.). Format: string. Example: \".\".",
+          "maxLength": 4096,
+          "default": ".",
+          "examples": [
+            "."
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "credential leak detection"
+        ],
+        "scope": "Scan current workspace files with Gitleaks for exposed credentials. Returns redacted findings; excludes Git history.",
+        "preferredFor": "Scan current workspace files with Gitleaks for exposed credentials. Returns redacted findings; excludes Git history. Use when you need credential leak detection. Use workspace_scan_vulnerabilities for combined dependency/IaC/secret coverage; Git history is excluded.",
+        "legacyName": "secret_scan"
+      }
+    }
+  },
+  {
+    "name": "workspace_scan_code",
+    "description": "Analyze workspace source for insecure coding patterns using Semgrep. Use when you need static application analysis. Do not use for operations outside this scope: Analyze workspace source for insecure coding patterns using Semgrep..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for workspace_scan_code. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Workspace-relative file or directory; default current workspace. Optional. If omitted, default: current workspace (.). Format: string. Example: \".\".",
+          "maxLength": 4096,
+          "default": ".",
+          "examples": [
+            "."
+          ]
+        },
+        "max_findings": {
+          "type": "integer",
+          "description": "Maximum findings returned; default 100, maximum 300. Optional. If omitted, default: 100. Format: integer. Example: 100.",
+          "minimum": 1,
+          "maximum": 300,
+          "default": 100,
+          "examples": [
+            100
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "static application analysis"
+        ],
+        "scope": "Analyze workspace source for insecure coding patterns using Semgrep.",
+        "preferredFor": "Analyze workspace source for insecure coding patterns using Semgrep. Use when you need static application analysis. Do not use for operations outside this scope: Analyze workspace source for insecure coding patterns using Semgrep..",
+        "legacyName": "code_scan"
+      }
+    }
+  },
+  {
+    "name": "workspace_generate_sbom",
+    "description": "Inventory workspace software packages with Syft and optionally save a CycloneDX SBOM. Use when you need software bill of materials. Do not use for operations outside this scope: Inventory workspace software packages with Syft and optionally save a CycloneDX SBOM..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for workspace_generate_sbom. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Workspace-relative file or directory; default current workspace. Optional. If omitted, default: current workspace (.). Format: string. Example: \".\".",
+          "maxLength": 4096,
+          "default": ".",
+          "examples": [
+            "."
+          ]
+        },
+        "output": {
+          "type": "string",
+          "description": "Optional workspace-relative .json path for a CycloneDX SBOM artifact. Optional. If omitted: Return an inventory summary without saving a CycloneDX artifact. Format: string. Example: \"reports/output.json\".",
+          "maxLength": 4096,
+          "examples": [
+            "reports/output.json"
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false,
+      "x-pi-effect": "workspace_write",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "software bill of materials"
+        ],
+        "scope": "Inventory workspace software packages with Syft and optionally save a CycloneDX SBOM.",
+        "preferredFor": "Inventory workspace software packages with Syft and optionally save a CycloneDX SBOM. Use when you need software bill of materials. Do not use for operations outside this scope: Inventory workspace software packages with Syft and optionally save a CycloneDX SBOM..",
+        "legacyName": "generate_sbom"
+      }
+    }
+  },
+  {
+    "name": "yara_scan_files",
+    "description": "Match YARA rules against workspace files using bundled or supplied rules. Use when you need artifact pattern signatures. Do not use for operations outside this scope: Match YARA rules against workspace files using bundled or supplied rules..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for yara_scan_files. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Workspace-relative file or directory. Required. Format: string. Example: \"reports/input.json\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "reports/input.json"
+          ]
+        },
+        "rules": {
+          "type": "string",
+          "description": "Optional workspace-relative .yar/.yara rule file; omit for bundled baseline rules. Optional. If omitted: Use bundled baseline rules. Format: string. Example: \"rules/local.rules\".",
+          "maxLength": 4096,
+          "examples": [
+            "rules/local.rules"
+          ]
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "artifact pattern signatures"
+        ],
+        "scope": "Match YARA rules against workspace files using bundled or supplied rules.",
+        "preferredFor": "Match YARA rules against workspace files using bundled or supplied rules. Use when you need artifact pattern signatures. Do not use for operations outside this scope: Match YARA rules against workspace files using bundled or supplied rules..",
+        "overlapGroup": "artifact",
+        "legacyName": "yara_scan"
+      }
+    }
+  },
+  {
+    "name": "malware_scan_files",
+    "description": "Scan workspace files with ClamAV and report detected signatures. Use when you need antivirus file scan. Do not use for operations outside this scope: Scan workspace files with ClamAV and report detected signatures..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for malware_scan_files. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Workspace-relative file or directory. Required. Format: string. Example: \"reports/input.json\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "reports/input.json"
+          ]
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "antivirus file scan"
+        ],
+        "scope": "Scan workspace files with ClamAV and report detected signatures.",
+        "preferredFor": "Scan workspace files with ClamAV and report detected signatures. Use when you need antivirus file scan. Do not use for operations outside this scope: Scan workspace files with ClamAV and report detected signatures..",
+        "overlapGroup": "artifact",
+        "legacyName": "malware_scan"
+      }
+    }
+  },
+  {
+    "name": "file_compute_hash",
+    "description": "Compute a workspace file\u2019s SHA-256, SHA-512 or MD5 digest. Use when you need file integrity checksum. Do not use for operations outside this scope: Compute a workspace file\u2019s SHA-256, SHA-512 or MD5 digest..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for file_compute_hash. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Workspace-relative file path. Required. Format: string. Example: \"reports/input.json\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "reports/input.json"
+          ]
+        },
+        "algorithm": {
+          "type": "string",
+          "description": "Hash algorithm; default sha256. Optional. If omitted, default: \"sha256\". Allowed values: sha256, sha512, md5. Example: \"sha256\".",
+          "enum": [
+            "sha256",
+            "sha512",
+            "md5"
+          ],
+          "maxLength": 4096,
+          "default": "sha256",
+          "examples": [
+            "sha256"
+          ]
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "file integrity checksum"
+        ],
+        "scope": "Compute a workspace file\u2019s SHA-256, SHA-512 or MD5 digest.",
+        "preferredFor": "Compute a workspace file\u2019s SHA-256, SHA-512 or MD5 digest. Use when you need file integrity checksum. Do not use for operations outside this scope: Compute a workspace file\u2019s SHA-256, SHA-512 or MD5 digest..",
+        "overlapGroup": "artifact",
+        "legacyName": "file_hash"
+      }
+    }
+  },
+  {
+    "name": "file_extract_strings",
+    "description": "Extract printable strings from the entire raw file, including data outside recognized binary sections. Use when you need raw artifact strings. Use binary_analyze_file for structured binary metadata and disassembly; do not execute the input.",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for file_extract_strings. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Workspace-relative file path. Required. Format: string. Example: \"reports/input.json\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "reports/input.json"
+          ]
+        },
+        "min_length": {
+          "type": "integer",
+          "description": "Minimum string length; default 6, range 4-32. Optional. If omitted, default: 6. Format: integer. Example: 6.",
+          "minimum": 4,
+          "maximum": 32,
+          "default": 6,
+          "examples": [
+            6
+          ]
+        },
+        "max_lines": {
+          "type": "integer",
+          "description": "Maximum strings returned; default 300, maximum 1000. Optional. If omitted, default: 300. Format: integer. Example: 300.",
+          "minimum": 1,
+          "maximum": 1000,
+          "default": 300,
+          "examples": [
+            300
+          ]
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "raw artifact strings"
+        ],
+        "scope": "Extract printable strings from the entire raw file, including data outside recognized binary sections.",
+        "preferredFor": "Extract printable strings from the entire raw file, including data outside recognized binary sections. Use when you need raw artifact strings. Use binary_analyze_file for structured binary metadata and disassembly; do not execute the input.",
+        "overlapGroup": "artifact",
+        "legacyName": "file_strings"
+      }
+    }
+  },
+  {
+    "name": "pcap_capture_packets",
+    "description": "Record bounded traffic on a Security-container interface into a workspace PCAP. Requires SECURITY_ALLOW_PACKET_CAPTURE=true. Use when you need tcpdump capture. Use network_observe_broadcast_multicast for physical host observations; use pcap_analyze_file for saved captures.",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for pcap_capture_packets. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "interface": {
+          "type": "string",
+          "description": "Network interface name such as eth0. Required. Format: string. Example: \"eth0\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "pattern": "^[A-Za-z0-9_.:-]+$",
+          "examples": [
+            "eth0"
+          ]
+        },
+        "output": {
+          "type": "string",
+          "description": "Workspace-relative output .pcap path. Required. Format: string. Example: \"reports/output.json\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "reports/output.json"
+          ]
+        },
+        "duration_seconds": {
+          "type": "integer",
+          "description": "Capture duration; default 30, maximum 120. Optional. If omitted, default: 30. Format: integer. Example: 30.",
+          "minimum": 1,
+          "maximum": 120,
+          "default": 30,
+          "examples": [
+            30
+          ]
+        },
+        "packet_count": {
+          "type": "integer",
+          "description": "Maximum packets; default 2000, maximum 10000. Optional. If omitted, default: 2000. Format: integer. Example: 2000.",
+          "minimum": 1,
+          "maximum": 10000,
+          "default": 2000,
+          "examples": [
+            2000
+          ]
+        },
+        "filter": {
+          "type": "string",
+          "description": "Optional tcpdump BPF capture filter such as tcp port 443. Optional. If omitted: Capture traffic without a BPF filter. Format: string. Example: \"tcp port 443\".",
+          "maxLength": 8192,
+          "examples": [
+            "tcp port 443"
+          ]
+        }
+      },
+      "required": [
+        "interface",
+        "output"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "passive_capture",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "tcpdump capture"
+        ],
+        "scope": "Record bounded traffic on a Security-container interface into a workspace PCAP. Requires SECURITY_ALLOW_PACKET_CAPTURE=true.",
+        "preferredFor": "Record bounded traffic on a Security-container interface into a workspace PCAP. Requires SECURITY_ALLOW_PACKET_CAPTURE=true. Use when you need tcpdump capture. Use network_observe_broadcast_multicast for physical host observations; use pcap_analyze_file for saved captures.",
+        "legacyName": "packet_capture"
+      }
+    }
+  },
+  {
+    "name": "network_list_container_interfaces",
+    "description": "Inspect Security-container interfaces and routes for container diagnostics or choosing a packet-capture interface. Use when you need container interface list. Use network_get_host_interfaces for physical host interfaces; do not infer LAN devices from container interfaces.",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for network_list_container_interfaces. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "container interface list"
+        ],
+        "scope": "Inspect Security-container interfaces and routes for container diagnostics or choosing a packet-capture interface.",
+        "preferredFor": "Inspect Security-container interfaces and routes for container diagnostics or choosing a packet-capture interface. Use when you need container interface list. Use network_get_host_interfaces for physical host interfaces; do not infer LAN devices from container interfaces.",
+        "legacyName": "network_interfaces"
+      }
+    }
+  },
+  {
+    "name": "suricata_analyze_capture",
+    "description": "Run Suricata IDS on a saved capture using the installed ruleset; return alert and event counts. Use when you need offline IDS alerts. Use suricata_test_rules for an explicit ruleset and pcap_analyze_file for packet-field analysis.",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for suricata_analyze_capture. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Workspace-relative .pcap or .pcapng file. Required. Format: string. Example: \"captures/input.pcap\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "captures/input.pcap"
+          ]
+        },
+        "max_alerts": {
+          "type": "integer",
+          "description": "Maximum alerts returned; default 100, maximum 300. Optional. If omitted, default: 100. Format: integer. Example: 100.",
+          "minimum": 1,
+          "maximum": 300,
+          "default": 100,
+          "examples": [
+            100
+          ]
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "workspace_write",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "offline IDS alerts"
+        ],
+        "scope": "Run Suricata IDS on a saved capture using the installed ruleset; return alert and event counts.",
+        "preferredFor": "Run Suricata IDS on a saved capture using the installed ruleset; return alert and event counts. Use when you need offline IDS alerts. Use suricata_test_rules for an explicit ruleset and pcap_analyze_file for packet-field analysis.",
+        "overlapGroup": "pcap",
+        "legacyName": "suricata_alerts"
+      }
+    }
+  },
+  {
+    "name": "host_search_logs",
+    "description": "Find text or regex matches in an allowlisted mounted-host /var/log file. Use when you need authentication log evidence. Do not use for operations outside this scope: Find text or regex matches in an allowlisted mounted-host /var/log file..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for host_search_logs. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Absolute host log path under /var/log, e.g. /var/log/auth.log. Required. Format: string. Example: \"/var/log/auth.log\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "/var/log/auth.log"
+          ]
+        },
+        "query": {
+          "type": "string",
+          "description": "Literal text or extended regular expression. Required. Format: string. Example: \"error\".",
+          "minLength": 1,
+          "maxLength": 8192,
+          "examples": [
+            "error"
+          ]
+        },
+        "regex": {
+          "type": "boolean",
+          "description": "Treat query as an extended regular expression. Optional. If omitted, default: false. Format: boolean. Example: false.",
+          "default": false,
+          "examples": [
+            false
+          ]
+        },
+        "max_matches": {
+          "type": "integer",
+          "description": "Maximum matching lines; default 100, maximum 500. Optional. If omitted, default: 100. Format: integer. Example: 100.",
+          "minimum": 1,
+          "maximum": 500,
+          "default": 100,
+          "examples": [
+            100
+          ]
+        }
+      },
+      "required": [
+        "path",
+        "query"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "authentication log evidence"
+        ],
+        "scope": "Find text or regex matches in an allowlisted mounted-host /var/log file.",
+        "preferredFor": "Find text or regex matches in an allowlisted mounted-host /var/log file. Use when you need authentication log evidence. Do not use for operations outside this scope: Find text or regex matches in an allowlisted mounted-host /var/log file..",
+        "legacyName": "host_log_search"
+      }
+    }
+  },
+  {
+    "name": "workspace_search_ioc",
+    "description": "Search workspace text files recursively for one literal indicator. Use when you need IOC scoping. Do not use for operations outside this scope: Search workspace text files recursively for one literal indicator..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for workspace_search_ioc. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Workspace-relative directory; default current workspace. Optional. If omitted, default: current workspace (.). Format: string. Example: \".\".",
+          "maxLength": 4096,
+          "default": ".",
+          "examples": [
+            "."
+          ]
+        },
+        "indicator": {
+          "type": "string",
+          "description": "Literal indicator to locate. Required. Format: string. Example: \"example.com\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "example.com"
+          ]
+        },
+        "max_matches": {
+          "type": "integer",
+          "description": "Maximum matching lines; default 100, maximum 500. Optional. If omitted, default: 100. Format: integer. Example: 100.",
+          "minimum": 1,
+          "maximum": 500,
+          "default": 100,
+          "examples": [
+            100
+          ]
+        }
+      },
+      "required": [
+        "indicator"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "IOC scoping"
+        ],
+        "scope": "Search workspace text files recursively for one literal indicator.",
+        "preferredFor": "Search workspace text files recursively for one literal indicator. Use when you need IOC scoping. Do not use for operations outside this scope: Search workspace text files recursively for one literal indicator..",
+        "legacyName": "workspace_ioc_search"
+      }
+    }
+  },
+  {
+    "name": "host_audit_hardening",
+    "description": "Audit mounted-host filesystem hardening with Lynis and summarize warnings and suggestions. Use when you need host hardening review. Do not use for operations outside this scope: Audit mounted-host filesystem hardening with Lynis and summarize warnings and suggestions..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for host_audit_hardening. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "timeout_seconds": {
+          "type": "integer",
+          "description": "Maximum runtime; default 180, maximum 300. Optional. If omitted, default: 180. Format: integer. Example: 180.",
+          "minimum": 30,
+          "maximum": 300,
+          "default": 180,
+          "examples": [
+            180
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "security",
+        "aliases": [
+          "host hardening review"
+        ],
+        "scope": "Audit mounted-host filesystem hardening with Lynis and summarize warnings and suggestions.",
+        "preferredFor": "Audit mounted-host filesystem hardening with Lynis and summarize warnings and suggestions. Use when you need host hardening review. Do not use for operations outside this scope: Audit mounted-host filesystem hardening with Lynis and summarize warnings and suggestions..",
+        "legacyName": "host_audit"
+      }
+    }
+  }
+]

@@ -19,12 +19,12 @@ function rpc(server,requests,env={},imports=[]){
 const call=(name,args={})=>({method:'tools/call',params:{name,arguments:args}});
 
 test('every owned catalog has concise unique names and retires duplicate wrappers',()=>{
- const counts={system:56,security:65,google:23};
+ const counts={system:58,security:65,google:23};
  const retired=['host_network_info','network_scan_ports','image_thumbnail','network_discover','service_detect','dns_records','pcap_fields','pcap_summary','pcap_conversations','lldp_observe','cdp_observe','llmnr_nbns_observe'];
  for(const [server,count] of Object.entries(counts)){
   const tools=rpc(server,[{method:'tools/list'}])[0].result.tools;
   assert.equal(tools.length,count);assert.equal(new Set(tools.map(t=>t.name)).size,count);
-  for(const t of tools){assert(!t.name.startsWith(server+'_'),t.name);assert(!retired.includes(t.name),t.name);assert(t.description.length<=550,t.name);assert(t._meta['ai.catalog'].aliases.length,t.name);}
+  for(const t of tools){assert.match(t.name,/^[a-z][a-z0-9]*(?:_[a-z0-9]+)+$/);assert(!retired.includes(t.name),t.name);assert(t.description.length<=550,t.name);assert(t._meta['ai.catalog'].aliases.length,t.name);}
   if(server==='system')assert(!tools.some(t=>t.name==='network_interfaces'));
  }
 });

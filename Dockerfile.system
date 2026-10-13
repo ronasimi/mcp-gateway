@@ -44,8 +44,11 @@ COPY scripts/verify-office-runtime.py /opt/mcp/verify-office-runtime.py
 COPY scripts/security-runtime.mjs /opt/mcp/security-runtime.mjs
 COPY scripts/openwrt-status.mjs scripts/system-tools.mjs /opt/mcp/
 COPY scripts/module-layout.mjs scripts/mcp-stdio.mjs /opt/mcp/
+COPY package.json package-lock.json /opt/mcp/
+RUN cd /opt/mcp && npm ci --omit=dev && npm cache clean --force
 COPY src /opt/mcp/src
 COPY scripts/catalog-metadata.mjs /opt/mcp/catalog-metadata.mjs
+COPY scripts/weather-rss.mjs scripts/weather-rss-adapter.mjs /opt/mcp/
 COPY scripts/local-briefing.mjs /opt/mcp/local-briefing.mjs
 COPY scripts/office_replaceable.py /opt/mcp/office_replaceable.py
 RUN timeout 240 /usr/bin/python3 /opt/mcp/verify-office-runtime.py

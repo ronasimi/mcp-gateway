@@ -39,15 +39,15 @@ try {
   if (!initialized?.serverInfo || !initialized?.capabilities?.tools) throw new Error('Invalid Security MCP initialize response');
   child.stdin.write(JSON.stringify({jsonrpc:'2.0', method:'notifications/initialized'}) + '\n');
   const catalog = await request(2, 'tools/list');
-  if (!catalog?.tools?.some(tool => tool.name === 'read_security_result')) throw new Error('Security MCP catalog is missing read_security_result');
-  const passive = catalog.tools.find(tool=>tool.name==='observe_broadcast_multicast');
+  if (!catalog?.tools?.some(tool => tool.name === 'security_read_result')) throw new Error('Security MCP catalog is missing read_security_result');
+  const passive = catalog.tools.find(tool=>tool.name==='network_observe_broadcast_multicast');
   if (passive?.inputSchema?.['x-pi-effect'] !== 'passive_capture' || passive?.annotations?.idempotentHint !== false)
     throw new Error('Passive observation must publish passive_capture and remain fresh between executions');
-  for (const name of ['probe_gateway_proxy_arp','probe_gateway_hairpin','observe_dns_cache']) {
+  for (const name of ['network_probe_gateway_proxy_arp','network_probe_gateway_hairpin','dns_observe_cache']) {
     if (catalog.tools.find(tool=>tool.name===name)?.inputSchema?.['x-pi-effect'] !== 'active_probe')
       throw new Error(`Active operation lost its probe gate: ${name}`);
   }
-  const masscan=catalog.tools.find(tool=>tool.name==='masscan_scan');
+  const masscan=catalog.tools.find(tool=>tool.name==='masscan_scan_ports');
   if(masscan?.inputSchema?.['x-pi-effect']!=='active_probe' || masscan?.annotations?.idempotentHint!==false || masscan?.annotations?.readOnlyHint!==false)
     throw new Error('Masscan must remain an active, fresh, separately authorized operation');
   console.log(`Security MCP startup passed: initialize and ${catalog.tools.length} catalog tools; no operations executed.`);

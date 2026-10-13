@@ -35,3 +35,5 @@ __pycache__/
 .env.*backup*
 data/
 secrets/
+
+node_modules/

@@ -1,0 +1,3369 @@
+[
+  {
+    "name": "pdf_read_pages",
+    "description": "Read PDF text by page with bounded pagination; scanned pages need OCR. Use when you need read PDF pages. Use office_read_document for Office files and OCR for image-only PDFs.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Workspace-relative input file. Required. Format: string. Example: \"docs/report.pdf\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "docs/report.pdf"
+          ]
+        },
+        "start": {
+          "type": "integer",
+          "description": "First page, 1-based; default 1. Optional. If omitted, default: 1. Format: integer. Example: 1.",
+          "minimum": 1,
+          "maximum": 100000,
+          "default": 1,
+          "examples": [
+            1
+          ]
+        },
+        "count": {
+          "type": "integer",
+          "description": "Pages to read; default 10. Optional. If omitted, default: 10. Format: integer. Example: 10.",
+          "minimum": 1,
+          "maximum": 50,
+          "default": 10,
+          "examples": [
+            10
+          ]
+        },
+        "max_chars": {
+          "type": "integer",
+          "description": "Maximum returned text characters; default 30000. Narrow range/pages when truncated. Optional. If omitted, default: 30000. Format: integer. Example: 30000.",
+          "minimum": 100,
+          "maximum": 50000,
+          "default": 30000,
+          "examples": [
+            30000
+          ]
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "description": "Arguments for pdf_read_pages. Required fields are listed in required; omission behavior is documented per field.",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "read PDF pages"
+        ],
+        "scope": "Read PDF text by page with bounded pagination; scanned pages need OCR.",
+        "preferredFor": "Read PDF text by page with bounded pagination; scanned pages need OCR. Use when you need read PDF pages. Use office_read_document for Office files and OCR for image-only PDFs.",
+        "overlapGroup": "documents",
+        "legacyName": "pdf_read"
+      }
+    }
+  },
+  {
+    "name": "pdf_write_document",
+    "description": "Create PDF from text or merge, select, reorder and rotate PDF pages. Use when you need write PDF. Use office_export_document for Office conversion; do not use to edit existing PDF text.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "output": {
+          "type": "string",
+          "description": "Workspace-relative output copy; original input is preserved. Required. Format: string. Example: \"reports/output.json\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "reports/output.json"
+          ]
+        },
+        "overwrite": {
+          "type": "boolean",
+          "description": "Replace an existing output file; default false. Input and output must differ. Optional. If omitted, default: false. Format: boolean. Example: false.",
+          "default": false,
+          "examples": [
+            false
+          ]
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "create",
+            "assemble"
+          ],
+          "description": "create (default): text to PDF; assemble: source pages to PDF. Optional. If omitted, default: \"create\". Allowed values: create, assemble. Example: \"create\".",
+          "maxLength": 4096,
+          "default": "create",
+          "examples": [
+            "create"
+          ]
+        },
+        "text": {
+          "type": "string",
+          "description": "Plain text for create; blank lines separate paragraphs, form feed separates pages. Maximum 200000 characters. Optional. If omitted: Required in create mode; unused in assemble mode. Format: string. Example: \"Report text\".",
+          "maxLength": 200000,
+          "examples": [
+            "Report text"
+          ]
+        },
+        "title": {
+          "type": "string",
+          "description": "Optional title for a new PDF. Optional. If omitted: Do not add a title. Format: string. Example: \"Network map\".",
+          "maxLength": 4096,
+          "examples": [
+            "Network map"
+          ]
+        },
+        "sources": {
+          "description": "PDF inputs with optional page selections and rotations. Optional. If omitted: Required in assemble mode; unused in create mode. Format: array. Example: [{\"path\": \"docs/report.pdf\"}].",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 30,
+          "items": {
+            "type": "object",
+            "properties": {
+              "path": {
+                "type": "string",
+                "description": "Workspace-relative input file. Required. Format: string. Example: \"docs/report.pdf\".",
+                "minLength": 1,
+                "maxLength": 4096,
+                "examples": [
+                  "docs/report.pdf"
+                ]
+              },
+              "pages": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 1000,
+                "items": {
+                  "type": "integer",
+                  "description": "1-based page number. Required. Format: integer. Example: 1.",
+                  "minimum": 1,
+                  "maximum": 100000,
+                  "examples": [
+                    1
+                  ]
+                },
+                "description": "Ordered page selection; omitted means all pages. Optional. If omitted: Include all source pages in original order. Format: array. Example: [1].",
+                "examples": [
+                  [
+                    1
+                  ]
+                ]
+              },
+              "rotate": {
+                "type": "integer",
+                "enum": [
+                  0,
+                  90,
+                  180,
+                  270
+                ],
+                "description": "Clockwise rotation; default 0. Optional. If omitted, default: 0. Allowed values: 0, 90, 180, 270. Example: 0.",
+                "default": 0,
+                "examples": [
+                  0
+                ]
+              }
+            },
+            "required": [
+              "path"
+            ],
+            "additionalProperties": false,
+            "examples": [
+              {
+                "path": "docs/report.pdf"
+              }
+            ],
+            "description": ". Required. Format: object. Example: {\"path\": \"docs/report.pdf\"}."
+          },
+          "examples": [
+            [
+              {
+                "path": "docs/report.pdf"
+              }
+            ]
+          ]
+        }
+      },
+      "required": [
+        "output"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "mutation",
+      "description": "Arguments for pdf_write_document. Required fields are listed in required; omission behavior is documented per field.",
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "assemble"
+              }
+            },
+            "required": [
+              "mode"
+            ]
+          },
+          "then": {
+            "required": [
+              "sources"
+            ]
+          },
+          "else": {
+            "required": [
+              "text"
+            ]
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "write PDF",
+          "merge PDF",
+          "split PDF"
+        ],
+        "scope": "Create PDF from text or merge, select, reorder and rotate PDF pages.",
+        "preferredFor": "Create PDF from text or merge, select, reorder and rotate PDF pages. Use when you need write PDF. Use office_export_document for Office conversion; do not use to edit existing PDF text.",
+        "overlapGroup": "documents",
+        "legacyName": "pdf_write"
+      }
+    }
+  },
+  {
+    "name": "office_read_document",
+    "description": "Read Word/OpenDocument text, Excel/Calc cells and formulas, or PowerPoint/Impress slide text. Use when you need read DOC DOCX ODT XLS XLSX ODS PPT PPTX ODP. Use pdf_read_pages for PDF pagination.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Workspace-relative input file. Required. Format: string. Example: \"docs/report.docx\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "docs/report.docx"
+          ]
+        },
+        "max_chars": {
+          "type": "integer",
+          "description": "Maximum returned text characters; default 30000. Narrow range/pages when truncated. Optional. If omitted, default: 30000. Format: integer. Example: 30000.",
+          "minimum": 100,
+          "maximum": 50000,
+          "default": 30000,
+          "examples": [
+            30000
+          ]
+        },
+        "sheet": {
+          "type": "string",
+          "description": "Spreadsheet sheet name; default first sheet. Optional. If omitted: Read the first sheet. Format: string. Example: \"Sheet1\".",
+          "maxLength": 4096,
+          "examples": [
+            "Sheet1"
+          ]
+        },
+        "range": {
+          "type": "string",
+          "description": "Spreadsheet A1 range; default A1:T50, maximum 200 rows by 50 columns. Optional. If omitted, use A1:T50. Format: string. Example: \"A1:T50\".",
+          "maxLength": 4096,
+          "examples": [
+            "A1:T50"
+          ]
+        },
+        "start": {
+          "type": "integer",
+          "description": "First slide, 1-based; default 1. Optional. If omitted, default: 1. Format: integer. Example: 1.",
+          "minimum": 1,
+          "maximum": 100000,
+          "default": 1,
+          "examples": [
+            1
+          ]
+        },
+        "count": {
+          "type": "integer",
+          "description": "Slides to read; default 10. Optional. If omitted, default: 10. Format: integer. Example: 10.",
+          "minimum": 1,
+          "maximum": 30,
+          "default": 10,
+          "examples": [
+            10
+          ]
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "description": "Arguments for office_read_document. Required fields are listed in required; omission behavior is documented per field.",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "read DOC DOCX ODT XLS XLSX ODS PPT PPTX ODP"
+        ],
+        "scope": "Read Word/OpenDocument text, Excel/Calc cells and formulas, or PowerPoint/Impress slide text.",
+        "preferredFor": "Read Word/OpenDocument text, Excel/Calc cells and formulas, or PowerPoint/Impress slide text. Use when you need read DOC DOCX ODT XLS XLSX ODS PPT PPTX ODP. Use pdf_read_pages for PDF pagination.",
+        "overlapGroup": "documents",
+        "legacyName": "office_read"
+      }
+    }
+  },
+  {
+    "name": "office_edit_document",
+    "description": "Save an edited Office/OpenDocument copy: replace text or update spreadsheet cells and formulas. Use when you need edit Word Excel PowerPoint. Use office_export_document for conversion without content edits.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Workspace-relative input file. Required. Format: string. Example: \"docs/report.docx\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "docs/report.docx"
+          ]
+        },
+        "output": {
+          "type": "string",
+          "description": "Workspace-relative output copy; original input is preserved. Required. Format: string. Example: \"reports/output.json\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "reports/output.json"
+          ]
+        },
+        "overwrite": {
+          "type": "boolean",
+          "description": "Replace an existing output file; default false. Input and output must differ. Optional. If omitted, default: false. Format: boolean. Example: false.",
+          "default": false,
+          "examples": [
+            false
+          ]
+        },
+        "replacements": {
+          "description": "Ordered literal text replacements; each must match. Optional. If omitted: Apply cells instead; at least one edit collection is required. Format: array. Example: [{\"find\": \"old text\", \"replace\": \"new text\"}].",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "items": {
+            "type": "object",
+            "properties": {
+              "find": {
+                "type": "string",
+                "description": "Nonempty case-sensitive literal text. Required. Format: string. Example: \"old text\".",
+                "minLength": 1,
+                "maxLength": 4096,
+                "examples": [
+                  "old text"
+                ]
+              },
+              "replace": {
+                "type": "string",
+                "description": "Replacement text. Required. Format: string. Example: \"new text\".",
+                "maxLength": 200000,
+                "examples": [
+                  "new text"
+                ]
+              },
+              "expected_count": {
+                "type": "integer",
+                "description": "Optional exact number of matches; mismatch cancels output. Optional. If omitted, accept any positive match count. Format: integer. Example: 1.",
+                "minimum": 0,
+                "maximum": 100000,
+                "examples": [
+                  1
+                ]
+              }
+            },
+            "required": [
+              "find",
+              "replace"
+            ],
+            "additionalProperties": false,
+            "examples": [
+              {
+                "find": "old text",
+                "replace": "new text"
+              }
+            ],
+            "description": ". Required. Format: object. Example: {\"find\": \"old text\", \"replace\": \"new text\"}."
+          },
+          "examples": [
+            [
+              {
+                "find": "old text",
+                "replace": "new text"
+              }
+            ]
+          ]
+        },
+        "cells": {
+          "description": "Explicit spreadsheet cell edits; supply value or formula per cell. Optional. If omitted: Apply replacements instead; at least one edit collection is required. Format: array. Example: [{\"cell\": \"A1\"}].",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1000,
+          "items": {
+            "type": "object",
+            "properties": {
+              "sheet": {
+                "type": "string",
+                "description": "Sheet name; default first sheet. Optional. If omitted, use the first sheet. Format: string. Example: \"Sheet1\".",
+                "maxLength": 4096,
+                "examples": [
+                  "Sheet1"
+                ]
+              },
+              "cell": {
+                "type": "string",
+                "description": "Single A1 cell address. Required. Format: string. Example: \"A1\".",
+                "minLength": 1,
+                "maxLength": 4096,
+                "pattern": "^\\$?[A-Za-z]{1,3}\\$?[1-9][0-9]*$",
+                "examples": [
+                  "A1"
+                ]
+              },
+              "value": {
+                "type": [
+                  "string",
+                  "number",
+                  "null"
+                ],
+                "description": "Literal value; strings beginning with = remain text. Null clears the cell. Optional. If omitted: Supply formula instead; exactly one of value and formula is required per cell. Format: string or number or null. Example: \"sample value\".",
+                "examples": [
+                  "sample value"
+                ]
+              },
+              "formula": {
+                "type": "string",
+                "description": "Formula starting with =; supply instead of value. Optional. If omitted: Supply value instead; exactly one of value and formula is required per cell. Format: string. Example: \"=SUM(A1:A5)\".",
+                "maxLength": 4096,
+                "pattern": "^=",
+                "examples": [
+                  "=SUM(A1:A5)"
+                ]
+              }
+            },
+            "required": [
+              "cell"
+            ],
+            "additionalProperties": false,
+            "examples": [
+              {
+                "cell": "A1",
+                "value": "sample value"
+              }
+            ],
+            "description": ". Required. Format: object. Example: {\"cell\": \"A1\"}.",
+            "oneOf": [
+              {
+                "required": [
+                  "value"
+                ]
+              },
+              {
+                "required": [
+                  "formula"
+                ]
+              }
+            ]
+          },
+          "examples": [
+            [
+              {
+                "cell": "A1",
+                "value": "sample value"
+              }
+            ]
+          ]
+        }
+      },
+      "required": [
+        "path",
+        "output"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "mutation",
+      "description": "Arguments for office_edit_document. Required fields are listed in required; omission behavior is documented per field.",
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "anyOf": [
+        {
+          "required": [
+            "replacements"
+          ]
+        },
+        {
+          "required": [
+            "cells"
+          ]
+        }
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "edit Word Excel PowerPoint",
+          "edit Writer Calc Impress"
+        ],
+        "scope": "Save an edited Office/OpenDocument copy: replace text or update spreadsheet cells and formulas.",
+        "preferredFor": "Save an edited Office/OpenDocument copy: replace text or update spreadsheet cells and formulas. Use when you need edit Word Excel PowerPoint. Use office_export_document for conversion without content edits.",
+        "overlapGroup": "documents",
+        "legacyName": "office_edit"
+      }
+    }
+  },
+  {
+    "name": "office_export_document",
+    "description": "Export Office/OpenDocument files to PDF or another format in the same document family. Use when you need Office to PDF. Use document_convert for Pandoc formats and pdf_write_document for PDF assembly.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Workspace-relative input file. Required. Format: string. Example: \"docs/report.docx\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "docs/report.docx"
+          ]
+        },
+        "output": {
+          "type": "string",
+          "description": "Workspace-relative output copy; original input is preserved. Required. Format: string. Example: \"reports/output.json\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "reports/output.json"
+          ]
+        },
+        "overwrite": {
+          "type": "boolean",
+          "description": "Replace an existing output file; default false. Input and output must differ. Optional. If omitted, default: false. Format: boolean. Example: false.",
+          "default": false,
+          "examples": [
+            false
+          ]
+        }
+      },
+      "required": [
+        "path",
+        "output"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "mutation",
+      "description": "Arguments for office_export_document. Required fields are listed in required; omission behavior is documented per field.",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "Office to PDF",
+          "LibreOffice conversion"
+        ],
+        "scope": "Export Office/OpenDocument files to PDF or another format in the same document family.",
+        "preferredFor": "Export Office/OpenDocument files to PDF or another format in the same document family. Use when you need Office to PDF. Use document_convert for Pandoc formats and pdf_write_document for PDF assembly.",
+        "overlapGroup": "documents",
+        "legacyName": "office_export"
+      }
+    }
+  },
+  {
+    "name": "local_get_daily_briefing",
+    "description": "Perform london Ontario daily briefing: current weather, seven-day forecast and CBC London headlines in a Markdown card. Use when you need morning briefing. Do not use for operations outside this scope: London Ontario daily briefing: current weather, seven-day forecast and CBC London headlines in a Markdown card..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for local_get_daily_briefing. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "headline_count": {
+          "type": "integer",
+          "description": "Number of CBC London headlines to include; default 7, minimum 5, maximum 7. Optional. If omitted, default: 7. Format: integer. Example: 7.",
+          "minimum": 5,
+          "maximum": 7,
+          "default": 7,
+          "examples": [
+            7
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "morning briefing",
+          "London local weather news"
+        ],
+        "scope": "London Ontario daily briefing: current weather, seven-day forecast and CBC London headlines in a Markdown card.",
+        "preferredFor": "Perform london Ontario daily briefing: current weather, seven-day forecast and CBC London headlines in a Markdown card. Use when you need morning briefing. Do not use for operations outside this scope: London Ontario daily briefing: current weather, seven-day forecast and CBC London headlines in a Markdown card..",
+        "legacyName": "local_daily_briefing"
+      }
+    }
+  },
+  {
+    "name": "docker_list_containers",
+    "description": "List Docker containers with names, state, health, ports and Compose service. Running containers by default. Use when you need docker ps. Do not use for operations outside this scope: List Docker containers with names, state, health, ports and Compose service. Running containers by default..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for docker_list_containers. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "all": {
+          "type": "boolean",
+          "description": "Include stopped containers too; default false. Optional. If omitted, default: false. Format: boolean. Example: false.",
+          "default": false,
+          "examples": [
+            false
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "docker ps",
+          "running containers"
+        ],
+        "scope": "List Docker containers with names, state, health, ports and Compose service. Running containers by default.",
+        "preferredFor": "List Docker containers with names, state, health, ports and Compose service. Running containers by default. Use when you need docker ps. Do not use for operations outside this scope: List Docker containers with names, state, health, ports and Compose service. Running containers by default..",
+        "legacyName": "docker_list_containers"
+      }
+    }
+  },
+  {
+    "name": "docker_inspect_container",
+    "description": "Inspect one Docker container: configuration, mounts, networks, environment and health. Use when you need container details. Do not use for operations outside this scope: Inspect one Docker container: configuration, mounts, networks, environment and health..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for docker_inspect_container. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "container": {
+          "type": "string",
+          "description": "Container name or ID. Required. Format: string. Example: \"mcp-system\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "mcp-system"
+          ]
+        }
+      },
+      "required": [
+        "container"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "container details"
+        ],
+        "scope": "Inspect one Docker container: configuration, mounts, networks, environment and health.",
+        "preferredFor": "Inspect one Docker container: configuration, mounts, networks, environment and health. Use when you need container details. Do not use for operations outside this scope: Inspect one Docker container: configuration, mounts, networks, environment and health..",
+        "legacyName": "docker_inspect_container"
+      }
+    }
+  },
+  {
+    "name": "docker_read_container_logs",
+    "description": "Read recent stdout/stderr logs from a Docker container. Use when you need container startup errors. Do not use for operations outside this scope: Read recent stdout/stderr logs from a Docker container..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for docker_read_container_logs. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "container": {
+          "type": "string",
+          "description": "Container name or ID. Required. Format: string. Example: \"mcp-system\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "mcp-system"
+          ]
+        },
+        "tail": {
+          "type": "integer",
+          "description": "Number of log lines; default 200. Optional. If omitted, default: 200. Format: integer. Example: 200.",
+          "minimum": 1,
+          "maximum": 5000,
+          "default": 200,
+          "examples": [
+            200
+          ]
+        },
+        "since": {
+          "type": "string",
+          "description": "Docker-compatible time or duration, e.g. 10m, 2h, 2026-09-30T12:00:00Z. Optional. If omitted: No time filter; return the most recent tail lines. Format: string. Example: \"2026-10-12T12:00:00Z\".",
+          "maxLength": 4096,
+          "examples": [
+            "2026-10-12T12:00:00Z"
+          ]
+        }
+      },
+      "required": [
+        "container"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "container startup errors"
+        ],
+        "scope": "Read recent stdout/stderr logs from a Docker container.",
+        "preferredFor": "Read recent stdout/stderr logs from a Docker container. Use when you need container startup errors. Do not use for operations outside this scope: Read recent stdout/stderr logs from a Docker container..",
+        "legacyName": "docker_container_logs"
+      }
+    }
+  },
+  {
+    "name": "docker_get_container_stats",
+    "description": "Measure one Docker container\u2019s CPU, memory, network and disk I/O. Use when you need container resource usage. Do not use for operations outside this scope: Measure one Docker container\u2019s CPU, memory, network and disk I/O..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for docker_get_container_stats. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "container": {
+          "type": "string",
+          "description": "Container name or ID. Required. Format: string. Example: \"mcp-system\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "mcp-system"
+          ]
+        }
+      },
+      "required": [
+        "container"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "container resource usage"
+        ],
+        "scope": "Measure one Docker container\u2019s CPU, memory, network and disk I/O.",
+        "preferredFor": "Measure one Docker container\u2019s CPU, memory, network and disk I/O. Use when you need container resource usage. Do not use for operations outside this scope: Measure one Docker container\u2019s CPU, memory, network and disk I/O..",
+        "legacyName": "docker_container_stats"
+      }
+    }
+  },
+  {
+    "name": "docker_list_images",
+    "description": "List local Docker images, tags, IDs and sizes. Use when you need docker image inventory. Do not use for operations outside this scope: List local Docker images, tags, IDs and sizes..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for docker_list_images. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "docker image inventory"
+        ],
+        "scope": "List local Docker images, tags, IDs and sizes.",
+        "preferredFor": "List local Docker images, tags, IDs and sizes. Use when you need docker image inventory. Do not use for operations outside this scope: List local Docker images, tags, IDs and sizes..",
+        "legacyName": "docker_list_images"
+      }
+    }
+  },
+  {
+    "name": "docker_inspect_image",
+    "description": "Inspect a Docker image\u2019s architecture, layers, entrypoint and labels. Use when you need image configuration. Do not use for operations outside this scope: Inspect a Docker image\u2019s architecture, layers, entrypoint and labels..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for docker_inspect_image. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "image": {
+          "type": "string",
+          "description": "Image name, tag, digest, or ID. Required. Format: string. Example: \"alpine:latest\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "alpine:latest"
+          ]
+        }
+      },
+      "required": [
+        "image"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "image configuration"
+        ],
+        "scope": "Inspect a Docker image\u2019s architecture, layers, entrypoint and labels.",
+        "preferredFor": "Inspect a Docker image\u2019s architecture, layers, entrypoint and labels. Use when you need image configuration. Do not use for operations outside this scope: Inspect a Docker image\u2019s architecture, layers, entrypoint and labels..",
+        "legacyName": "docker_inspect_image"
+      }
+    }
+  },
+  {
+    "name": "docker_list_networks",
+    "description": "List Docker virtual networks and their drivers. Use when you need container network inventory. Do not use for operations outside this scope: List Docker virtual networks and their drivers..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for docker_list_networks. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "container network inventory"
+        ],
+        "scope": "List Docker virtual networks and their drivers.",
+        "preferredFor": "List Docker virtual networks and their drivers. Use when you need container network inventory. Do not use for operations outside this scope: List Docker virtual networks and their drivers..",
+        "legacyName": "docker_list_networks"
+      }
+    }
+  },
+  {
+    "name": "docker_inspect_network",
+    "description": "Inspect one Docker network: IPAM subnets, attached containers and options. Use when you need docker bridge attachments. Do not use for operations outside this scope: Inspect one Docker network: IPAM subnets, attached containers and options..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for docker_inspect_network. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "network": {
+          "type": "string",
+          "description": "Docker network name or ID. Required. Format: string. Example: \"bridge\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "bridge"
+          ]
+        }
+      },
+      "required": [
+        "network"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "docker bridge attachments"
+        ],
+        "scope": "Inspect one Docker network: IPAM subnets, attached containers and options.",
+        "preferredFor": "Inspect one Docker network: IPAM subnets, attached containers and options. Use when you need docker bridge attachments. Do not use for operations outside this scope: Inspect one Docker network: IPAM subnets, attached containers and options..",
+        "legacyName": "docker_inspect_network"
+      }
+    }
+  },
+  {
+    "name": "docker_list_volumes",
+    "description": "List Docker named volumes and storage drivers. Use when you need persistent container storage. Do not use for operations outside this scope: List Docker named volumes and storage drivers..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for docker_list_volumes. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "persistent container storage"
+        ],
+        "scope": "List Docker named volumes and storage drivers.",
+        "preferredFor": "List Docker named volumes and storage drivers. Use when you need persistent container storage. Do not use for operations outside this scope: List Docker named volumes and storage drivers..",
+        "legacyName": "docker_list_volumes"
+      }
+    }
+  },
+  {
+    "name": "docker_inspect_volume",
+    "description": "Inspect one Docker volume\u2019s mountpoint, driver and labels. Use when you need volume location. Do not use for operations outside this scope: Inspect one Docker volume\u2019s mountpoint, driver and labels..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for docker_inspect_volume. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "volume": {
+          "type": "string",
+          "description": "Docker volume name. Required. Format: string. Example: \"mcp-data\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "mcp-data"
+          ]
+        }
+      },
+      "required": [
+        "volume"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "volume location"
+        ],
+        "scope": "Inspect one Docker volume\u2019s mountpoint, driver and labels.",
+        "preferredFor": "Inspect one Docker volume\u2019s mountpoint, driver and labels. Use when you need volume location. Do not use for operations outside this scope: Inspect one Docker volume\u2019s mountpoint, driver and labels..",
+        "legacyName": "docker_inspect_volume"
+      }
+    }
+  },
+  {
+    "name": "docker_execute_command",
+    "description": "Execute a bounded command inside a named Docker container. Requires DOCKER_ALLOW_EXEC=true. Use when you need container command. Do not use for operations outside this scope: Execute a bounded command inside a named Docker container. Requires DOCKER_ALLOW_EXEC=true..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for docker_execute_command. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "container": {
+          "type": "string",
+          "description": "Container name or ID. Required. Format: string. Example: \"mcp-system\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "mcp-system"
+          ]
+        },
+        "command": {
+          "type": "string",
+          "description": "Command string executed with /bin/sh -lc. Required. Format: string. Example: \"uname -a\".",
+          "minLength": 1,
+          "maxLength": 8192,
+          "examples": [
+            "uname -a"
+          ]
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "description": "Timeout seconds; default 30. Optional. If omitted, default: 30. Format: integer. Example: 30.",
+          "minimum": 1,
+          "maximum": 300,
+          "default": 30,
+          "examples": [
+            30
+          ]
+        }
+      },
+      "required": [
+        "container",
+        "command"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "mutation",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "container command"
+        ],
+        "scope": "Execute a bounded command inside a named Docker container. Requires DOCKER_ALLOW_EXEC=true.",
+        "preferredFor": "Execute a bounded command inside a named Docker container. Requires DOCKER_ALLOW_EXEC=true. Use when you need container command. Do not use for operations outside this scope: Execute a bounded command inside a named Docker container. Requires DOCKER_ALLOW_EXEC=true..",
+        "legacyName": "docker_exec"
+      }
+    }
+  },
+  {
+    "name": "docker_control_container",
+    "description": "Start, stop, restart, pause, unpause or kill a Docker container. Requires DOCKER_ALLOW_WRITE=true. Use when you need container lifecycle. Do not use for operations outside this scope: Start, stop, restart, pause, unpause or kill a Docker container. Requires DOCKER_ALLOW_WRITE=true..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for docker_control_container. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "container": {
+          "type": "string",
+          "description": "Container name or ID. Required. Format: string. Example: \"mcp-system\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "mcp-system"
+          ]
+        },
+        "action": {
+          "type": "string",
+          "description": "Lifecycle action. Required. Allowed values: start, stop, restart, pause, unpause, kill. Example: \"start\".",
+          "enum": [
+            "start",
+            "stop",
+            "restart",
+            "pause",
+            "unpause",
+            "kill"
+          ],
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "start"
+          ]
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "description": "Stop/restart timeout seconds. Optional. If omitted: Delegate stop/restart grace period to the Docker daemon; ignored for other actions. Format: integer. Example: 1.",
+          "minimum": 0,
+          "maximum": 300,
+          "examples": [
+            1
+          ]
+        }
+      },
+      "required": [
+        "container",
+        "action"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "mutation",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "container lifecycle"
+        ],
+        "scope": "Start, stop, restart, pause, unpause or kill a Docker container. Requires DOCKER_ALLOW_WRITE=true.",
+        "preferredFor": "Start, stop, restart, pause, unpause or kill a Docker container. Requires DOCKER_ALLOW_WRITE=true. Use when you need container lifecycle. Do not use for operations outside this scope: Start, stop, restart, pause, unpause or kill a Docker container. Requires DOCKER_ALLOW_WRITE=true..",
+        "legacyName": "docker_container_action"
+      }
+    }
+  },
+  {
+    "name": "docker_remove_container",
+    "description": "Delete a Docker container, optionally forced. Requires DOCKER_ALLOW_WRITE=true. Use when you need remove stopped container. Do not use for operations outside this scope: Delete a Docker container, optionally forced. Requires DOCKER_ALLOW_WRITE=true..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for docker_remove_container. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "container": {
+          "type": "string",
+          "description": "Container name or ID. Required. Format: string. Example: \"mcp-system\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "mcp-system"
+          ]
+        },
+        "force": {
+          "type": "boolean",
+          "description": "Force removal of a running container. Optional. If omitted, default: false. Format: boolean. Example: false.",
+          "default": false,
+          "examples": [
+            false
+          ]
+        }
+      },
+      "required": [
+        "container"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "mutation",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "remove stopped container"
+        ],
+        "scope": "Delete a Docker container, optionally forced. Requires DOCKER_ALLOW_WRITE=true.",
+        "preferredFor": "Delete a Docker container, optionally forced. Requires DOCKER_ALLOW_WRITE=true. Use when you need remove stopped container. Do not use for operations outside this scope: Delete a Docker container, optionally forced. Requires DOCKER_ALLOW_WRITE=true..",
+        "legacyName": "docker_remove_container"
+      }
+    }
+  },
+  {
+    "name": "docker_remove_image",
+    "description": "Delete a local Docker image by name or ID. Requires DOCKER_ALLOW_WRITE=true. Use when you need remove image tag. Do not use for operations outside this scope: Delete a local Docker image by name or ID. Requires DOCKER_ALLOW_WRITE=true..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for docker_remove_image. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "image": {
+          "type": "string",
+          "description": "Image name, tag, digest, or ID. Required. Format: string. Example: \"alpine:latest\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "alpine:latest"
+          ]
+        },
+        "force": {
+          "type": "boolean",
+          "description": "Force removal. Optional. If omitted, default: false. Format: boolean. Example: false.",
+          "default": false,
+          "examples": [
+            false
+          ]
+        }
+      },
+      "required": [
+        "image"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "mutation",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "remove image tag"
+        ],
+        "scope": "Delete a local Docker image by name or ID. Requires DOCKER_ALLOW_WRITE=true.",
+        "preferredFor": "Delete a local Docker image by name or ID. Requires DOCKER_ALLOW_WRITE=true. Use when you need remove image tag. Do not use for operations outside this scope: Delete a local Docker image by name or ID. Requires DOCKER_ALLOW_WRITE=true..",
+        "legacyName": "docker_remove_image"
+      }
+    }
+  },
+  {
+    "name": "host_get_snapshot",
+    "description": "Summarize mounted-host health: OS, uptime, CPU load, memory and disk capacity. Use when you need host health overview. Use targeted host detail tools when only one metric is needed.",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for host_get_snapshot. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "host health overview"
+        ],
+        "scope": "Summarize mounted-host health: OS, uptime, CPU load, memory and disk capacity.",
+        "preferredFor": "Summarize mounted-host health: OS, uptime, CPU load, memory and disk capacity. Use when you need host health overview. Use targeted host detail tools when only one metric is needed.",
+        "overlapGroup": "host-health",
+        "legacyName": "host_snapshot"
+      }
+    }
+  },
+  {
+    "name": "host_get_cpu_info",
+    "description": "Read mounted-host CPU model, features, load and per-CPU counters. Use when you need processor capabilities. Do not use for operations outside this scope: Read mounted-host CPU model, features, load and per-CPU counters..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for host_get_cpu_info. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "processor capabilities"
+        ],
+        "scope": "Read mounted-host CPU model, features, load and per-CPU counters.",
+        "preferredFor": "Read mounted-host CPU model, features, load and per-CPU counters. Use when you need processor capabilities. Do not use for operations outside this scope: Read mounted-host CPU model, features, load and per-CPU counters..",
+        "overlapGroup": "host-health",
+        "legacyName": "host_cpu_info"
+      }
+    }
+  },
+  {
+    "name": "host_get_memory_info",
+    "description": "Read mounted-host memory, cache, swap and commit accounting. Use when you need RAM pressure. Do not use for operations outside this scope: Read mounted-host memory, cache, swap and commit accounting..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for host_get_memory_info. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "RAM pressure"
+        ],
+        "scope": "Read mounted-host memory, cache, swap and commit accounting.",
+        "preferredFor": "Read mounted-host memory, cache, swap and commit accounting. Use when you need RAM pressure. Do not use for operations outside this scope: Read mounted-host memory, cache, swap and commit accounting..",
+        "overlapGroup": "host-health",
+        "legacyName": "host_memory_info"
+      }
+    }
+  },
+  {
+    "name": "host_list_processes",
+    "description": "List mounted-host processes, sorted by memory, CPU, PID or name. Use when you need process inventory. Do not use for operations outside this scope: List mounted-host processes, sorted by memory, CPU, PID or name..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for host_list_processes. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "limit": {
+          "type": "integer",
+          "description": "Maximum processes returned; default 80. Optional. If omitted, default: 80. Format: integer. Example: 80.",
+          "minimum": 1,
+          "maximum": 500,
+          "default": 80,
+          "examples": [
+            80
+          ]
+        },
+        "sort_by": {
+          "type": "string",
+          "description": "Sort key. Optional. If omitted, default: \"rss\". Allowed values: rss, cpu, pid, name. Example: \"rss\".",
+          "enum": [
+            "rss",
+            "cpu",
+            "pid",
+            "name"
+          ],
+          "maxLength": 4096,
+          "default": "rss",
+          "examples": [
+            "rss"
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "process inventory"
+        ],
+        "scope": "List mounted-host processes, sorted by memory, CPU, PID or name.",
+        "preferredFor": "List mounted-host processes, sorted by memory, CPU, PID or name. Use when you need process inventory. Do not use for operations outside this scope: List mounted-host processes, sorted by memory, CPU, PID or name..",
+        "legacyName": "host_processes"
+      }
+    }
+  },
+  {
+    "name": "host_get_process_info",
+    "description": "Inspect one mounted-host PID: security_get_status, command, threads, limits and file count. Use when you need process details. Do not use for operations outside this scope: Inspect one mounted-host PID: security_get_status, command, threads, limits and file count..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for host_get_process_info. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "pid": {
+          "type": "integer",
+          "description": "Host PID. Required. Format: integer. Example: 1.",
+          "minimum": 1,
+          "examples": [
+            1
+          ]
+        }
+      },
+      "required": [
+        "pid"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "process details"
+        ],
+        "scope": "Inspect one mounted-host PID: status, command, threads, limits and file count.",
+        "preferredFor": "Inspect one mounted-host PID: security_get_status, command, threads, limits and file count. Use when you need process details. Do not use for operations outside this scope: Inspect one mounted-host PID: security_get_status, command, threads, limits and file count..",
+        "legacyName": "host_process_info"
+      }
+    }
+  },
+  {
+    "name": "host_get_disk_usage",
+    "description": "Report capacity, used and free space for the mounted host filesystem. Use when you need disk full. Do not use for operations outside this scope: Report capacity, used and free space for the mounted host filesystem..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for host_get_disk_usage. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "disk full"
+        ],
+        "scope": "Report capacity, used and free space for the mounted host filesystem.",
+        "preferredFor": "Report capacity, used and free space for the mounted host filesystem. Use when you need disk full. Do not use for operations outside this scope: Report capacity, used and free space for the mounted host filesystem..",
+        "overlapGroup": "host-health",
+        "legacyName": "host_disk_usage"
+      }
+    }
+  },
+  {
+    "name": "host_read_file",
+    "description": "Read a bounded diagnostic text file under mounted-host /etc, /proc, /sys, /var/log or /run. Use when you need host config file. Do not use for operations outside this scope: Read a bounded diagnostic text file under mounted-host /etc, /proc, /sys, /var/log or /run..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for host_read_file. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Absolute host path such as /etc/os-release or /proc/loadavg. Required. Format: string. Example: \"/etc/os-release\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "/etc/os-release"
+          ]
+        },
+        "max_bytes": {
+          "type": "integer",
+          "description": "Maximum bytes to read; default 32768. Optional. If omitted, default: 32768. Format: integer. Example: 32768.",
+          "minimum": 1,
+          "maximum": 131072,
+          "default": 32768,
+          "examples": [
+            32768
+          ]
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "host config file"
+        ],
+        "scope": "Read a bounded diagnostic text file under mounted-host /etc, /proc, /sys, /var/log or /run.",
+        "preferredFor": "Read a bounded diagnostic text file under mounted-host /etc, /proc, /sys, /var/log or /run. Use when you need host config file. Do not use for operations outside this scope: Read a bounded diagnostic text file under mounted-host /etc, /proc, /sys, /var/log or /run..",
+        "legacyName": "host_read_file"
+      }
+    }
+  },
+  {
+    "name": "network_lookup_dns",
+    "description": "Query one or multiple DNS record types, including PTR and CAA. Returns records grouped by type. Use when you need DNS records. Do not use for operations outside this scope: Query one or multiple DNS record types, including PTR and CAA. Returns records grouped by type..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for network_lookup_dns. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Hostname, domain, or reverse-DNS name. Required. Format: string. Example: \"example.com\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "example.com"
+          ]
+        },
+        "type": {
+          "type": "string",
+          "description": "Single record type; default A. Use types for multiple records. Optional. If omitted, default: \"A\". Allowed values: A, AAAA, CNAME, MX, TXT, NS, SOA, PTR, CAA. Example: \"A\".",
+          "enum": [
+            "A",
+            "AAAA",
+            "CNAME",
+            "MX",
+            "TXT",
+            "NS",
+            "SOA",
+            "PTR",
+            "CAA"
+          ],
+          "maxLength": 4096,
+          "default": "A",
+          "examples": [
+            "A"
+          ]
+        },
+        "types": {
+          "type": "array",
+          "description": "Record types to query together; mutually exclusive with type. Optional. If omitted: Query type, default A, when types is absent. Format: array. Example: [\"A\"].",
+          "items": {
+            "type": "string",
+            "description": "DNS record type. Required. Allowed values: A, AAAA, CNAME, MX, TXT, NS, SOA, PTR, CAA. Example: \"A\".",
+            "enum": [
+              "A",
+              "AAAA",
+              "CNAME",
+              "MX",
+              "TXT",
+              "NS",
+              "SOA",
+              "PTR",
+              "CAA"
+            ],
+            "minLength": 1,
+            "maxLength": 4096,
+            "examples": [
+              "A"
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 1000,
+          "examples": [
+            [
+              "A"
+            ]
+          ]
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "active_probe",
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "not": {
+        "required": [
+          "type",
+          "types"
+        ]
+      }
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "DNS records",
+          "mail policy TXT MX",
+          "reverse lookup"
+        ],
+        "scope": "Query one or multiple DNS record types, including PTR and CAA. Returns records grouped by type.",
+        "preferredFor": "Query one or multiple DNS record types, including PTR and CAA. Returns records grouped by type. Use when you need DNS records. Do not use for operations outside this scope: Query one or multiple DNS record types, including PTR and CAA. Returns records grouped by type..",
+        "legacyName": "network_dns_lookup"
+      }
+    }
+  },
+  {
+    "name": "network_ping_host",
+    "description": "Measure ICMP reachability, loss and latency to a supplied host from the System container. Use when you need ping latency. Do not use for operations outside this scope: Measure ICMP reachability, loss and latency to a supplied host from the System container..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for network_ping_host. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "host": {
+          "type": "string",
+          "description": "Hostname or IP address. Required. Format: string. Example: \"192.168.1.1\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "192.168.1.1"
+          ]
+        },
+        "count": {
+          "type": "integer",
+          "description": "Packets; default 4. Optional. If omitted, default: 4. Format: integer. Example: 4.",
+          "minimum": 1,
+          "maximum": 20,
+          "default": 4,
+          "examples": [
+            4
+          ]
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "description": "Per-packet timeout seconds; default 2. Optional. If omitted, default: 2. Format: integer. Example: 2.",
+          "minimum": 1,
+          "maximum": 10,
+          "default": 2,
+          "examples": [
+            2
+          ]
+        }
+      },
+      "required": [
+        "host"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "active_probe",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "ping latency"
+        ],
+        "scope": "Measure ICMP reachability, loss and latency to a supplied host from the System container.",
+        "preferredFor": "Measure ICMP reachability, loss and latency to a supplied host from the System container. Use when you need ping latency. Do not use for operations outside this scope: Measure ICMP reachability, loss and latency to a supplied host from the System container..",
+        "legacyName": "network_ping"
+      }
+    }
+  },
+  {
+    "name": "network_trace_route",
+    "description": "Trace routed hops to a supplied host from the System container. Use when you need traceroute path. Do not use for operations outside this scope: Trace routed hops to a supplied host from the System container..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for network_trace_route. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "host": {
+          "type": "string",
+          "description": "Hostname or IP address. Required. Format: string. Example: \"192.168.1.1\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "192.168.1.1"
+          ]
+        },
+        "max_hops": {
+          "type": "integer",
+          "description": "Maximum hops; default 20. Optional. If omitted, default: 20. Format: integer. Example: 20.",
+          "minimum": 1,
+          "maximum": 64,
+          "default": 20,
+          "examples": [
+            20
+          ]
+        }
+      },
+      "required": [
+        "host"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "active_probe",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "traceroute path"
+        ],
+        "scope": "Trace routed hops to a supplied host from the System container.",
+        "preferredFor": "Trace routed hops to a supplied host from the System container. Use when you need traceroute path. Do not use for operations outside this scope: Trace routed hops to a supplied host from the System container..",
+        "legacyName": "network_trace_route"
+      }
+    }
+  },
+  {
+    "name": "network_probe_http",
+    "description": "Fetch HTTP security_get_status, raw headers, redirects, timing and optional body from a URL using curl. Use when you need HTTP connectivity. Use http_audit_headers for security policy or firecrawl_scrape_page for readable web content.",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for network_probe_http. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "url": {
+          "type": "string",
+          "description": "http:// or https:// URL. Required. Format: string. Example: \"https://example.com/\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "pattern": "^https?://[^\\s]+$",
+          "examples": [
+            "https://example.com/"
+          ]
+        },
+        "method": {
+          "type": "string",
+          "description": "HTTP method. Optional. If omitted, default: \"GET\". Allowed values: GET, HEAD. Example: \"GET\".",
+          "enum": [
+            "GET",
+            "HEAD"
+          ],
+          "maxLength": 4096,
+          "default": "GET",
+          "examples": [
+            "GET"
+          ]
+        },
+        "body": {
+          "type": "boolean",
+          "description": "Include a bounded response body for GET. Optional. If omitted, default: false. Format: boolean. Example: false.",
+          "default": false,
+          "examples": [
+            false
+          ]
+        }
+      },
+      "required": [
+        "url"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "active_probe",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "HTTP connectivity",
+          "response timing"
+        ],
+        "scope": "Fetch HTTP status, raw headers, redirects, timing and optional body from a URL using curl.",
+        "preferredFor": "Fetch HTTP security_get_status, raw headers, redirects, timing and optional body from a URL using curl. Use when you need HTTP connectivity. Use http_audit_headers for security policy or firecrawl_scrape_page for readable web content.",
+        "overlapGroup": "http",
+        "legacyName": "network_http_probe"
+      }
+    }
+  },
+  {
+    "name": "network_check_port",
+    "description": "Check whether a single TCP port accepts a connection from the System container. Use when you need TCP connection test. Do not use for operations outside this scope: Check whether a single TCP port accepts a connection from the System container..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for network_check_port. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "host": {
+          "type": "string",
+          "description": "Hostname or IP. Required. Format: string. Example: \"192.168.1.1\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "192.168.1.1"
+          ]
+        },
+        "port": {
+          "type": "integer",
+          "description": "TCP port. Required. Format: integer. Example: 1.",
+          "minimum": 1,
+          "maximum": 65535,
+          "examples": [
+            1
+          ]
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "description": "Timeout seconds; default 3. Optional. If omitted, default: 3. Format: integer. Example: 3.",
+          "minimum": 1,
+          "maximum": 30,
+          "default": 3,
+          "examples": [
+            3
+          ]
+        }
+      },
+      "required": [
+        "host",
+        "port"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "active_probe",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "TCP connection test"
+        ],
+        "scope": "Check whether a single TCP port accepts a connection from the System container.",
+        "preferredFor": "Check whether a single TCP port accepts a connection from the System container. Use when you need TCP connection test. Do not use for operations outside this scope: Check whether a single TCP port accepts a connection from the System container..",
+        "legacyName": "network_port_check"
+      }
+    }
+  },
+  {
+    "name": "openwrt_list_targets",
+    "description": "List configured OpenWrt SSH target aliases. Start here when the router target is unknown. Use when you need configured routers. Do not use for operations outside this scope: List configured OpenWrt SSH target aliases. Start here when the router target is unknown..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for openwrt_list_targets. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false,
+      "x-pi-effect": "config_read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "configured routers",
+          "SSH aliases"
+        ],
+        "scope": "List configured OpenWrt SSH target aliases. Start here when the router target is unknown.",
+        "preferredFor": "List configured OpenWrt SSH target aliases. Start here when the router target is unknown. Use when you need configured routers. Do not use for operations outside this scope: List configured OpenWrt SSH target aliases. Start here when the router target is unknown..",
+        "overlapGroup": "openwrt",
+        "legacyName": "openwrt_targets"
+      }
+    }
+  },
+  {
+    "name": "openwrt_get_status",
+    "description": "Read OpenWrt router security_get_status: board, uptime, memory, routes and interface state from a known SSH target. Use when you need OpenWrt router health. Do not use for operations outside this scope: Read OpenWrt router security_get_status: board, uptime, memory, routes and interface state from a known SSH target..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for openwrt_get_status. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "target": {
+          "type": "string",
+          "description": "Configured SSH alias returned by openwrt_list_targets. Required. Format: string. Example: \"anansi\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "anansi"
+          ]
+        }
+      },
+      "required": [
+        "target"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "config_read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "OpenWrt router health"
+        ],
+        "scope": "Read OpenWrt router status: board, uptime, memory, routes and interface state from a known SSH target.",
+        "preferredFor": "Read OpenWrt router security_get_status: board, uptime, memory, routes and interface state from a known SSH target. Use when you need OpenWrt router health. Do not use for operations outside this scope: Read OpenWrt router security_get_status: board, uptime, memory, routes and interface state from a known SSH target..",
+        "overlapGroup": "openwrt",
+        "legacyName": "openwrt_status"
+      }
+    }
+  },
+  {
+    "name": "openwrt_read_uci_config",
+    "description": "Read an OpenWrt UCI package or all UCI configuration from a known SSH target. Use when you need router config sections. Do not use for operations outside this scope: Read an OpenWrt UCI package or all UCI configuration from a known SSH target..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for openwrt_read_uci_config. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "target": {
+          "type": "string",
+          "description": "Configured SSH alias returned by openwrt_list_targets. Required. Format: string. Example: \"anansi\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "anansi"
+          ]
+        },
+        "package": {
+          "type": "string",
+          "description": "Optional UCI package name such as network, wireless, firewall, dhcp, system. Optional. If omitted: Show all UCI packages. Format: string. Example: \"example\".",
+          "maxLength": 4096,
+          "examples": [
+            "example"
+          ]
+        }
+      },
+      "required": [
+        "target"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "config_read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "router config sections"
+        ],
+        "scope": "Read an OpenWrt UCI package or all UCI configuration from a known SSH target.",
+        "preferredFor": "Read an OpenWrt UCI package or all UCI configuration from a known SSH target. Use when you need router config sections. Do not use for operations outside this scope: Read an OpenWrt UCI package or all UCI configuration from a known SSH target..",
+        "overlapGroup": "openwrt",
+        "legacyName": "openwrt_uci_show"
+      }
+    }
+  },
+  {
+    "name": "openwrt_get_uci_value",
+    "description": "Read one OpenWrt UCI key from a known SSH target. Use when you need router config value. Do not use for operations outside this scope: Read one OpenWrt UCI key from a known SSH target..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for openwrt_get_uci_value. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "target": {
+          "type": "string",
+          "description": "Configured SSH alias returned by openwrt_list_targets. Required. Format: string. Example: \"anansi\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "anansi"
+          ]
+        },
+        "key": {
+          "type": "string",
+          "description": "UCI key. Required. Format: string. Example: \"network.lan.ipaddr\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "network.lan.ipaddr"
+          ]
+        }
+      },
+      "required": [
+        "target",
+        "key"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "config_read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "router config value"
+        ],
+        "scope": "Read one OpenWrt UCI key from a known SSH target.",
+        "preferredFor": "Read one OpenWrt UCI key from a known SSH target. Use when you need router config value. Do not use for operations outside this scope: Read one OpenWrt UCI key from a known SSH target..",
+        "overlapGroup": "openwrt",
+        "legacyName": "openwrt_uci_get"
+      }
+    }
+  },
+  {
+    "name": "openwrt_call_ubus",
+    "description": "Perform call an OpenWrt ubus object/method on a known SSH target. Use when you need router ubus RPC. Do not use for operations outside this scope: Call an OpenWrt ubus object/method on a known SSH target..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for openwrt_call_ubus. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "target": {
+          "type": "string",
+          "description": "Configured SSH alias returned by openwrt_list_targets. Required. Format: string. Example: \"anansi\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "anansi"
+          ]
+        },
+        "object": {
+          "type": "string",
+          "description": "ubus object. Required. Format: string. Example: \"system\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "system"
+          ]
+        },
+        "method": {
+          "type": "string",
+          "description": "ubus method. Required. Format: string. Example: \"board\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "board"
+          ]
+        },
+        "arguments": {
+          "type": "object",
+          "description": "Named ubus method arguments as a JSON object; encoded to JSON by the dispatcher. Optional. If omitted, default: {}. Format: object. Example: {}.",
+          "additionalProperties": {
+            "$ref": "#/definitions/json_value"
+          },
+          "required": [],
+          "default": {},
+          "examples": [
+            {}
+          ]
+        }
+      },
+      "required": [
+        "target",
+        "object",
+        "method"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "mutation",
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "definitions": {
+        "json_value": {
+          "description": "A JSON value from a saved reconnaissance result.",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/json_value"
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": {
+                "$ref": "#/definitions/json_value"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "router ubus RPC"
+        ],
+        "scope": "Call an OpenWrt ubus object/method on a known SSH target.",
+        "preferredFor": "Perform call an OpenWrt ubus object/method on a known SSH target. Use when you need router ubus RPC. Do not use for operations outside this scope: Call an OpenWrt ubus object/method on a known SSH target..",
+        "overlapGroup": "openwrt",
+        "legacyName": "openwrt_ubus_call"
+      }
+    }
+  },
+  {
+    "name": "openwrt_read_logs",
+    "description": "Read recent OpenWrt system log lines from a known SSH target. Use when you need router logs. Do not use for operations outside this scope: Read recent OpenWrt system log lines from a known SSH target..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for openwrt_read_logs. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "target": {
+          "type": "string",
+          "description": "Configured SSH alias returned by openwrt_list_targets. Required. Format: string. Example: \"anansi\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "anansi"
+          ]
+        },
+        "lines": {
+          "type": "integer",
+          "description": "Recent lines; default 200. Optional. If omitted, default: 200. Format: integer. Example: 200.",
+          "minimum": 1,
+          "maximum": 3000,
+          "default": 200,
+          "examples": [
+            200
+          ]
+        },
+        "filter": {
+          "type": "string",
+          "description": "Optional grep text. Optional. If omitted: Do not filter returned lines. Format: string. Example: \"tcp port 443\".",
+          "maxLength": 8192,
+          "examples": [
+            "tcp port 443"
+          ]
+        }
+      },
+      "required": [
+        "target"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "config_read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "router logs"
+        ],
+        "scope": "Read recent OpenWrt system log lines from a known SSH target.",
+        "preferredFor": "Read recent OpenWrt system log lines from a known SSH target. Use when you need router logs. Do not use for operations outside this scope: Read recent OpenWrt system log lines from a known SSH target..",
+        "overlapGroup": "openwrt",
+        "legacyName": "openwrt_logread"
+      }
+    }
+  },
+  {
+    "name": "openwrt_get_wifi_status",
+    "description": "Read OpenWrt radio, SSID and associated-station metrics from a known SSH target. Use when you need router radio metrics. Do not use for operations outside this scope: Read OpenWrt radio, SSID and associated-station metrics from a known SSH target..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for openwrt_get_wifi_status. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "target": {
+          "type": "string",
+          "description": "Configured SSH alias returned by openwrt_list_targets. Required. Format: string. Example: \"anansi\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "anansi"
+          ]
+        }
+      },
+      "required": [
+        "target"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "config_read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "router radio metrics"
+        ],
+        "scope": "Read OpenWrt radio, SSID and associated-station metrics from a known SSH target.",
+        "preferredFor": "Read OpenWrt radio, SSID and associated-station metrics from a known SSH target. Use when you need router radio metrics. Do not use for operations outside this scope: Read OpenWrt radio, SSID and associated-station metrics from a known SSH target..",
+        "overlapGroup": "openwrt",
+        "legacyName": "openwrt_wifi_status"
+      }
+    }
+  },
+  {
+    "name": "openwrt_list_clients",
+    "description": "Read DHCP leases, neighbors and associated stations from a known OpenWrt SSH target. Use when you need OpenWrt connected clients. Do not use for operations outside this scope: Read DHCP leases, neighbors and associated stations from a known OpenWrt SSH target..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for openwrt_list_clients. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "target": {
+          "type": "string",
+          "description": "Configured SSH alias returned by openwrt_list_targets. Required. Format: string. Example: \"anansi\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "anansi"
+          ]
+        }
+      },
+      "required": [
+        "target"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "config_read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "OpenWrt connected clients"
+        ],
+        "scope": "Read DHCP leases, neighbors and associated stations from a known OpenWrt SSH target.",
+        "preferredFor": "Read DHCP leases, neighbors and associated stations from a known OpenWrt SSH target. Use when you need OpenWrt connected clients. Do not use for operations outside this scope: Read DHCP leases, neighbors and associated stations from a known OpenWrt SSH target..",
+        "overlapGroup": "openwrt",
+        "legacyName": "openwrt_clients"
+      }
+    }
+  },
+  {
+    "name": "openwrt_query_packages",
+    "description": "List installed or available packages on a known OpenWrt SSH target. Use when you need router opkg packages. Do not use for operations outside this scope: List installed or available packages on a known OpenWrt SSH target..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for openwrt_query_packages. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "target": {
+          "type": "string",
+          "description": "Configured SSH alias returned by openwrt_list_targets. Required. Format: string. Example: \"anansi\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "anansi"
+          ]
+        },
+        "mode": {
+          "type": "string",
+          "description": "Query mode. Required. Allowed values: installed, search. Example: \"installed\".",
+          "enum": [
+            "installed",
+            "search"
+          ],
+          "minLength": 1,
+          "maxLength": 4096,
+          "default": "installed",
+          "examples": [
+            "installed"
+          ]
+        },
+        "query": {
+          "type": "string",
+          "description": "Optional case-insensitive package filter. Optional. If omitted: Do not filter package names. Format: string. Example: \"error\".",
+          "maxLength": 8192,
+          "examples": [
+            "error"
+          ]
+        }
+      },
+      "required": [
+        "target",
+        "mode"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "config_read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "router opkg packages"
+        ],
+        "scope": "List installed or available packages on a known OpenWrt SSH target.",
+        "preferredFor": "List installed or available packages on a known OpenWrt SSH target. Use when you need router opkg packages. Do not use for operations outside this scope: List installed or available packages on a known OpenWrt SSH target..",
+        "overlapGroup": "openwrt",
+        "legacyName": "openwrt_package_query"
+      }
+    }
+  },
+  {
+    "name": "openwrt_control_service",
+    "description": "Control an OpenWrt service on a known SSH target. Requires OPENWRT_ALLOW_WRITE=true. Use when you need restart router service. Do not use for operations outside this scope: Control an OpenWrt service on a known SSH target. Requires OPENWRT_ALLOW_WRITE=true..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for openwrt_control_service. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "target": {
+          "type": "string",
+          "description": "Configured SSH alias returned by openwrt_list_targets. Required. Format: string. Example: \"anansi\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "anansi"
+          ]
+        },
+        "service": {
+          "type": "string",
+          "description": "Init script/service name. Required. Format: string. Example: \"dnsmasq\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "dnsmasq"
+          ]
+        },
+        "action": {
+          "type": "string",
+          "description": "Service action. Required. Allowed values: start, stop, restart, reload, enable, disable. Example: \"start\".",
+          "enum": [
+            "start",
+            "stop",
+            "restart",
+            "reload",
+            "enable",
+            "disable"
+          ],
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "start"
+          ]
+        }
+      },
+      "required": [
+        "target",
+        "service",
+        "action"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "mutation",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "restart router service"
+        ],
+        "scope": "Control an OpenWrt service on a known SSH target. Requires OPENWRT_ALLOW_WRITE=true.",
+        "preferredFor": "Control an OpenWrt service on a known SSH target. Requires OPENWRT_ALLOW_WRITE=true. Use when you need restart router service. Do not use for operations outside this scope: Control an OpenWrt service on a known SSH target. Requires OPENWRT_ALLOW_WRITE=true..",
+        "overlapGroup": "openwrt",
+        "legacyName": "openwrt_service_action"
+      }
+    }
+  },
+  {
+    "name": "openwrt_set_uci_value",
+    "description": "Set and optionally commit an OpenWrt UCI key on a known SSH target. Requires OPENWRT_ALLOW_WRITE=true. Use when you need change router setting. Do not use for operations outside this scope: Set and optionally commit an OpenWrt UCI key on a known SSH target. Requires OPENWRT_ALLOW_WRITE=true..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for openwrt_set_uci_value. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "target": {
+          "type": "string",
+          "description": "Configured SSH alias returned by openwrt_list_targets. Required. Format: string. Example: \"anansi\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "anansi"
+          ]
+        },
+        "key": {
+          "type": "string",
+          "description": "UCI key. Required. Format: string. Example: \"network.lan.ipaddr\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "network.lan.ipaddr"
+          ]
+        },
+        "value": {
+          "type": "string",
+          "description": "New value. Required. Format: string. Example: \"example\".",
+          "maxLength": 200000,
+          "examples": [
+            "example"
+          ]
+        },
+        "commit": {
+          "type": "boolean",
+          "description": "Commit the containing UCI package after setting. Optional. If omitted, default: false. Format: boolean. Example: false.",
+          "default": false,
+          "examples": [
+            false
+          ]
+        }
+      },
+      "required": [
+        "target",
+        "key",
+        "value"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "mutation",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "change router setting"
+        ],
+        "scope": "Set and optionally commit an OpenWrt UCI key on a known SSH target. Requires OPENWRT_ALLOW_WRITE=true.",
+        "preferredFor": "Set and optionally commit an OpenWrt UCI key on a known SSH target. Requires OPENWRT_ALLOW_WRITE=true. Use when you need change router setting. Do not use for operations outside this scope: Set and optionally commit an OpenWrt UCI key on a known SSH target. Requires OPENWRT_ALLOW_WRITE=true..",
+        "overlapGroup": "openwrt",
+        "legacyName": "openwrt_uci_set"
+      }
+    }
+  },
+  {
+    "name": "image_list_files",
+    "description": "List workspace images, optionally recursively. Use when you need list image files. Do not use for operations outside this scope: List workspace images, optionally recursively..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for image_list_files. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "directory": {
+          "type": "string",
+          "description": "Workspace-relative directory; default . Optional. If omitted, default: \".\". Format: string. Example: \".\".",
+          "maxLength": 4096,
+          "default": ".",
+          "examples": [
+            "."
+          ]
+        },
+        "recursive": {
+          "type": "boolean",
+          "description": "Recurse into subdirectories. Optional. If omitted, default: false. Format: boolean. Example: false.",
+          "default": false,
+          "examples": [
+            false
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "list image files"
+        ],
+        "scope": "List workspace images, optionally recursively.",
+        "preferredFor": "List workspace images, optionally recursively. Use when you need list image files. Do not use for operations outside this scope: List workspace images, optionally recursively..",
+        "overlapGroup": "images",
+        "legacyName": "image_list"
+      }
+    }
+  },
+  {
+    "name": "image_get_info",
+    "description": "Inspect image format, dimensions, color space, alpha and frames. Use when you need pixel geometry. Use image_read_metadata for embedded camera/GPS metadata.",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for image_get_info. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Workspace-relative image path. Required. Format: string. Example: \"reports/input.json\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "reports/input.json"
+          ]
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "pixel geometry"
+        ],
+        "scope": "Inspect image format, dimensions, color space, alpha and frames.",
+        "preferredFor": "Inspect image format, dimensions, color space, alpha and frames. Use when you need pixel geometry. Use image_read_metadata for embedded camera/GPS metadata.",
+        "overlapGroup": "images",
+        "legacyName": "image_info"
+      }
+    }
+  },
+  {
+    "name": "image_read_metadata",
+    "description": "Read embedded EXIF, XMP and ICC metadata, camera details and GPS tags. Use when you need photo metadata. Use image_get_info for pixel geometry and frames.",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for image_read_metadata. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Workspace-relative image path. Required. Format: string. Example: \"reports/input.json\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "reports/input.json"
+          ]
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "photo metadata"
+        ],
+        "scope": "Read embedded EXIF, XMP and ICC metadata, camera details and GPS tags.",
+        "preferredFor": "Read embedded EXIF, XMP and ICC metadata, camera details and GPS tags. Use when you need photo metadata. Use image_get_info for pixel geometry and frames.",
+        "overlapGroup": "images",
+        "legacyName": "image_metadata"
+      }
+    }
+  },
+  {
+    "name": "image_resize_file",
+    "description": "Resize an image or create a proportional thumbnail. Thumbnail mode defaults to shrinking only. Use when you need image thumbnail. Do not use for operations outside this scope: Resize an image or create a proportional thumbnail. Thumbnail mode defaults to shrinking only..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for image_resize_file. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "Workspace-relative input image. Required. Format: string. Example: \"images/input.png\".",
+          "maxLength": 4096,
+          "examples": [
+            "images/input.png"
+          ]
+        },
+        "output": {
+          "type": "string",
+          "description": "Workspace-relative output image. Required. Format: string. Example: \"reports/output.json\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "reports/output.json"
+          ]
+        },
+        "geometry": {
+          "type": "string",
+          "description": "Resize geometry, e.g. 1024x1024, 1920x1080>, 50%. Required in resize mode. Optional. If omitted: Required in resize mode; unused in thumbnail mode. Format: string. Example: \"1024x1024>\".",
+          "maxLength": 4096,
+          "examples": [
+            "1024x1024>"
+          ]
+        },
+        "mode": {
+          "type": "string",
+          "description": "Processing mode; default resize. Optional. If omitted, default: \"resize\". Allowed values: resize, thumbnail. Example: \"resize\".",
+          "enum": [
+            "resize",
+            "thumbnail"
+          ],
+          "maxLength": 4096,
+          "default": "resize",
+          "examples": [
+            "resize"
+          ]
+        },
+        "width": {
+          "type": "integer",
+          "description": "Thumbnail maximum width. Optional. If omitted: Required in thumbnail mode; unused in resize mode. Format: integer. Example: 1.",
+          "minimum": 1,
+          "examples": [
+            1
+          ]
+        },
+        "height": {
+          "type": "integer",
+          "description": "Thumbnail maximum height. Optional. If omitted: Required in thumbnail mode; unused in resize mode. Format: integer. Example: 1.",
+          "minimum": 1,
+          "examples": [
+            1
+          ]
+        },
+        "enlarge": {
+          "type": "boolean",
+          "description": "Allow thumbnail enlargement; default false. Optional. If omitted, default: false. Format: boolean. Example: false.",
+          "default": false,
+          "examples": [
+            false
+          ]
+        }
+      },
+      "required": [
+        "input",
+        "output"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "mutation",
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "thumbnail"
+              }
+            },
+            "required": [
+              "mode"
+            ]
+          },
+          "then": {
+            "required": [
+              "width",
+              "height"
+            ]
+          },
+          "else": {
+            "required": [
+              "geometry"
+            ]
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "image thumbnail",
+          "scale image"
+        ],
+        "scope": "Resize an image or create a proportional thumbnail. Thumbnail mode defaults to shrinking only.",
+        "preferredFor": "Resize an image or create a proportional thumbnail. Thumbnail mode defaults to shrinking only. Use when you need image thumbnail. Do not use for operations outside this scope: Resize an image or create a proportional thumbnail. Thumbnail mode defaults to shrinking only..",
+        "overlapGroup": "images",
+        "legacyName": "image_resize"
+      }
+    }
+  },
+  {
+    "name": "image_crop_file",
+    "description": "Crop a rectangular region from a workspace image and write a new image. Use when you need extract image region. Do not use for operations outside this scope: Crop a rectangular region from a workspace image and write a new image..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for image_crop_file. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "Workspace-relative input image. Required. Format: string. Example: \"images/input.png\".",
+          "maxLength": 4096,
+          "examples": [
+            "images/input.png"
+          ]
+        },
+        "output": {
+          "type": "string",
+          "description": "Workspace-relative output image. Required. Format: string. Example: \"reports/output.json\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "reports/output.json"
+          ]
+        },
+        "width": {
+          "type": "integer",
+          "description": "Crop width pixels. Required. Format: integer. Example: 1.",
+          "minimum": 1,
+          "examples": [
+            1
+          ]
+        },
+        "height": {
+          "type": "integer",
+          "description": "Crop height pixels. Required. Format: integer. Example: 1.",
+          "minimum": 1,
+          "examples": [
+            1
+          ]
+        },
+        "x": {
+          "type": "integer",
+          "description": "Left offset pixels. Required. Format: integer. Example: 0.",
+          "minimum": 0,
+          "default": 0,
+          "examples": [
+            0
+          ]
+        },
+        "y": {
+          "type": "integer",
+          "description": "Top offset pixels. Required. Format: integer. Example: 0.",
+          "minimum": 0,
+          "default": 0,
+          "examples": [
+            0
+          ]
+        }
+      },
+      "required": [
+        "input",
+        "output",
+        "width",
+        "height",
+        "x",
+        "y"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "mutation",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "extract image region"
+        ],
+        "scope": "Crop a rectangular region from a workspace image and write a new image.",
+        "preferredFor": "Crop a rectangular region from a workspace image and write a new image. Use when you need extract image region. Do not use for operations outside this scope: Crop a rectangular region from a workspace image and write a new image..",
+        "overlapGroup": "images",
+        "legacyName": "image_crop"
+      }
+    }
+  },
+  {
+    "name": "image_convert_file",
+    "description": "Encode a workspace image in another format with optional quality control. Use when you need image format conversion. Do not use for operations outside this scope: Encode a workspace image in another format with optional quality control..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for image_convert_file. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "Workspace-relative input image. Required. Format: string. Example: \"images/input.png\".",
+          "maxLength": 4096,
+          "examples": [
+            "images/input.png"
+          ]
+        },
+        "output": {
+          "type": "string",
+          "description": "Workspace-relative output image. Required. Format: string. Example: \"reports/output.json\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "reports/output.json"
+          ]
+        },
+        "quality": {
+          "type": "integer",
+          "description": "Optional quality 1-100 for lossy formats. Optional. If omitted: Use the encoder default quality. Format: integer. Example: 1.",
+          "minimum": 1,
+          "maximum": 100,
+          "examples": [
+            1
+          ]
+        }
+      },
+      "required": [
+        "input",
+        "output"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "mutation",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "image format conversion"
+        ],
+        "scope": "Encode a workspace image in another format with optional quality control.",
+        "preferredFor": "Encode a workspace image in another format with optional quality control. Use when you need image format conversion. Do not use for operations outside this scope: Encode a workspace image in another format with optional quality control..",
+        "overlapGroup": "images",
+        "legacyName": "image_convert"
+      }
+    }
+  },
+  {
+    "name": "image_compare_files",
+    "description": "Compare two images using RMSE and optionally write a difference image. Use when you need pixel difference. Do not use for operations outside this scope: Compare two images using RMSE and optionally write a difference image..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for image_compare_files. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "left": {
+          "type": "string",
+          "description": "First workspace-relative image. Required. Format: string. Example: \"images/a.png\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "images/a.png"
+          ]
+        },
+        "right": {
+          "type": "string",
+          "description": "Second workspace-relative image. Required. Format: string. Example: \"images/b.png\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "images/b.png"
+          ]
+        },
+        "diff_output": {
+          "type": "string",
+          "description": "Optional workspace-relative diff image path. Optional. If omitted: Return the RMSE metric without writing a difference image. Format: string. Example: \"images/diff.png\".",
+          "maxLength": 4096,
+          "examples": [
+            "images/diff.png"
+          ]
+        }
+      },
+      "required": [
+        "left",
+        "right"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "pixel difference"
+        ],
+        "scope": "Compare two images using RMSE and optionally write a difference image.",
+        "preferredFor": "Compare two images using RMSE and optionally write a difference image. Use when you need pixel difference. Do not use for operations outside this scope: Compare two images using RMSE and optionally write a difference image..",
+        "overlapGroup": "images",
+        "legacyName": "image_compare"
+      }
+    }
+  },
+  {
+    "name": "document_list_files",
+    "description": "List workspace documents, optionally including subdirectories. Use when you need find document files. Do not use for operations outside this scope: List workspace documents, optionally including subdirectories..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for document_list_files. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "directory": {
+          "type": "string",
+          "description": "Workspace-relative directory; default . Optional. If omitted, default: \".\". Format: string. Example: \".\".",
+          "maxLength": 4096,
+          "default": ".",
+          "examples": [
+            "."
+          ]
+        },
+        "recursive": {
+          "type": "boolean",
+          "description": "Recurse into subdirectories. Optional. If omitted, default: false. Format: boolean. Example: false.",
+          "default": false,
+          "examples": [
+            false
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "find document files"
+        ],
+        "scope": "List workspace documents, optionally including subdirectories.",
+        "preferredFor": "List workspace documents, optionally including subdirectories. Use when you need find document files. Do not use for operations outside this scope: List workspace documents, optionally including subdirectories..",
+        "overlapGroup": "documents",
+        "legacyName": "document_list"
+      }
+    }
+  },
+  {
+    "name": "document_get_info",
+    "description": "Inspect document format, file size and PDF metadata/page count. Use when you need document properties. Do not use for operations outside this scope: Inspect document format, file size and PDF metadata/page count..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for document_get_info. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Workspace-relative document path. Required. Format: string. Example: \"reports/input.json\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "reports/input.json"
+          ]
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "document properties"
+        ],
+        "scope": "Inspect document format, file size and PDF metadata/page count.",
+        "preferredFor": "Inspect document format, file size and PDF metadata/page count. Use when you need document properties. Do not use for operations outside this scope: Inspect document format, file size and PDF metadata/page count..",
+        "overlapGroup": "documents",
+        "legacyName": "document_info"
+      }
+    }
+  },
+  {
+    "name": "document_extract_text",
+    "description": "Extract readable text from a workspace document for reading or summarization. Use when you need read PDF DOCX text. Use pdf_read_pages for bounded PDF pages or office_read_document for cells and formulas.",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for document_extract_text. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Workspace-relative document path. Required. Format: string. Example: \"reports/input.json\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "reports/input.json"
+          ]
+        },
+        "max_chars": {
+          "type": "integer",
+          "description": "Maximum characters returned; default 60000. Optional. If omitted, default: 60000. Format: integer. Example: 60000.",
+          "minimum": 100,
+          "maximum": 200000,
+          "default": 60000,
+          "examples": [
+            60000
+          ]
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "read PDF DOCX text"
+        ],
+        "scope": "Extract readable text from a workspace document for reading or summarization.",
+        "preferredFor": "Extract readable text from a workspace document for reading or summarization. Use when you need read PDF DOCX text. Use pdf_read_pages for bounded PDF pages or office_read_document for cells and formulas.",
+        "overlapGroup": "documents",
+        "legacyName": "document_extract_text"
+      }
+    }
+  },
+  {
+    "name": "document_search_text",
+    "description": "Search document text for a phrase or regex and return matching context. Use when you need search inside document. Do not use for operations outside this scope: Search document text for a phrase or regex and return matching context..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for document_search_text. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Workspace-relative document path. Required. Format: string. Example: \"reports/input.json\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "reports/input.json"
+          ]
+        },
+        "query": {
+          "type": "string",
+          "description": "Search text or regular expression. Required. Format: string. Example: \"error\".",
+          "minLength": 1,
+          "maxLength": 8192,
+          "examples": [
+            "error"
+          ]
+        },
+        "regex": {
+          "type": "boolean",
+          "description": "Treat query as a regular expression. Optional. If omitted, default: false. Format: boolean. Example: false.",
+          "default": false,
+          "examples": [
+            false
+          ]
+        },
+        "context": {
+          "type": "integer",
+          "description": "Context lines around each match; default 2. Optional. If omitted, default: 2. Format: integer. Example: 2.",
+          "minimum": 0,
+          "maximum": 10,
+          "default": 2,
+          "examples": [
+            2
+          ]
+        },
+        "max_matches": {
+          "type": "integer",
+          "description": "Maximum matches; default 50. Optional. If omitted, default: 50. Format: integer. Example: 50.",
+          "minimum": 1,
+          "maximum": 200,
+          "default": 50,
+          "examples": [
+            50
+          ]
+        }
+      },
+      "required": [
+        "path",
+        "query"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "read",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "search inside document"
+        ],
+        "scope": "Search document text for a phrase or regex and return matching context.",
+        "preferredFor": "Search document text for a phrase or regex and return matching context. Use when you need search inside document. Do not use for operations outside this scope: Search document text for a phrase or regex and return matching context..",
+        "overlapGroup": "documents",
+        "legacyName": "document_search_text"
+      }
+    }
+  },
+  {
+    "name": "document_convert",
+    "description": "Convert a document with Pandoc and write the requested output format. Use when you need document format conversion. Use office_export_document for Office-family conversions.",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for document_convert. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "Workspace-relative input file. Required. Format: string. Example: \"images/input.png\".",
+          "maxLength": 4096,
+          "examples": [
+            "images/input.png"
+          ]
+        },
+        "output": {
+          "type": "string",
+          "description": "Workspace-relative output file. Required. Format: string. Example: \"reports/output.json\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "reports/output.json"
+          ]
+        },
+        "to": {
+          "type": "string",
+          "description": "Optional pandoc output format override, e.g. markdown, plain, html, docx, epub. Optional. If omitted: Infer output format from output filename. Format: string. Example: \"markdown\".",
+          "maxLength": 4096,
+          "examples": [
+            "markdown"
+          ]
+        }
+      },
+      "required": [
+        "input",
+        "output"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "mutation",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "document format conversion"
+        ],
+        "scope": "Convert a document with Pandoc and write the requested output format.",
+        "preferredFor": "Convert a document with Pandoc and write the requested output format. Use when you need document format conversion. Use office_export_document for Office-family conversions.",
+        "overlapGroup": "documents",
+        "legacyName": "document_convert"
+      }
+    }
+  },
+  {
+    "name": "document_render_pdf_page",
+    "description": "Render one PDF page to a PNG image at a chosen resolution. Use when you need PDF page preview. Do not use for operations outside this scope: Render one PDF page to a PNG image at a chosen resolution..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for document_render_pdf_page. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "Workspace-relative PDF path. Required. Format: string. Example: \"images/input.png\".",
+          "maxLength": 4096,
+          "examples": [
+            "images/input.png"
+          ]
+        },
+        "page": {
+          "type": "integer",
+          "description": "1-based page number. Required. Format: integer. Example: 1.",
+          "minimum": 1,
+          "examples": [
+            1
+          ]
+        },
+        "output": {
+          "type": "string",
+          "description": "Workspace-relative PNG output path. Required. Format: string. Example: \"reports/output.json\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "reports/output.json"
+          ]
+        },
+        "dpi": {
+          "type": "integer",
+          "description": "Render DPI; default 144. Optional. If omitted, default: 144. Format: integer. Example: 144.",
+          "minimum": 36,
+          "maximum": 600,
+          "default": 144,
+          "examples": [
+            144
+          ]
+        }
+      },
+      "required": [
+        "input",
+        "page",
+        "output"
+      ],
+      "additionalProperties": false,
+      "x-pi-effect": "mutation",
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "system",
+        "aliases": [
+          "PDF page preview"
+        ],
+        "scope": "Render one PDF page to a PNG image at a chosen resolution.",
+        "preferredFor": "Render one PDF page to a PNG image at a chosen resolution. Use when you need PDF page preview. Do not use for operations outside this scope: Render one PDF page to a PNG image at a chosen resolution..",
+        "overlapGroup": "documents",
+        "legacyName": "document_render_pdf_page"
+      }
+    }
+  }
+]

@@ -500,8 +500,8 @@ test('MCP protocol validates calls, parses Nmap/ffuf, preserves large JSON and r
   const call=(name,args)=>rpc('tools/call',{name,arguments:args});
   try {
     const catalog=await rpc('tools/list',{}); assert.equal(catalog.tools.length,65);
-    const interfaceTool=catalog.tools.find(t=>t.name==='network_interfaces');
-    assert.match(interfaceTool.description,/container.*interfaces/i); assert.doesNotMatch(interfaceTool.description,/LAN|laptop|reconnaissance/i);
+    const interfaceTool=catalog.tools.find(t=>t.name==='network_list_container_interfaces');
+    assert.match(interfaceTool.description,/container.*interfaces/i); assert.match(interfaceTool.description,/do not infer LAN devices from container interfaces/i);
     const bad=await call('sqlmap',{}); assert.equal(bad.isError,true);
     for(const target of ['8.8.8.8','127.0.0.1/99','fd00::1','--script=default']) {
       const r=await call('port_scan',{target}); assert.equal(r.isError,true,target);

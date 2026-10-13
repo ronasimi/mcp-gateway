@@ -1,4 +1,5 @@
 import { redact } from './redact.mjs';
+import { adaptToolContracts } from './tool-contracts.mjs';
 /**
  * Minimal JSON-RPC/MCP stdio server used by the local domain processes.
  * Domain modules own catalog metadata, argument validation, execution policy,
@@ -6,6 +7,7 @@ import { redact } from './redact.mjs';
  */
 export function startMcpStdioServer({
   serverName,
+  contractDomain,
   serverVersion='1.0.0',
   instructions,
   tools,
@@ -20,6 +22,11 @@ export function startMcpStdioServer({
   if(!Array.isArray(tools)) throw new Error('tools must be an array');
   if(typeof callTool!=='function') throw new Error('callTool must be a function');
 
+  let canonicalize=(name,args)=>({name,args});
+  if(contractDomain){
+    const contract=adaptToolContracts(contractDomain,tools,callTool,validateCall);
+    ({tools,callTool,validateCall,canonicalize}=contract);
+  }
   const toolMap=new Map(tools.map(tool=>[tool.name,tool]));
   const response=(id,result)=>output.write(JSON.stringify({jsonrpc:'2.0',id,result})+'\n');
   const errorResponse=(id,code,message,data)=>output.write(JSON.stringify({jsonrpc:'2.0',id,error:{code,message,...(data?{data}:{})}})+'\n');
@@ -37,11 +44,13 @@ export function startMcpStdioServer({
       if(msg.method==='ping') return response(msg.id,{});
       if(msg.method==='tools/list') return response(msg.id,{tools});
       if(msg.method==='tools/call'){
-        const name=msg.params?.name;
-        const args=msg.params?.arguments||{};
-        const tool=toolMap.get(name);
-        if(!tool) throw new Error(`unknown tool: ${name}`);
+        let name=msg.params?.name;
+        let args=msg.params?.arguments === undefined ? {} : msg.params.arguments;
+        let tool;
         try{
+          ({name,args}=canonicalize(name,args));
+          tool=toolMap.get(name);
+          if(!tool) throw new Error(`unknown tool: ${name}`);
           if(validateCall) await validateCall(tool,args,name);
           const value=redact(await callTool(name,args));
           const text=await encodeResult(value,{tool,name,args:redact(args)});

@@ -1,3 +1,5 @@
+import fs from 'node:fs';
+import { resolveSourceRoot } from './module-layout.mjs';
 // Pi BM25 indexes the namespace description AND initialize instructions for every
 // tool. Keep these identity-only; put capability terms on the owning tool.
 export const SERVER_CATALOG = Object.freeze({
@@ -156,7 +158,10 @@ const google = {
   drive_upload_file: entry('Upload a workspace file to Google Drive. Requires Drive writes.', ['save file to Drive'], 'drive'),
   drive_delete_file: entry('Delete a Google Drive file by ID. Requires Drive writes.', ['remove Drive file'], 'drive'),
 };
-export const TOOL_CATALOG = Object.freeze({...system,...security,...google});
+const canonicalTools=['system','security','google'].flatMap(domain=>JSON.parse(fs.readFileSync(new URL(`contracts/${domain}-tools.json`,resolveSourceRoot(import.meta.url)),'utf8')));
+export const TOOL_CATALOG=Object.freeze(Object.fromEntries(canonicalTools.map(tool=>[tool.name,{
+  description:tool.description, ...tool._meta['ai.catalog'],
+}])));
 const DOMAINS = {system,security,google};
 export function decorateCatalogTools(tools, domain) {
   return tools.map(tool => {
@@ -174,5 +179,6 @@ export function decorateCatalogTools(tools, domain) {
   });
 }
 export function catalogMetadataFor(name, domain) {
-  return {domain,...DOMAINS[domain]?.[name]};
+  const canonical=TOOL_CATALOG[name];
+  return {domain,...(canonical?.domain===domain?canonical:DOMAINS[domain]?.[name])};
 }

@@ -307,6 +307,7 @@ async function encodeResult(value) {
 }
 
 startMcpStdioServer({
+  contractDomain:'security',
   serverName:'local-security-tools',
   serverVersion:'2.1.0',
   instructions:SERVER_CATALOG.security.description,

@@ -1,0 +1,21 @@
+{
+  "name": "mcp-gateway-custom-servers",
+  "version": "2.2.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "bash scripts/check.sh",
+    "check:catalog": "node scripts/validate-catalog.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.1",
+    "zod": "3.25.76",
+    "rss-parser": "3.13.0",
+    "ajv": "8.17.1",
+    "ajv-formats": "3.0.1",
+    "zod-to-json-schema": "3.25.1"
+  }
+}

@@ -106,6 +106,8 @@ COPY scripts/catalog-metadata.mjs /opt/mcp/catalog-metadata.mjs
 COPY config/metasploit-release.asc /opt/mcp/metasploit-release.asc
 RUN sh /opt/mcp/install-security-extras.sh
 COPY scripts/security-result-reader.mjs scripts/security-tools.mjs scripts/security-runtime.mjs scripts/security-extended.mjs scripts/security-protocols.mjs scripts/security-network-recon.mjs scripts/mdns-subnets.mjs scripts/module-layout.mjs scripts/mcp-stdio.mjs /opt/mcp/
+COPY package.json package-lock.json /opt/mcp/
+RUN cd /opt/mcp && npm ci --omit=dev && npm cache clean --force
 COPY src /opt/mcp/src
 COPY scripts/security-masscan.mjs /opt/mcp/security-masscan.mjs
 COPY scripts/verify-security-startup.mjs /opt/mcp/verify-security-startup.mjs

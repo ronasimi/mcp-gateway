@@ -21,18 +21,18 @@ The helper stores observations in its private state workspace and the gateway wr
 
 | Tool | Observation or operation |
 | :--- | :--- |
-| `get_host_interface_info` | Physical interfaces, addresses, routes, gateway and link facts |
-| `perform_network_discovery` | Authorized host inventory with bounded optional enrichment |
-| `analyze_network_topology` | Routes, physical prefixes and selected topology evidence |
-| `analyze_wireless_environment` | Association, signal/rate/width and cached neighboring BSSIDs |
-| `discover_mdns_subnets` | Advertised addresses and candidate ranges through bounded DNS-SD queries |
-| `observe_broadcast_multicast` | Passive ARP, mDNS, LLMNR and SSDP observations |
-| `probe_gateway_proxy_arp` | Explicit bounded ARP probe and responder-MAC comparisons |
-| `probe_gateway_hairpin` | Explicit peer path comparison |
-| `observe_dns_cache` | Explicit nonrecursive DNS cache observations |
-| `generate_graphical_network_map` | DOT, SVG and self-contained HTML from collected observations |
+| `network_get_host_interfaces` | Physical interfaces, addresses, routes, gateway and link facts |
+| `network_discover_hosts` | Authorized host inventory with bounded optional enrichment |
+| `network_analyze_topology` | Routes, physical prefixes and selected topology evidence |
+| `wireless_analyze_environment` | Association, signal/rate/width and cached neighboring BSSIDs |
+| `mdns_discover_subnets` | Advertised addresses and candidate ranges through bounded DNS-SD queries |
+| `network_observe_broadcast_multicast` | Passive ARP, mDNS, LLMNR and SSDP observations |
+| `network_probe_gateway_proxy_arp` | Explicit bounded ARP probe and responder-MAC comparisons |
+| `network_probe_gateway_hairpin` | Explicit peer path comparison |
+| `dns_observe_cache` | Explicit nonrecursive DNS cache observations |
+| `network_render_map` | DOT, SVG and self-contained HTML from collected observations |
 
-Discover one exact operation through Pi `tool_search`, inspect its schema, then use `tool_invoke`. High-level host operations fail closed when the helper is unavailable. Generic `network_interfaces`, protocol probes and scanner operations retain their documented container scope.
+Discover one exact operation through Pi `tool_search`, inspect its schema, then use `tool_invoke`. High-level host operations fail closed when the helper is unavailable. Generic `network_list_container_interfaces`, protocol probes and scanner operations retain their documented container scope.
 
 ## Bounds and interpretation
 
@@ -62,13 +62,13 @@ Use the returned `host_table_markdown` and `candidate_table_markdown` for exact 
 
 ## Saved evidence and maps
 
-Full raw evidence and compact recovery reports are separate artifacts. When a response is truncated, recover `report_path` first. Use `read_security_result` for selected fields under `.security-results`; its schema bounds pagination and rejects traversal, symlinks and prototype selectors. Retrieval is not a fresh network operation.
+Full raw evidence and compact recovery reports are separate artifacts. When a response is truncated, recover `report_path` first. Use `security_read_result` for selected fields under `.security-results`; its schema bounds pagination and rejects traversal, symlinks and prototype selectors. Retrieval is not a fresh network operation.
 
 Maps require observed data or saved input paths. Unknown physical attachment stays visibly uncertain; logical reachability does not prove a physical link. HTML is a self-contained SVG view. Download the returned actual artifact paths rather than treating opaque Pi result references as filenames.
 
 ## Passive observation metadata
 
-`observe_broadcast_multicast` publishes `x-pi-effect: passive_capture`, `readOnlyHint: false` because it saves an observation artifact, and `idempotentHint: false` because later captures observe new traffic. It is not in the active-tool set. ARP, hairpin and DNS-cache probe operations remain `active_probe`. The startup verifier checks these public catalog declarations without executing probes.
+`network_observe_broadcast_multicast` publishes `x-pi-effect: passive_capture`, `readOnlyHint: false` because it saves an observation artifact, and `idempotentHint: false` because later captures observe new traffic. It is not in the active-tool set. ARP, hairpin and DNS-cache probe operations remain `active_probe`. The startup verifier checks these public catalog declarations without executing probes.
 
 ## Masscan
 
@@ -95,7 +95,7 @@ This is an illustrative target; use the actual authorized address. The tool take
 
 Scope/rate combinations that cannot fit within the selected deadline are rejected before execution. No arbitrary CLI flags, source spoofing, banner collection, config paths or shell commands are exposed. An ambient `/etc/masscan/masscan.conf` containing options is rejected; the clean image removes that implicit configuration.
 
-Target address, requested port and planned probe counts describe the requested scope, not measured packets sent. The scanner emits list-format observations. The gateway parses and deduplicates them, rejects unexpected addresses/ports/protocols, and reports timeouts, output caps and parse problems as incomplete evidence. Large results are stored under `.security-results` and retrieved with `read_security_result`. A successful process with no returned ports does not prove that the ports are closed. Use Nmap `port_scan` for service/version detection.
+Target address, requested port and planned probe counts describe the requested scope, not measured packets sent. The scanner emits list-format observations. The gateway parses and deduplicates them, rejects unexpected addresses/ports/protocols, and reports timeouts, output caps and parse problems as incomplete evidence. Large results are stored under `.security-results` and retrieved with `security_read_result`. A successful process with no returned ports does not prove that the ports are closed. Use Nmap `nmap_scan_ports` for service/version detection.
 
 This tool runs inside the existing Security-container namespace with `NET_RAW`; no host-network mode, extra host-helper privilege or firewall change is introduced. Reachability and return traffic depend on your deployment. Physical-interface and isolation claims still need the host-helper observations.
 

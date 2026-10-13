@@ -12,6 +12,7 @@ import { promisify } from 'node:util';
 import { buildLondonDailyBriefing } from './local-briefing.mjs';
 import { decorateCatalogTools, SERVER_CATALOG } from './catalog-metadata.mjs';
 import { startMcpStdioServer } from './mcp-stdio.mjs';
+import { createWeatherRssTools } from './weather-rss-adapter.mjs';
 
 const execFileAsync = promisify(execFile);
 const WORKSPACE = path.resolve(process.env.MCP_WORKSPACE || '/workspace');
@@ -380,12 +381,15 @@ async function callTool(name,a={}){
   throw new Error(`unknown tool: ${name}`);
 }
 
+const weatherRss=createWeatherRssTools();
+
 startMcpStdioServer({
+  contractDomain:'system',
   serverName:'local-system-tools',
   serverVersion:'2.0.0',
   instructions:SERVER_CATALOG.system.description,
-  tools:CATALOG_TOOLS,
-  callTool,
+  tools:[...CATALOG_TOOLS,...weatherRss.tools],
+  callTool:(name,args)=>weatherRss.has(name)?weatherRss.callTool(name,args):callTool(name,args),
   encodeResult:value=>clip(value),
   encodeError:error=>clip(error?.stack||String(error)),
 });

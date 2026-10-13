@@ -16,6 +16,7 @@ test('flat image layout initializes; missing redactor fails startup verification
     for (const source of match[1].split(' ')) await fs.copyFile(path.join(gateway, source), path.join(root, match[2] || path.basename(source)));
   }
   await fs.cp(path.join(gateway, 'src'), path.join(root, 'src'), {recursive:true});
+  await fs.symlink(path.join(gateway,'node_modules'),path.join(root,'node_modules'),'dir');
   const verify = () => spawnSync(process.execPath, [path.join(root, 'verify-security-startup.mjs')], {encoding:'utf8', timeout:10000});
   const success = verify();
   assert.equal(success.status, 0, success.stderr);

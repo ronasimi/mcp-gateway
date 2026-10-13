@@ -1,0 +1,1627 @@
+[
+  {
+    "name": "google_get_auth_status",
+    "description": "Check Google OAuth configuration and granted scopes; credentials remain server-side. Use when you need Google account authentication. Do not use for operations outside this scope: Check Google OAuth configuration and granted scopes; credentials remain server-side..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for google_get_auth_status. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "google",
+        "aliases": [
+          "Google account authentication"
+        ],
+        "scope": "Check Google OAuth configuration and granted scopes; credentials remain server-side.",
+        "preferredFor": "Check Google OAuth configuration and granted scopes; credentials remain server-side. Use when you need Google account authentication. Do not use for operations outside this scope: Check Google OAuth configuration and granted scopes; credentials remain server-side..",
+        "legacyName": "auth_status"
+      }
+    }
+  },
+  {
+    "name": "gmail_get_unread_count",
+    "description": "Return exact unread Gmail message and thread counts. Use when you need how many unread emails. Use gmail_search_messages when message records are required.",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for gmail_get_unread_count. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "label_id": {
+          "type": "string",
+          "description": "Gmail label ID to count; default \"INBOX\". Common system IDs include INBOX, UNREAD, SPAM, TRASH, SENT, and STARRED. Optional. If omitted, default: \"INBOX\". Format: string. Example: \"INBOX\".",
+          "maxLength": 4096,
+          "default": "INBOX",
+          "examples": [
+            "INBOX"
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "google",
+        "aliases": [
+          "how many unread emails"
+        ],
+        "scope": "Return exact unread Gmail message and thread counts.",
+        "preferredFor": "Return exact unread Gmail message and thread counts. Use when you need how many unread emails. Use gmail_search_messages when message records are required.",
+        "overlapGroup": "gmail",
+        "legacyName": "gmail_get_unread_count"
+      }
+    }
+  },
+  {
+    "name": "gmail_search_messages",
+    "description": "Find Gmail messages with a query; return matching records, metadata and snippets. Use when you need find email. Use gmail_get_unread_count when only an exact unread count is required.",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for gmail_search_messages. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "Gmail search query, e.g. \"in:inbox is:unread newer_than:7d\", \"from:alice@example.com\", or \"subject:invoice\". Optional. If omitted: List mailbox messages without a Gmail search filter. Format: string. Example: \"error\".",
+          "maxLength": 8192,
+          "examples": [
+            "error"
+          ]
+        },
+        "max_results": {
+          "type": "integer",
+          "description": "Maximum messages to return; default 20, maximum 100. Optional. If omitted, default: 20. Format: integer. Example: 20.",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 20,
+          "examples": [
+            20
+          ]
+        },
+        "page_token": {
+          "type": "string",
+          "description": "Optional Gmail page token for continuing a previous search. Optional. If omitted, return the first page. Format: string. Example: \"returned-page-token\".",
+          "maxLength": 4096,
+          "examples": [
+            "returned-page-token"
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "google",
+        "aliases": [
+          "find email"
+        ],
+        "scope": "Find Gmail messages with a query; return matching records, metadata and snippets.",
+        "preferredFor": "Find Gmail messages with a query; return matching records, metadata and snippets. Use when you need find email. Use gmail_get_unread_count when only an exact unread count is required.",
+        "overlapGroup": "gmail",
+        "legacyName": "gmail_search_messages"
+      }
+    }
+  },
+  {
+    "name": "gmail_get_message",
+    "description": "Read one Gmail message by ID, including headers and optional decoded body. Use when you need email content. Do not use for operations outside this scope: Read one Gmail message by ID, including headers and optional decoded body..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for gmail_get_message. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "message_id": {
+          "type": "string",
+          "description": "Gmail message ID returned by Gmail search or thread tools. Required. Format: string. Example: \"18abc123\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "18abc123"
+          ]
+        },
+        "include_body": {
+          "type": "boolean",
+          "description": "Include decoded text body; default true. Optional. If omitted, default: true. Format: boolean. Example: true.",
+          "default": true,
+          "examples": [
+            true
+          ]
+        }
+      },
+      "required": [
+        "message_id"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "google",
+        "aliases": [
+          "email content"
+        ],
+        "scope": "Read one Gmail message by ID, including headers and optional decoded body.",
+        "preferredFor": "Read one Gmail message by ID, including headers and optional decoded body. Use when you need email content. Do not use for operations outside this scope: Read one Gmail message by ID, including headers and optional decoded body..",
+        "overlapGroup": "gmail",
+        "legacyName": "gmail_get_message"
+      }
+    }
+  },
+  {
+    "name": "gmail_get_thread",
+    "description": "Read all messages in a Gmail conversation thread. Use when you need email conversation. Do not use for operations outside this scope: Read all messages in a Gmail conversation thread..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for gmail_get_thread. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "thread_id": {
+          "type": "string",
+          "description": "Gmail thread ID. Required. Format: string. Example: \"18abc123\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "18abc123"
+          ]
+        },
+        "include_body": {
+          "type": "boolean",
+          "description": "Include decoded text bodies; default true. Optional. If omitted, default: true. Format: boolean. Example: true.",
+          "default": true,
+          "examples": [
+            true
+          ]
+        }
+      },
+      "required": [
+        "thread_id"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "google",
+        "aliases": [
+          "email conversation"
+        ],
+        "scope": "Read all messages in a Gmail conversation thread.",
+        "preferredFor": "Read all messages in a Gmail conversation thread. Use when you need email conversation. Do not use for operations outside this scope: Read all messages in a Gmail conversation thread..",
+        "overlapGroup": "gmail",
+        "legacyName": "gmail_get_thread"
+      }
+    }
+  },
+  {
+    "name": "gmail_list_labels",
+    "description": "List Gmail system and user labels with their IDs. Use when you need mailbox labels. Do not use for operations outside this scope: List Gmail system and user labels with their IDs..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for gmail_list_labels. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "google",
+        "aliases": [
+          "mailbox labels"
+        ],
+        "scope": "List Gmail system and user labels with their IDs.",
+        "preferredFor": "List Gmail system and user labels with their IDs. Use when you need mailbox labels. Do not use for operations outside this scope: List Gmail system and user labels with their IDs..",
+        "overlapGroup": "gmail",
+        "legacyName": "gmail_list_labels"
+      }
+    }
+  },
+  {
+    "name": "gmail_create_draft",
+    "description": "Create an unsent Gmail draft. Requires Gmail writes and a matching OAuth scope. Use when you need draft email. Use gmail_send_draft to send a reviewed draft; creation does not send.",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for gmail_create_draft. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "to": {
+          "type": "array",
+          "description": "Recipient email addresses. Required. Format: array. Example: [\"user@example.com\"].",
+          "items": {
+            "type": "string",
+            "description": "Email address. Required. Format: string. Example: \"user@example.com\".",
+            "minLength": 1,
+            "maxLength": 4096,
+            "format": "email",
+            "examples": [
+              "user@example.com"
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 1000,
+          "examples": [
+            [
+              "user@example.com"
+            ]
+          ]
+        },
+        "subject": {
+          "type": "string",
+          "description": "Email subject. Required. Format: string. Example: \"Status update\".",
+          "maxLength": 4096,
+          "examples": [
+            "Status update"
+          ]
+        },
+        "body": {
+          "type": "string",
+          "description": "Plain-text email body. Required. Format: string. Example: \"Please review the attached report.\".",
+          "maxLength": 200000,
+          "examples": [
+            "Please review the attached report."
+          ]
+        },
+        "cc": {
+          "type": "array",
+          "description": "Optional CC recipients. Optional. If omitted, default: []. Format: array. Example: [].",
+          "items": {
+            "type": "string",
+            "description": "Email address. Required. Format: string. Example: \"user@example.com\".",
+            "minLength": 1,
+            "maxLength": 4096,
+            "format": "email",
+            "examples": [
+              "user@example.com"
+            ]
+          },
+          "minItems": 0,
+          "maxItems": 1000,
+          "default": [],
+          "examples": [
+            []
+          ]
+        },
+        "bcc": {
+          "type": "array",
+          "description": "Optional BCC recipients. Optional. If omitted, default: []. Format: array. Example: [].",
+          "items": {
+            "type": "string",
+            "description": "Email address. Required. Format: string. Example: \"user@example.com\".",
+            "minLength": 1,
+            "maxLength": 4096,
+            "format": "email",
+            "examples": [
+              "user@example.com"
+            ]
+          },
+          "minItems": 0,
+          "maxItems": 1000,
+          "default": [],
+          "examples": [
+            []
+          ]
+        },
+        "thread_id": {
+          "type": "string",
+          "description": "Optional Gmail thread ID to associate this draft with a conversation. Optional. If omitted, do not attach this reply/thread metadata. Format: string. Example: \"18abc123\".",
+          "maxLength": 4096,
+          "examples": [
+            "18abc123"
+          ]
+        },
+        "in_reply_to": {
+          "type": "string",
+          "description": "Optional RFC Message-ID value for In-Reply-To when creating a reply. Optional. If omitted, do not attach this reply/thread metadata. Format: string. Example: \"<message@example.com>\".",
+          "maxLength": 4096,
+          "examples": [
+            "<message@example.com>"
+          ]
+        },
+        "references": {
+          "type": "string",
+          "description": "Optional RFC References header value when creating a reply. Optional. If omitted, do not attach this reply/thread metadata. Format: string. Example: \"<message@example.com>\".",
+          "maxLength": 8192,
+          "examples": [
+            "<message@example.com>"
+          ]
+        }
+      },
+      "required": [
+        "to",
+        "subject",
+        "body"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "google",
+        "aliases": [
+          "draft email"
+        ],
+        "scope": "Create an unsent Gmail draft. Requires Gmail writes and a matching OAuth scope.",
+        "preferredFor": "Create an unsent Gmail draft. Requires Gmail writes and a matching OAuth scope. Use when you need draft email. Use gmail_send_draft to send a reviewed draft; creation does not send.",
+        "overlapGroup": "gmail",
+        "legacyName": "gmail_create_draft"
+      }
+    }
+  },
+  {
+    "name": "gmail_send_draft",
+    "description": "Send an existing Gmail draft by ID. Requires Gmail writes and a send scope. Use when you need send prepared email. Do not use for operations outside this scope: Send an existing Gmail draft by ID. Requires Gmail writes and a send scope..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for gmail_send_draft. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "draft_id": {
+          "type": "string",
+          "description": "Gmail draft ID. Required. Format: string. Example: \"draft-123\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "draft-123"
+          ]
+        }
+      },
+      "required": [
+        "draft_id"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "google",
+        "aliases": [
+          "send prepared email"
+        ],
+        "scope": "Send an existing Gmail draft by ID. Requires Gmail writes and a send scope.",
+        "preferredFor": "Send an existing Gmail draft by ID. Requires Gmail writes and a send scope. Use when you need send prepared email. Do not use for operations outside this scope: Send an existing Gmail draft by ID. Requires Gmail writes and a send scope..",
+        "overlapGroup": "gmail",
+        "legacyName": "gmail_send_draft"
+      }
+    }
+  },
+  {
+    "name": "gmail_modify_labels",
+    "description": "Add or remove labels on a Gmail message. Requires Gmail writes. Use when you need archive mark read star. Do not use for operations outside this scope: Add or remove labels on a Gmail message. Requires Gmail writes..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for gmail_modify_labels. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "message_id": {
+          "type": "string",
+          "description": "Gmail message ID. Required. Format: string. Example: \"18abc123\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "18abc123"
+          ]
+        },
+        "add_label_ids": {
+          "type": "array",
+          "description": "Label IDs to add. Optional. If omitted, default: []. Format: array. Example: [].",
+          "items": {
+            "type": "string",
+            "description": "Gmail label ID. Required. Format: string. Example: \"example\".",
+            "minLength": 1,
+            "maxLength": 4096,
+            "examples": [
+              "example"
+            ]
+          },
+          "maxItems": 1000,
+          "default": [],
+          "examples": [
+            []
+          ]
+        },
+        "remove_label_ids": {
+          "type": "array",
+          "description": "Label IDs to remove. Optional. If omitted, default: []. Format: array. Example: [].",
+          "items": {
+            "type": "string",
+            "description": "Gmail label ID. Required. Format: string. Example: \"example\".",
+            "minLength": 1,
+            "maxLength": 4096,
+            "examples": [
+              "example"
+            ]
+          },
+          "maxItems": 1000,
+          "default": [],
+          "examples": [
+            []
+          ]
+        }
+      },
+      "required": [
+        "message_id"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "anyOf": [
+        {
+          "required": [
+            "add_label_ids"
+          ],
+          "properties": {
+            "add_label_ids": {
+              "minItems": 1
+            }
+          }
+        },
+        {
+          "required": [
+            "remove_label_ids"
+          ],
+          "properties": {
+            "remove_label_ids": {
+              "minItems": 1
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "google",
+        "aliases": [
+          "archive mark read star"
+        ],
+        "scope": "Add or remove labels on a Gmail message. Requires Gmail writes.",
+        "preferredFor": "Add or remove labels on a Gmail message. Requires Gmail writes. Use when you need archive mark read star. Do not use for operations outside this scope: Add or remove labels on a Gmail message. Requires Gmail writes..",
+        "overlapGroup": "gmail",
+        "legacyName": "gmail_modify_labels"
+      }
+    }
+  },
+  {
+    "name": "calendar_list_calendars",
+    "description": "List accessible Google calendars and their IDs. Use when you need available calendars. Do not use for operations outside this scope: List accessible Google calendars and their IDs..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for calendar_list_calendars. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "max_results": {
+          "type": "integer",
+          "description": "Maximum calendars; default 100, maximum 250. Optional. If omitted, default: 100. Format: integer. Example: 100.",
+          "minimum": 1,
+          "maximum": 250,
+          "default": 100,
+          "examples": [
+            100
+          ]
+        },
+        "page_token": {
+          "type": "string",
+          "description": "Optional continuation token. Optional. If omitted, return the first page. Format: string. Example: \"returned-page-token\".",
+          "maxLength": 4096,
+          "examples": [
+            "returned-page-token"
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "google",
+        "aliases": [
+          "available calendars"
+        ],
+        "scope": "List accessible Google calendars and their IDs.",
+        "preferredFor": "List accessible Google calendars and their IDs. Use when you need available calendars. Do not use for operations outside this scope: List accessible Google calendars and their IDs..",
+        "overlapGroup": "calendar",
+        "legacyName": "calendar_list_calendars"
+      }
+    }
+  },
+  {
+    "name": "calendar_list_events",
+    "description": "List Google Calendar events in a time range; omitted lower bound starts at the current time for upcoming events. Use when you need upcoming meetings. Do not use for operations outside this scope: List Google Calendar events in a time range; omitted lower bound starts at the current time for upcoming events..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for calendar_list_events. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "calendar_id": {
+          "type": "string",
+          "description": "Calendar ID; default \"primary\". Optional. If omitted, default: \"primary\". Format: string. Example: \"primary\".",
+          "maxLength": 4096,
+          "default": "primary",
+          "examples": [
+            "primary"
+          ]
+        },
+        "time_min": {
+          "type": "string",
+          "description": "RFC3339 lower bound, e.g. 2026-09-30T00:00:00-04:00. Omit to use the current time and return upcoming events. Optional. If omitted, use current time for upcoming events. Format: string. Example: \"2026-10-13T00:00:00-04:00\".",
+          "maxLength": 4096,
+          "format": "date-time",
+          "examples": [
+            "2026-10-13T00:00:00-04:00"
+          ]
+        },
+        "time_max": {
+          "type": "string",
+          "description": "RFC3339 upper bound. Optional. If omitted: Do not set an upper time bound. Format: string. Example: \"2026-10-14T00:00:00-04:00\".",
+          "maxLength": 4096,
+          "format": "date-time",
+          "examples": [
+            "2026-10-14T00:00:00-04:00"
+          ]
+        },
+        "query": {
+          "type": "string",
+          "description": "Optional free-text Calendar search query. Optional. If omitted: Do not apply a text filter. Format: string. Example: \"error\".",
+          "maxLength": 8192,
+          "examples": [
+            "error"
+          ]
+        },
+        "max_results": {
+          "type": "integer",
+          "description": "Maximum events; default 50, maximum 250. Optional. If omitted, default: 50. Format: integer. Example: 50.",
+          "minimum": 1,
+          "maximum": 250,
+          "default": 50,
+          "examples": [
+            50
+          ]
+        },
+        "page_token": {
+          "type": "string",
+          "description": "Optional continuation token. Optional. If omitted, return the first page. Format: string. Example: \"returned-page-token\".",
+          "maxLength": 4096,
+          "examples": [
+            "returned-page-token"
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "google",
+        "aliases": [
+          "upcoming meetings",
+          "calendar agenda",
+          "next calendar events"
+        ],
+        "scope": "List Google Calendar events in a time range; omitted lower bound starts at the current time for upcoming events.",
+        "preferredFor": "List Google Calendar events in a time range; omitted lower bound starts at the current time for upcoming events. Use when you need upcoming meetings. Do not use for operations outside this scope: List Google Calendar events in a time range; omitted lower bound starts at the current time for upcoming events..",
+        "overlapGroup": "calendar",
+        "legacyName": "calendar_list_events"
+      }
+    }
+  },
+  {
+    "name": "calendar_get_event",
+    "description": "Read one Google Calendar event\u2019s complete details. Use when you need meeting details. Do not use for operations outside this scope: Read one Google Calendar event\u2019s complete details..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for calendar_get_event. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "calendar_id": {
+          "type": "string",
+          "description": "Calendar ID; default \"primary\". Optional. If omitted, default: \"primary\". Format: string. Example: \"primary\".",
+          "maxLength": 4096,
+          "default": "primary",
+          "examples": [
+            "primary"
+          ]
+        },
+        "event_id": {
+          "type": "string",
+          "description": "Google Calendar event ID. Required. Format: string. Example: \"event-id\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "event-id"
+          ]
+        }
+      },
+      "required": [
+        "event_id"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "google",
+        "aliases": [
+          "meeting details"
+        ],
+        "scope": "Read one Google Calendar event\u2019s complete details.",
+        "preferredFor": "Read one Google Calendar event\u2019s complete details. Use when you need meeting details. Do not use for operations outside this scope: Read one Google Calendar event\u2019s complete details..",
+        "overlapGroup": "calendar",
+        "legacyName": "calendar_get_event"
+      }
+    }
+  },
+  {
+    "name": "calendar_get_free_busy",
+    "description": "Read busy intervals for one or more calendars over a requested period. Use when you need calendar availability. Use calendar_list_events when titles or meeting details are required.",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for calendar_get_free_busy. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "time_min": {
+          "type": "string",
+          "description": "RFC3339 start timestamp. Required. Format: string. Example: \"2026-10-13T00:00:00-04:00\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "format": "date-time",
+          "examples": [
+            "2026-10-13T00:00:00-04:00"
+          ]
+        },
+        "time_max": {
+          "type": "string",
+          "description": "RFC3339 end timestamp. Required. Format: string. Example: \"2026-10-14T00:00:00-04:00\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "format": "date-time",
+          "examples": [
+            "2026-10-14T00:00:00-04:00"
+          ]
+        },
+        "calendar_ids": {
+          "type": "array",
+          "description": "Calendar IDs; use \"primary\" for the main calendar. Required. Format: array. Example: [\"primary\"].",
+          "items": {
+            "type": "string",
+            "description": "Calendar ID. Required. Format: string. Example: \"primary\".",
+            "minLength": 1,
+            "maxLength": 4096,
+            "examples": [
+              "primary"
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 1000,
+          "examples": [
+            [
+              "primary"
+            ]
+          ]
+        },
+        "time_zone": {
+          "type": "string",
+          "description": "Optional IANA time zone such as America/Toronto. Optional. If omitted: Use the Google API default UTC time zone. Format: string. Example: \"America/Toronto\".",
+          "maxLength": 4096,
+          "examples": [
+            "America/Toronto"
+          ]
+        }
+      },
+      "required": [
+        "time_min",
+        "time_max",
+        "calendar_ids"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "google",
+        "aliases": [
+          "calendar availability",
+          "meeting conflicts"
+        ],
+        "scope": "Read busy intervals for one or more calendars over a requested period.",
+        "preferredFor": "Read busy intervals for one or more calendars over a requested period. Use when you need calendar availability. Use calendar_list_events when titles or meeting details are required.",
+        "overlapGroup": "calendar",
+        "legacyName": "calendar_freebusy"
+      }
+    }
+  },
+  {
+    "name": "calendar_create_event",
+    "description": "Create a Google Calendar event. Requires Calendar writes and a matching OAuth scope. Use when you need schedule meeting. Do not use for operations outside this scope: Create a Google Calendar event. Requires Calendar writes and a matching OAuth scope..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for calendar_create_event. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "calendar_id": {
+          "type": "string",
+          "description": "Calendar ID; default \"primary\". Optional. If omitted, default: \"primary\". Format: string. Example: \"primary\".",
+          "maxLength": 4096,
+          "default": "primary",
+          "examples": [
+            "primary"
+          ]
+        },
+        "summary": {
+          "type": "string",
+          "description": "Event title. Required. Format: string. Example: \"Team meeting\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "Team meeting"
+          ]
+        },
+        "start": {
+          "type": "string",
+          "description": "RFC3339 timestamp for timed events, or YYYY-MM-DD for all-day events. Required. Format: string. Example: \"2026-10-13T09:00:00-04:00\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "2026-10-13T09:00:00-04:00"
+          ]
+        },
+        "end": {
+          "type": "string",
+          "description": "RFC3339 timestamp for timed events, or exclusive YYYY-MM-DD end date for all-day events. Required. Format: string. Example: \"2026-10-13T10:00:00-04:00\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "2026-10-13T10:00:00-04:00"
+          ]
+        },
+        "all_day": {
+          "type": "boolean",
+          "description": "Treat start/end as YYYY-MM-DD all-day dates. Optional. If omitted, default: false. Format: boolean. Example: false.",
+          "default": false,
+          "examples": [
+            false
+          ]
+        },
+        "time_zone": {
+          "type": "string",
+          "description": "IANA time zone for timed events, e.g. America/Toronto. Optional. If omitted: Use the timestamp offset and calendar time zone; omitted for all-day dates. Format: string. Example: \"America/Toronto\".",
+          "maxLength": 4096,
+          "examples": [
+            "America/Toronto"
+          ]
+        },
+        "description": {
+          "type": "string",
+          "description": "Optional event description. Optional. If omitted: Create without a description. Format: string. Example: \"Weekly planning\".",
+          "maxLength": 200000,
+          "examples": [
+            "Weekly planning"
+          ]
+        },
+        "location": {
+          "type": "string",
+          "description": "Optional location. Optional. If omitted: Create without a location. Format: string. Example: \"London, Ontario\".",
+          "maxLength": 4096,
+          "examples": [
+            "London, Ontario"
+          ]
+        },
+        "attendees": {
+          "type": "array",
+          "description": "Optional attendee email addresses. Optional. If omitted, default: []. Format: array. Example: [].",
+          "items": {
+            "type": "string",
+            "description": "Email address. Required. Format: string. Example: \"user@example.com\".",
+            "minLength": 1,
+            "maxLength": 4096,
+            "format": "email",
+            "examples": [
+              "user@example.com"
+            ]
+          },
+          "minItems": 0,
+          "maxItems": 1000,
+          "default": [],
+          "examples": [
+            []
+          ]
+        }
+      },
+      "required": [
+        "summary",
+        "start",
+        "end"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "all_day": {
+                "const": true
+              }
+            },
+            "required": [
+              "all_day"
+            ]
+          },
+          "then": {
+            "properties": {
+              "start": {
+                "format": "date",
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+              },
+              "end": {
+                "format": "date",
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "start": {
+                "format": "date-time",
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+              },
+              "end": {
+                "format": "date-time",
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "google",
+        "aliases": [
+          "schedule meeting"
+        ],
+        "scope": "Create a Google Calendar event. Requires Calendar writes and a matching OAuth scope.",
+        "preferredFor": "Create a Google Calendar event. Requires Calendar writes and a matching OAuth scope. Use when you need schedule meeting. Do not use for operations outside this scope: Create a Google Calendar event. Requires Calendar writes and a matching OAuth scope..",
+        "overlapGroup": "calendar",
+        "legacyName": "calendar_create_event"
+      }
+    }
+  },
+  {
+    "name": "calendar_update_event",
+    "description": "Perform update selected fields of an existing Google Calendar event. Requires Calendar writes. Use when you need reschedule event. Do not use for operations outside this scope: Update selected fields of an existing Google Calendar event. Requires Calendar writes..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for calendar_update_event. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "calendar_id": {
+          "type": "string",
+          "description": "Calendar ID; default \"primary\". Optional. If omitted, default: \"primary\". Format: string. Example: \"primary\".",
+          "maxLength": 4096,
+          "default": "primary",
+          "examples": [
+            "primary"
+          ]
+        },
+        "event_id": {
+          "type": "string",
+          "description": "Google Calendar event ID. Required. Format: string. Example: \"event-id\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "event-id"
+          ]
+        },
+        "summary": {
+          "type": "string",
+          "description": "New event title. Optional. If omitted, leave this field unchanged. Format: string. Example: \"Team meeting\".",
+          "maxLength": 4096,
+          "examples": [
+            "Team meeting"
+          ]
+        },
+        "start": {
+          "type": "string",
+          "description": "New RFC3339 timestamp or YYYY-MM-DD date. Optional. If omitted, leave this field unchanged. Format: string. Example: \"2026-10-13T09:00:00-04:00\".",
+          "maxLength": 4096,
+          "examples": [
+            "2026-10-13T09:00:00-04:00"
+          ]
+        },
+        "end": {
+          "type": "string",
+          "description": "New RFC3339 timestamp or YYYY-MM-DD date. Optional. If omitted, leave this field unchanged. Format: string. Example: \"2026-10-13T10:00:00-04:00\".",
+          "maxLength": 4096,
+          "examples": [
+            "2026-10-13T10:00:00-04:00"
+          ]
+        },
+        "all_day": {
+          "type": "boolean",
+          "description": "Treat supplied start/end as all-day dates. Optional. If omitted, default: false. Format: boolean. Example: false.",
+          "default": false,
+          "examples": [
+            false
+          ]
+        },
+        "time_zone": {
+          "type": "string",
+          "description": "IANA time zone for timed event values. Optional. If omitted, leave this field unchanged. Format: string. Example: \"America/Toronto\".",
+          "maxLength": 4096,
+          "examples": [
+            "America/Toronto"
+          ]
+        },
+        "description": {
+          "type": "string",
+          "description": "New description. Optional. If omitted, leave this field unchanged. Format: string. Example: \"Weekly planning\".",
+          "maxLength": 200000,
+          "examples": [
+            "Weekly planning"
+          ]
+        },
+        "location": {
+          "type": "string",
+          "description": "New location. Optional. If omitted, leave this field unchanged. Format: string. Example: \"London, Ontario\".",
+          "maxLength": 4096,
+          "examples": [
+            "London, Ontario"
+          ]
+        },
+        "attendees": {
+          "type": "array",
+          "description": "Replacement attendee email addresses. Optional. If omitted, leave this field unchanged. Format: array. Example: [\"user@example.com\"].",
+          "items": {
+            "type": "string",
+            "description": "Email address. Required. Format: string. Example: \"user@example.com\".",
+            "minLength": 1,
+            "maxLength": 4096,
+            "format": "email",
+            "examples": [
+              "user@example.com"
+            ]
+          },
+          "minItems": 0,
+          "maxItems": 1000,
+          "examples": [
+            [
+              "user@example.com"
+            ]
+          ]
+        }
+      },
+      "required": [
+        "event_id"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "all_day": {
+                "const": true
+              }
+            },
+            "required": [
+              "all_day"
+            ]
+          },
+          "then": {
+            "properties": {
+              "start": {
+                "format": "date",
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+              },
+              "end": {
+                "format": "date",
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "start": {
+                "format": "date-time",
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+              },
+              "end": {
+                "format": "date-time",
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+              }
+            }
+          }
+        }
+      ],
+      "anyOf": [
+        {
+          "required": [
+            "summary"
+          ]
+        },
+        {
+          "required": [
+            "start"
+          ]
+        },
+        {
+          "required": [
+            "end"
+          ]
+        },
+        {
+          "required": [
+            "description"
+          ]
+        },
+        {
+          "required": [
+            "location"
+          ]
+        },
+        {
+          "required": [
+            "attendees"
+          ]
+        }
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "google",
+        "aliases": [
+          "reschedule event"
+        ],
+        "scope": "Update selected fields of an existing Google Calendar event. Requires Calendar writes.",
+        "preferredFor": "Perform update selected fields of an existing Google Calendar event. Requires Calendar writes. Use when you need reschedule event. Do not use for operations outside this scope: Update selected fields of an existing Google Calendar event. Requires Calendar writes..",
+        "overlapGroup": "calendar",
+        "legacyName": "calendar_update_event"
+      }
+    }
+  },
+  {
+    "name": "calendar_delete_event",
+    "description": "Delete a Google Calendar event. Requires Calendar writes. Use when you need cancel calendar event. Do not use for operations outside this scope: Delete a Google Calendar event. Requires Calendar writes..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for calendar_delete_event. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "calendar_id": {
+          "type": "string",
+          "description": "Calendar ID; default \"primary\". Optional. If omitted, default: \"primary\". Format: string. Example: \"primary\".",
+          "maxLength": 4096,
+          "default": "primary",
+          "examples": [
+            "primary"
+          ]
+        },
+        "event_id": {
+          "type": "string",
+          "description": "Google Calendar event ID. Required. Format: string. Example: \"event-id\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "event-id"
+          ]
+        }
+      },
+      "required": [
+        "event_id"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "google",
+        "aliases": [
+          "cancel calendar event"
+        ],
+        "scope": "Delete a Google Calendar event. Requires Calendar writes.",
+        "preferredFor": "Delete a Google Calendar event. Requires Calendar writes. Use when you need cancel calendar event. Do not use for operations outside this scope: Delete a Google Calendar event. Requires Calendar writes..",
+        "overlapGroup": "calendar",
+        "legacyName": "calendar_delete_event"
+      }
+    }
+  },
+  {
+    "name": "drive_search_files",
+    "description": "Find Google Drive files or folders and return IDs and metadata. Use when you need find Drive document. Do not use for operations outside this scope: Find Google Drive files or folders and return IDs and metadata..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for drive_search_files. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "Plain-text term searched with Drive fullText contains. Optional. If omitted, do not apply this filter. Format: string. Example: \"Report text\".",
+          "maxLength": 200000,
+          "examples": [
+            "Report text"
+          ]
+        },
+        "name_contains": {
+          "type": "string",
+          "description": "Optional filename substring. Optional. If omitted, do not apply this filter. Format: string. Example: \"example\".",
+          "maxLength": 4096,
+          "examples": [
+            "example"
+          ]
+        },
+        "mime_type": {
+          "type": "string",
+          "description": "Optional exact Drive MIME type. Optional. If omitted, do not apply this filter. Format: string. Example: \"application/pdf\".",
+          "maxLength": 4096,
+          "examples": [
+            "application/pdf"
+          ]
+        },
+        "parent_id": {
+          "type": "string",
+          "description": "Optional parent folder ID. Optional. If omitted, do not apply this filter. Format: string. Example: \"folder-id\".",
+          "maxLength": 4096,
+          "examples": [
+            "folder-id"
+          ]
+        },
+        "query": {
+          "type": "string",
+          "description": "Optional raw Drive v3 q expression. Combined with the simpler filters when supplied. Optional. If omitted, do not apply this filter. Format: string. Example: \"error\".",
+          "maxLength": 8192,
+          "examples": [
+            "error"
+          ]
+        },
+        "include_trashed": {
+          "type": "boolean",
+          "description": "Include trashed files; default false. Optional. If omitted, default: false. Format: boolean. Example: false.",
+          "default": false,
+          "examples": [
+            false
+          ]
+        },
+        "max_results": {
+          "type": "integer",
+          "description": "Maximum files; default 50, maximum 200. Optional. If omitted, default: 50. Format: integer. Example: 50.",
+          "minimum": 1,
+          "maximum": 200,
+          "default": 50,
+          "examples": [
+            50
+          ]
+        },
+        "page_token": {
+          "type": "string",
+          "description": "Optional continuation token. Optional. If omitted, return the first page. Format: string. Example: \"returned-page-token\".",
+          "maxLength": 4096,
+          "examples": [
+            "returned-page-token"
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "google",
+        "aliases": [
+          "find Drive document"
+        ],
+        "scope": "Find Google Drive files or folders and return IDs and metadata.",
+        "preferredFor": "Find Google Drive files or folders and return IDs and metadata. Use when you need find Drive document. Do not use for operations outside this scope: Find Google Drive files or folders and return IDs and metadata..",
+        "overlapGroup": "drive",
+        "legacyName": "drive_search_files"
+      }
+    }
+  },
+  {
+    "name": "drive_get_file_metadata",
+    "description": "Read metadata for a known Google Drive file ID. Use when you need Drive file properties. Do not use for operations outside this scope: Read metadata for a known Google Drive file ID..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for drive_get_file_metadata. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "file_id": {
+          "type": "string",
+          "description": "Google Drive file ID. Required. Format: string. Example: \"drive-file-id\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "drive-file-id"
+          ]
+        }
+      },
+      "required": [
+        "file_id"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "google",
+        "aliases": [
+          "Drive file properties"
+        ],
+        "scope": "Read metadata for a known Google Drive file ID.",
+        "preferredFor": "Read metadata for a known Google Drive file ID. Use when you need Drive file properties. Do not use for operations outside this scope: Read metadata for a known Google Drive file ID..",
+        "overlapGroup": "drive",
+        "legacyName": "drive_get_file_metadata"
+      }
+    }
+  },
+  {
+    "name": "drive_read_text",
+    "description": "Read text from a known Drive file or exportable Google document. Use when you need Google Docs content. Use drive_download_file for binary files or unsupported text exports.",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for drive_read_text. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "file_id": {
+          "type": "string",
+          "description": "Google Drive file ID. Required. Format: string. Example: \"drive-file-id\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "drive-file-id"
+          ]
+        },
+        "max_chars": {
+          "type": "integer",
+          "description": "Maximum returned characters; default 60000, maximum 200000. Optional. If omitted, default: 60000. Format: integer. Example: 60000.",
+          "minimum": 100,
+          "maximum": 200000,
+          "default": 60000,
+          "examples": [
+            60000
+          ]
+        }
+      },
+      "required": [
+        "file_id"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "google",
+        "aliases": [
+          "Google Docs content"
+        ],
+        "scope": "Read text from a known Drive file or exportable Google document.",
+        "preferredFor": "Read text from a known Drive file or exportable Google document. Use when you need Google Docs content. Use drive_download_file for binary files or unsupported text exports.",
+        "overlapGroup": "drive",
+        "legacyName": "drive_read_text"
+      }
+    }
+  },
+  {
+    "name": "drive_download_file",
+    "description": "Save a Drive file\u2019s original bytes or export a Google document to the workspace. Use when you need download PDF image attachment. Do not use for operations outside this scope: Save a Drive file\u2019s original bytes or export a Google document to the workspace..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for drive_download_file. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "file_id": {
+          "type": "string",
+          "description": "Google Drive file ID. Required. Format: string. Example: \"drive-file-id\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "drive-file-id"
+          ]
+        },
+        "output": {
+          "type": "string",
+          "description": "Workspace-relative output path, e.g. \"downloads/report.pdf\". Required. Format: string. Example: \"reports/output.json\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "reports/output.json"
+          ]
+        },
+        "export_mime_type": {
+          "type": "string",
+          "description": "Optional export MIME type for Google Docs/Sheets/Slides, e.g. application/pdf, text/plain, text/csv, or application/vnd.openxmlformats-officedocument.wordprocessingml.document. Optional. If omitted: Infer a supported Google export format from output extension; binary files retain original bytes. Format: string. Example: \"application/pdf\".",
+          "maxLength": 4096,
+          "examples": [
+            "application/pdf"
+          ]
+        }
+      },
+      "required": [
+        "file_id",
+        "output"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "google",
+        "aliases": [
+          "download PDF image attachment"
+        ],
+        "scope": "Save a Drive file\u2019s original bytes or export a Google document to the workspace.",
+        "preferredFor": "Save a Drive file\u2019s original bytes or export a Google document to the workspace. Use when you need download PDF image attachment. Do not use for operations outside this scope: Save a Drive file\u2019s original bytes or export a Google document to the workspace..",
+        "overlapGroup": "drive",
+        "legacyName": "drive_download_file"
+      }
+    }
+  },
+  {
+    "name": "drive_create_folder",
+    "description": "Create a folder in Google Drive. Requires Drive writes. Use when you need new Drive folder. Do not use for operations outside this scope: Create a folder in Google Drive. Requires Drive writes..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for drive_create_folder. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Folder name. Required. Format: string. Example: \"example.com\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "example.com"
+          ]
+        },
+        "parent_id": {
+          "type": "string",
+          "description": "Optional parent folder ID. Optional. If omitted: Create in the account root. Format: string. Example: \"folder-id\".",
+          "maxLength": 4096,
+          "examples": [
+            "folder-id"
+          ]
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "google",
+        "aliases": [
+          "new Drive folder"
+        ],
+        "scope": "Create a folder in Google Drive. Requires Drive writes.",
+        "preferredFor": "Create a folder in Google Drive. Requires Drive writes. Use when you need new Drive folder. Do not use for operations outside this scope: Create a folder in Google Drive. Requires Drive writes..",
+        "overlapGroup": "drive",
+        "legacyName": "drive_create_folder"
+      }
+    }
+  },
+  {
+    "name": "drive_upload_file",
+    "description": "Perform upload a workspace file to Google Drive. Requires Drive writes. Use when you need save file to Drive. Do not use for operations outside this scope: Upload a workspace file to Google Drive. Requires Drive writes..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for drive_upload_file. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Workspace-relative source path. Required. Format: string. Example: \"reports/input.json\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "reports/input.json"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "description": "Optional destination filename; defaults to source basename. Optional. If omitted: Use the source basename. Format: string. Example: \"example.com\".",
+          "maxLength": 4096,
+          "examples": [
+            "example.com"
+          ]
+        },
+        "mime_type": {
+          "type": "string",
+          "description": "Content MIME type, e.g. text/plain, application/pdf, image/png, application/zip. Required. Format: string. Example: \"application/pdf\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "application/pdf"
+          ]
+        },
+        "parent_id": {
+          "type": "string",
+          "description": "Optional destination folder ID. Optional. If omitted: Upload to the account root. Format: string. Example: \"folder-id\".",
+          "maxLength": 4096,
+          "examples": [
+            "folder-id"
+          ]
+        }
+      },
+      "required": [
+        "path",
+        "mime_type"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "google",
+        "aliases": [
+          "save file to Drive"
+        ],
+        "scope": "Upload a workspace file to Google Drive. Requires Drive writes.",
+        "preferredFor": "Perform upload a workspace file to Google Drive. Requires Drive writes. Use when you need save file to Drive. Do not use for operations outside this scope: Upload a workspace file to Google Drive. Requires Drive writes..",
+        "overlapGroup": "drive",
+        "legacyName": "drive_upload_file"
+      }
+    }
+  },
+  {
+    "name": "drive_delete_file",
+    "description": "Delete a Google Drive file by ID. Requires Drive writes. Use when you need remove Drive file. Do not use for operations outside this scope: Delete a Google Drive file by ID. Requires Drive writes..",
+    "inputSchema": {
+      "type": "object",
+      "description": "Arguments for drive_delete_file. Required fields are listed in required; omission behavior is documented per field.",
+      "properties": {
+        "file_id": {
+          "type": "string",
+          "description": "Google Drive file ID. Required. Format: string. Example: \"drive-file-id\".",
+          "minLength": 1,
+          "maxLength": 4096,
+          "examples": [
+            "drive-file-id"
+          ]
+        }
+      },
+      "required": [
+        "file_id"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "ai.catalog": {
+        "domain": "google",
+        "aliases": [
+          "remove Drive file"
+        ],
+        "scope": "Delete a Google Drive file by ID. Requires Drive writes.",
+        "preferredFor": "Delete a Google Drive file by ID. Requires Drive writes. Use when you need remove Drive file. Do not use for operations outside this scope: Delete a Google Drive file by ID. Requires Drive writes..",
+        "overlapGroup": "drive",
+        "legacyName": "drive_delete_file"
+      }
+    }
+  }
+]

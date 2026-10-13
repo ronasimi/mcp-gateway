@@ -3,10 +3,11 @@
 ## One check command
 
 ```bash
+npm ci
 bash scripts/check.sh
 ```
 
-Use Node 22, Python 3 and `jq`. Python PDF tests need ReportLab and either pypdf or PyPDF2; packet fixtures need Scapy. Packet-worker tests use fixtures; live captures and scans are not part of the source check. The System image verifies real LibreOffice/UNO integration separately during its build.
+Use Node 22, Python 3 and `json_query_file`. Python PDF tests need ReportLab and either pypdf or PyPDF2; packet fixtures need Scapy. Packet-worker tests use fixtures; live captures and scans are not part of the source check. The System image verifies real LibreOffice/UNO integration separately during its build.
 
 The command runs all `*.test.mjs` suites, current `*-test.py` suites, the curated catalog validator and actual Security initialization/catalog discovery. Environment-dependent tests explicitly skip only unsupported Unix socket binding or UID/GID switching. These skips are limitations, not successful live validation.
 

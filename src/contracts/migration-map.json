@@ -1,0 +1,882 @@
+[
+  {
+    "server": "system",
+    "old_name": "pdf_read",
+    "new_name": "pdf_read_pages",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "pdf_write",
+    "new_name": "pdf_write_document",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "office_read",
+    "new_name": "office_read_document",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "office_edit",
+    "new_name": "office_edit_document",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "office_export",
+    "new_name": "office_export_document",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "local_daily_briefing",
+    "new_name": "local_get_daily_briefing",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "docker_list_containers",
+    "new_name": "docker_list_containers",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "docker_inspect_container",
+    "new_name": "docker_inspect_container",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "docker_container_logs",
+    "new_name": "docker_read_container_logs",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "docker_container_stats",
+    "new_name": "docker_get_container_stats",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "docker_list_images",
+    "new_name": "docker_list_images",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "docker_inspect_image",
+    "new_name": "docker_inspect_image",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "docker_list_networks",
+    "new_name": "docker_list_networks",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "docker_inspect_network",
+    "new_name": "docker_inspect_network",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "docker_list_volumes",
+    "new_name": "docker_list_volumes",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "docker_inspect_volume",
+    "new_name": "docker_inspect_volume",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "docker_exec",
+    "new_name": "docker_execute_command",
+    "parameter_renames": {
+      "timeout": "timeout_seconds"
+    }
+  },
+  {
+    "server": "system",
+    "old_name": "docker_container_action",
+    "new_name": "docker_control_container",
+    "parameter_renames": {
+      "timeout": "timeout_seconds"
+    }
+  },
+  {
+    "server": "system",
+    "old_name": "docker_remove_container",
+    "new_name": "docker_remove_container",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "docker_remove_image",
+    "new_name": "docker_remove_image",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "host_snapshot",
+    "new_name": "host_get_snapshot",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "host_cpu_info",
+    "new_name": "host_get_cpu_info",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "host_memory_info",
+    "new_name": "host_get_memory_info",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "host_processes",
+    "new_name": "host_list_processes",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "host_process_info",
+    "new_name": "host_get_process_info",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "host_disk_usage",
+    "new_name": "host_get_disk_usage",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "host_read_file",
+    "new_name": "host_read_file",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "network_dns_lookup",
+    "new_name": "network_lookup_dns",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "network_ping",
+    "new_name": "network_ping_host",
+    "parameter_renames": {
+      "timeout": "timeout_seconds"
+    }
+  },
+  {
+    "server": "system",
+    "old_name": "network_trace_route",
+    "new_name": "network_trace_route",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "network_http_probe",
+    "new_name": "network_probe_http",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "network_port_check",
+    "new_name": "network_check_port",
+    "parameter_renames": {
+      "timeout": "timeout_seconds"
+    }
+  },
+  {
+    "server": "system",
+    "old_name": "openwrt_targets",
+    "new_name": "openwrt_list_targets",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "openwrt_status",
+    "new_name": "openwrt_get_status",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "openwrt_uci_show",
+    "new_name": "openwrt_read_uci_config",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "openwrt_uci_get",
+    "new_name": "openwrt_get_uci_value",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "openwrt_ubus_call",
+    "new_name": "openwrt_call_ubus",
+    "parameter_renames": {
+      "args": "arguments"
+    },
+    "value_transforms": {
+      "arguments": {
+        "legacy_parameter": "args",
+        "operation": "json_stringify"
+      }
+    }
+  },
+  {
+    "server": "system",
+    "old_name": "openwrt_logread",
+    "new_name": "openwrt_read_logs",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "openwrt_wifi_status",
+    "new_name": "openwrt_get_wifi_status",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "openwrt_clients",
+    "new_name": "openwrt_list_clients",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "openwrt_package_query",
+    "new_name": "openwrt_query_packages",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "openwrt_service_action",
+    "new_name": "openwrt_control_service",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "openwrt_uci_set",
+    "new_name": "openwrt_set_uci_value",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "image_list",
+    "new_name": "image_list_files",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "image_info",
+    "new_name": "image_get_info",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "image_metadata",
+    "new_name": "image_read_metadata",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "image_resize",
+    "new_name": "image_resize_file",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "image_crop",
+    "new_name": "image_crop_file",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "image_convert",
+    "new_name": "image_convert_file",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "image_compare",
+    "new_name": "image_compare_files",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "document_list",
+    "new_name": "document_list_files",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "document_info",
+    "new_name": "document_get_info",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "document_extract_text",
+    "new_name": "document_extract_text",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "document_search_text",
+    "new_name": "document_search_text",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "document_convert",
+    "new_name": "document_convert",
+    "parameter_renames": {}
+  },
+  {
+    "server": "system",
+    "old_name": "document_render_pdf_page",
+    "new_name": "document_render_pdf_page",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "read_security_result",
+    "new_name": "security_read_result",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "masscan_scan",
+    "new_name": "masscan_scan_ports",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "status",
+    "new_name": "security_get_status",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "firecrawl_scrape",
+    "new_name": "firecrawl_scrape_page",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "firecrawl_map",
+    "new_name": "firecrawl_map_site",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "subdomain_enum",
+    "new_name": "dns_enumerate_subdomains",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "exploit_search",
+    "new_name": "exploit_search_catalog",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "exploit_source",
+    "new_name": "exploit_read_source",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "sqlmap",
+    "new_name": "sqlmap_test_injection",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "metasploit_info",
+    "new_name": "metasploit_get_module_info",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "metasploit_run",
+    "new_name": "metasploit_execute_module",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "listener_start",
+    "new_name": "listener_start_tcp",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "job_status",
+    "new_name": "job_get_status",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "job_send",
+    "new_name": "job_send_input",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "job_stop",
+    "new_name": "job_stop_process",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "jq",
+    "new_name": "json_query_file",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "pcap_analyze",
+    "new_name": "pcap_analyze_file",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "suricata_test_rules",
+    "new_name": "suricata_test_rules",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "osquery",
+    "new_name": "osquery_query_container",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "binary_analyze",
+    "new_name": "binary_analyze_file",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "mdns_discover",
+    "new_name": "mdns_discover_services",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "upnp_discover",
+    "new_name": "upnp_discover_devices",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "dhcp_discover",
+    "new_name": "dhcp_discover_options",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "dhcp6_discover",
+    "new_name": "dhcp6_discover_options",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "dns_audit",
+    "new_name": "dns_audit_server",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "snmp_discover",
+    "new_name": "snmp_discover_system",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "snmp_interfaces",
+    "new_name": "snmp_list_interfaces",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "smb_audit",
+    "new_name": "smb_audit_server",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "smb_shares",
+    "new_name": "smb_list_shares",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "ntp_discover",
+    "new_name": "ntp_discover_server",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "ldap_discover",
+    "new_name": "ldap_discover_directory",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "protocol_observe",
+    "new_name": "network_observe_protocol",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "wsd_discover",
+    "new_name": "wsd_discover_devices",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "arp_discover",
+    "new_name": "arp_discover_hosts",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "ndp_discover",
+    "new_name": "ndp_list_neighbors",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "observe_broadcast_multicast",
+    "new_name": "network_observe_broadcast_multicast",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "probe_gateway_proxy_arp",
+    "new_name": "network_probe_gateway_proxy_arp",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "probe_gateway_hairpin",
+    "new_name": "network_probe_gateway_hairpin",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "observe_dns_cache",
+    "new_name": "dns_observe_cache",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "discover_mdns_subnets",
+    "new_name": "mdns_discover_subnets",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "get_host_interface_info",
+    "new_name": "network_get_host_interfaces",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "perform_network_discovery",
+    "new_name": "network_discover_hosts",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "analyze_network_topology",
+    "new_name": "network_analyze_topology",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "analyze_wireless_environment",
+    "new_name": "wireless_analyze_environment",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "generate_graphical_network_map",
+    "new_name": "network_render_map",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "port_scan",
+    "new_name": "nmap_scan_ports",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "tls_audit",
+    "new_name": "tls_audit_service",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "http_headers_audit",
+    "new_name": "http_audit_headers",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "web_server_audit",
+    "new_name": "web_audit_server",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "vulnerability_scan",
+    "new_name": "web_scan_vulnerabilities",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "web_content_discover",
+    "new_name": "web_discover_paths",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "workspace_vuln_scan",
+    "new_name": "workspace_scan_vulnerabilities",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "secret_scan",
+    "new_name": "workspace_scan_secrets",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "code_scan",
+    "new_name": "workspace_scan_code",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "generate_sbom",
+    "new_name": "workspace_generate_sbom",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "yara_scan",
+    "new_name": "yara_scan_files",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "malware_scan",
+    "new_name": "malware_scan_files",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "file_hash",
+    "new_name": "file_compute_hash",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "file_strings",
+    "new_name": "file_extract_strings",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "packet_capture",
+    "new_name": "pcap_capture_packets",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "network_interfaces",
+    "new_name": "network_list_container_interfaces",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "suricata_alerts",
+    "new_name": "suricata_analyze_capture",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "host_log_search",
+    "new_name": "host_search_logs",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "workspace_ioc_search",
+    "new_name": "workspace_search_ioc",
+    "parameter_renames": {}
+  },
+  {
+    "server": "security",
+    "old_name": "host_audit",
+    "new_name": "host_audit_hardening",
+    "parameter_renames": {}
+  },
+  {
+    "server": "google",
+    "old_name": "auth_status",
+    "new_name": "google_get_auth_status",
+    "parameter_renames": {}
+  },
+  {
+    "server": "google",
+    "old_name": "gmail_get_unread_count",
+    "new_name": "gmail_get_unread_count",
+    "parameter_renames": {}
+  },
+  {
+    "server": "google",
+    "old_name": "gmail_search_messages",
+    "new_name": "gmail_search_messages",
+    "parameter_renames": {}
+  },
+  {
+    "server": "google",
+    "old_name": "gmail_get_message",
+    "new_name": "gmail_get_message",
+    "parameter_renames": {}
+  },
+  {
+    "server": "google",
+    "old_name": "gmail_get_thread",
+    "new_name": "gmail_get_thread",
+    "parameter_renames": {}
+  },
+  {
+    "server": "google",
+    "old_name": "gmail_list_labels",
+    "new_name": "gmail_list_labels",
+    "parameter_renames": {}
+  },
+  {
+    "server": "google",
+    "old_name": "gmail_create_draft",
+    "new_name": "gmail_create_draft",
+    "parameter_renames": {}
+  },
+  {
+    "server": "google",
+    "old_name": "gmail_send_draft",
+    "new_name": "gmail_send_draft",
+    "parameter_renames": {}
+  },
+  {
+    "server": "google",
+    "old_name": "gmail_modify_labels",
+    "new_name": "gmail_modify_labels",
+    "parameter_renames": {}
+  },
+  {
+    "server": "google",
+    "old_name": "calendar_list_calendars",
+    "new_name": "calendar_list_calendars",
+    "parameter_renames": {}
+  },
+  {
+    "server": "google",
+    "old_name": "calendar_list_events",
+    "new_name": "calendar_list_events",
+    "parameter_renames": {}
+  },
+  {
+    "server": "google",
+    "old_name": "calendar_get_event",
+    "new_name": "calendar_get_event",
+    "parameter_renames": {}
+  },
+  {
+    "server": "google",
+    "old_name": "calendar_freebusy",
+    "new_name": "calendar_get_free_busy",
+    "parameter_renames": {}
+  },
+  {
+    "server": "google",
+    "old_name": "calendar_create_event",
+    "new_name": "calendar_create_event",
+    "parameter_renames": {}
+  },
+  {
+    "server": "google",
+    "old_name": "calendar_update_event",
+    "new_name": "calendar_update_event",
+    "parameter_renames": {}
+  },
+  {
+    "server": "google",
+    "old_name": "calendar_delete_event",
+    "new_name": "calendar_delete_event",
+    "parameter_renames": {}
+  },
+  {
+    "server": "google",
+    "old_name": "drive_search_files",
+    "new_name": "drive_search_files",
+    "parameter_renames": {}
+  },
+  {
+    "server": "google",
+    "old_name": "drive_get_file_metadata",
+    "new_name": "drive_get_file_metadata",
+    "parameter_renames": {}
+  },
+  {
+    "server": "google",
+    "old_name": "drive_read_text",
+    "new_name": "drive_read_text",
+    "parameter_renames": {}
+  },
+  {
+    "server": "google",
+    "old_name": "drive_download_file",
+    "new_name": "drive_download_file",
+    "parameter_renames": {}
+  },
+  {
+    "server": "google",
+    "old_name": "drive_create_folder",
+    "new_name": "drive_create_folder",
+    "parameter_renames": {}
+  },
+  {
+    "server": "google",
+    "old_name": "drive_upload_file",
+    "new_name": "drive_upload_file",
+    "parameter_renames": {}
+  },
+  {
+    "server": "google",
+    "old_name": "drive_delete_file",
+    "new_name": "drive_delete_file",
+    "parameter_renames": {}
+  }
+]

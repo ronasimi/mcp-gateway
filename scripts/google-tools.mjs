@@ -596,6 +596,7 @@ async function callTool(name, a) {
 }
 
 startMcpStdioServer({
+  contractDomain:'google',
   serverName:'local-google-workspace-tools',
   serverVersion:'2.0.0',
   instructions:SERVER_CATALOG.google.description,

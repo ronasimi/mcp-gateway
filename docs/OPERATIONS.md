@@ -93,7 +93,7 @@ The System container's host-root mount is read-only. Docker socket access remain
 
 ## Documents and images
 
-System provides workspace-confined image inspection/transforms, document extraction/search/conversion, `pdf_read`, `pdf_write`, `office_read`, `office_edit` and `office_export`. Read the discovered schema for page, cell and edit limits. Edits save output copies; overwrite controls and path confinement apply.
+System provides workspace-confined image inspection/transforms, document extraction/search/conversion, `pdf_read_pages`, `pdf_write_document`, `office_read_document`, `office_edit_document` and `office_export_document`. Read the discovered schema for page, cell and edit limits. Edits save output copies; overwrite controls and path confinement apply.
 
 PDF support uses Poppler and Python PDF libraries. Office support uses LibreOffice's UNO runtime. The System image runs `verify-office-runtime.py` during its build, including text replacement through the supported document replace interface. Scanned PDFs need OCR before text extraction can recover their content.
 
